@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Buscar Artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="search.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Facturación</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Planes
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">V</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Venue</div>
+            <div class="sidebar-user-role">Venue</div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Buscar artistas</h1>
+          <p class="topbar-sub">Encuentra el talento perfecto para tu próximo evento.</p>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="search-bar">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input type="text" id="search-name" placeholder="Buscar por nombre o género…" />
+        </div>
+        <select class="filter-select" id="filter-genre">
+          <option value="">Todos los géneros</option>
+          <option value="jazz">Jazz & Soul</option>
+          <option value="pop">Pop & Indie</option>
+          <option value="rock">Rock & Blues</option>
+          <option value="electronic">DJ & Electronic</option>
+          <option value="classical">Clásica</option>
+          <option value="corporate">Corporativo</option>
+        </select>
+        <select class="filter-select" id="filter-cache">
+          <option value="">Cualquier caché</option>
+          <option value="low">Hasta 300€</option>
+          <option value="mid">300€ – 800€</option>
+          <option value="high">800€ – 2.000€</option>
+          <option value="premium">Más de 2.000€</option>
+        </select>
+        <select class="filter-select" id="filter-radius">
+          <option value="">Cualquier distancia</option>
+          <option value="10">Hasta 10 km</option>
+          <option value="25">Hasta 25 km</option>
+          <option value="50">Hasta 50 km</option>
+        </select>
+      </div>
+
+      <!-- Resultados -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <span style="font-size:13px;color:var(--app-text-muted);" id="results-count">Cargando artistas…</span>
+        <div style="display:flex;gap:6px;">
+          <span class="badge badge--green"><span class="badge-dot"></span> Disponible</span>
+          <span class="badge badge--purple"><span class="badge-dot"></span> PRO</span>
+        </div>
+      </div>
+
+      <div class="artist-grid" id="artist-grid">
+        <!-- Se llena con JS -->
+      </div>
+
+      <!-- Empty state (oculto por defecto) -->
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-icon">🔍</div>
+        <h3>Sin resultados</h3>
+        <p>No hay artistas que coincidan con estos filtros. Prueba a ampliar la búsqueda.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal de reserva -->
+  <div id="booking-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--app-surface);border:1px solid var(--app-border);border-radius:16px;padding:32px;max-width:440px;width:90%;">
+      <h3 style="font-size:20px;font-weight:800;color:white;margin-bottom:6px;">Reservar artista</h3>
+      <p style="font-size:13px;color:var(--app-text-muted);margin-bottom:20px;" id="modal-artist-name"></p>
+
+      <div class="app-field">
+        <label for="booking-date">Fecha del evento</label>
+        <input type="date" id="booking-date" />
+      </div>
+      <div class="app-field">
+        <label for="booking-time">Hora</label>
+        <input type="time" id="booking-time" value="21:00" />
+      </div>
+      <div class="app-field">
+        <label for="booking-notes">Notas (opcional)</label>
+        <input type="text" id="booking-notes" placeholder="Ej: Terraza, aforo 120 personas…" />
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="app-btn app-btn--ghost" id="modal-cancel" style="flex:1;">Cancelar</button>
+        <button class="app-btn app-btn--primary" id="modal-confirm" style="flex:1;">Confirmar reserva</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout } from './auth.js';
+    import { getUserProfile, listArtists, createBooking } from './data.js';
+
+    const loadingEl = document.getElementById('app-loading');
+    const shellEl   = document.getElementById('app-shell');
+    const grid      = document.getElementById('artist-grid');
+    const emptyEl   = document.getElementById('empty-state');
+    const countEl   = document.getElementById('results-count');
+    let allArtists  = [];
+    let selectedArtist = null;
+    let currentUserId = null;
+
+    /* ---- Auth guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      const profile = await getUserProfile(user.uid);
+      if (!profile || profile.role !== 'venue') {
+        window.location.href = profile?.role === 'artist' ? 'dashboard-artist.html' : 'login.html';
+        return;
+      }
+
+      currentUserId = user.uid;
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      allArtists = await listArtists();
+      renderArtists(allArtists);
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Render artistas ---- */
+    function renderArtists(artists) {
+      if (artists.length === 0) {
+        grid.innerHTML = '';
+        emptyEl.style.display = '';
+        countEl.textContent = '0 artistas encontrados';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      countEl.textContent = `${artists.length} artista${artists.length !== 1 ? 's' : ''} encontrado${artists.length !== 1 ? 's' : ''}`;
+
+      const genreLabels = { jazz:'Jazz & Soul', pop:'Pop & Indie', rock:'Rock & Blues', electronic:'DJ & Electronic', classical:'Clásica', corporate:'Corporativo' };
+      const avatarClasses = { jazz:'artist-avatar--jazz', pop:'artist-avatar--pop', rock:'artist-avatar--rock', electronic:'artist-avatar--default', classical:'artist-avatar--jazz', corporate:'artist-avatar--pop' };
+
+      grid.innerHTML = artists.map(a => `
+        <div class="artist-card" data-id="${a.id}">
+          <div class="artist-card-header">
+            <div class="artist-avatar ${avatarClasses[a.genre] || 'artist-avatar--default'}">
+              ${(a.name || '?').charAt(0).toUpperCase()}
+            </div>
+            <div class="artist-info">
+              <div class="artist-name">
+                ${a.name || 'Artista'}
+                ${a.pro ? '<span class="badge badge--gold" style="margin-left:6px;font-size:9px;">PRO</span>' : ''}
+              </div>
+              <div class="artist-genre">${genreLabels[a.genre] || a.genre || 'Sin género'}</div>
+            </div>
+            <span class="badge ${a.available !== false ? 'badge--green' : 'badge--gray'}">
+              <span class="badge-dot"></span>
+              ${a.available !== false ? 'Disponible' : 'Ocupado'}
+            </span>
+          </div>
+          <p style="font-size:13px;color:var(--app-text-muted);line-height:1.5;">
+            ${a.description || 'Artista verificado en la plataforma PALCOFY.'}
+          </p>
+          <div class="artist-details">
+            <div class="artist-detail">
+              <span class="artist-detail-label">Caché</span>
+              <span class="artist-detail-value">${a.cache || 0}€</span>
+            </div>
+            <div class="artist-detail">
+              <span class="artist-detail-label">Radio</span>
+              <span class="artist-detail-value">${a.radius || 50} km</span>
+            </div>
+            <div class="artist-detail">
+              <span class="artist-detail-label">Valoración</span>
+              <span class="artist-detail-value">${a.rating ? '★ ' + a.rating : '—'}</span>
+            </div>
+          </div>
+          <div class="artist-card-actions">
+            <button class="app-btn app-btn--ghost book-btn" data-id="${a.id}" ${a.available === false ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+              Reservar
+            </button>
+            <button class="app-btn app-btn--primary" style="background:transparent;border:1.5px solid var(--app-accent);color:var(--app-accent);">
+              Ver perfil
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.book-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const artist = allArtists.find(a => a.id === btn.dataset.id);
+          if (artist) openBookingModal(artist);
+        });
+      });
+    }
+
+    /* ---- Filtros ---- */
+    function applyFilters() {
+      const text   = document.getElementById('search-name').value.toLowerCase();
+      const genre  = document.getElementById('filter-genre').value;
+      const cache  = document.getElementById('filter-cache').value;
+      const radius = document.getElementById('filter-radius').value;
+
+      let filtered = allArtists.filter(a => {
+        if (text && !(a.name || '').toLowerCase().includes(text) && !(a.genre || '').includes(text)) return false;
+        if (genre && a.genre !== genre) return false;
+        if (cache) {
+          const c = a.cache || 0;
+          if (cache === 'low' && c > 300) return false;
+          if (cache === 'mid' && (c < 300 || c > 800)) return false;
+          if (cache === 'high' && (c < 800 || c > 2000)) return false;
+          if (cache === 'premium' && c < 2000) return false;
+        }
+        if (radius && (a.radius || 50) > parseInt(radius)) return false;
+        return true;
+      });
+      renderArtists(filtered);
+    }
+
+    document.getElementById('search-name').addEventListener('input', applyFilters);
+    document.getElementById('filter-genre').addEventListener('change', applyFilters);
+    document.getElementById('filter-cache').addEventListener('change', applyFilters);
+    document.getElementById('filter-radius').addEventListener('change', applyFilters);
+
+    /* ---- Modal de reserva ---- */
+    function openBookingModal(artist) {
+      selectedArtist = artist;
+      document.getElementById('modal-artist-name').textContent = `${artist.name} · ${artist.cache}€ · ${artist.genre || 'General'}`;
+      document.getElementById('booking-date').value = '';
+      document.getElementById('booking-notes').value = '';
+      document.getElementById('booking-modal').style.display = 'flex';
+    }
+
+    document.getElementById('modal-cancel').addEventListener('click', () => {
+      document.getElementById('booking-modal').style.display = 'none';
+      selectedArtist = null;
+    });
+
+    document.getElementById('modal-confirm').addEventListener('click', async () => {
+      const date  = document.getElementById('booking-date').value;
+      const time  = document.getElementById('booking-time').value;
+      const notes = document.getElementById('booking-notes').value;
+
+      if (!date) { alert('Selecciona una fecha para el evento.'); return; }
+      if (!currentUserId) return;
+
+      try {
+        await createBooking({
+          venueId: currentUserId,
+          artistId: selectedArtist.id,
+          artistName: selectedArtist.name,
+          date, time, notes,
+          cache: selectedArtist.cache
+        });
+        alert(`Reserva enviada para ${selectedArtist.name} el ${date}. El artista tiene 24h para confirmar.`);
+        document.getElementById('booking-modal').style.display = 'none';
+        selectedArtist = null;
+      } catch (e) {
+        alert('Error al reservar. Inténtalo de nuevo.');
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

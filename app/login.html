@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Acceder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <div class="login-page">
+
+    <!-- Left: brand panel -->
+    <div class="login-left">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="#FF3D7F"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <h1>PALCOFY</h1>
+        <p>Marketplace B2B para música en vivo en hospitality. Gestiona tu programación, escrow y liquidaciones desde un solo panel.</p>
+      </div>
+    </div>
+
+    <!-- Right: auth form -->
+    <div class="login-right">
+      <div class="login-card">
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-tab="login">Iniciar sesión</button>
+          <button class="auth-tab" data-tab="register">Crear cuenta</button>
+        </div>
+
+        <!-- Error message -->
+        <div class="auth-error" id="auth-error"></div>
+
+        <!-- ===== LOGIN FORM ===== -->
+        <form id="login-form">
+          <div class="app-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="tu@email.com" required />
+          </div>
+          <div class="app-field">
+            <label for="login-password">Contraseña</label>
+            <input type="password" id="login-password" placeholder="••••••••" required minlength="6" />
+          </div>
+          <button type="submit" class="app-btn app-btn--primary" id="login-btn">
+            Entrar
+          </button>
+          <a href="../index.html" class="app-btn app-btn--ghost" style="text-decoration:none;text-align:center;">
+            ← Volver a la web
+          </a>
+        </form>
+
+        <!-- ===== REGISTER FORM ===== -->
+        <form id="register-form" style="display:none;">
+          <div class="app-field">
+            <label for="reg-name">Nombre</label>
+            <input type="text" id="reg-name" placeholder="Tu nombre o el del venue" required />
+          </div>
+          <div class="app-field">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" placeholder="tu@email.com" required />
+          </div>
+          <div class="app-field">
+            <label for="reg-password">Contraseña</label>
+            <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          </div>
+
+          <!-- Role selector -->
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px;">Soy un…</label>
+          <div class="role-selector">
+            <div class="role-option is-selected" data-role="venue">
+              <div class="role-icon">🏨</div>
+              <div class="role-label">Venue / Hotel</div>
+              <div class="role-desc">Busco artistas para mi programación</div>
+            </div>
+            <div class="role-option" data-role="artist">
+              <div class="role-icon">🎵</div>
+              <div class="role-label">Artista</div>
+              <div class="role-desc">Quiero más reservas y cobrar rápido</div>
+            </div>
+          </div>
+          <input type="hidden" id="reg-role" value="venue" />
+
+          <button type="submit" class="app-btn app-btn--primary" id="register-btn">
+            Crear cuenta
+          </button>
+          <a href="../index.html" class="app-btn app-btn--ghost" style="text-decoration:none;text-align:center;">
+            ← Volver a la web
+          </a>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import {
+      login,
+      register,
+      getUserProfile,
+      onAuthChange,
+      redirectByRole
+    } from './auth.js';
+
+    /* Si ya hay sesión, redirigir */
+    onAuthChange(async (user) => {
+      if (user) {
+        const profile = await getUserProfile(user.uid);
+        if (profile) redirectByRole(profile.role);
+      }
+    });
+
+    /* ---- Tabs ---- */
+    const tabs = document.querySelectorAll('.auth-tab');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const errorEl = document.getElementById('auth-error');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        errorEl.classList.remove('is-visible');
+        if (tab.dataset.tab === 'login') {
+          loginForm.style.display = '';
+          registerForm.style.display = 'none';
+        } else {
+          loginForm.style.display = 'none';
+          registerForm.style.display = '';
+        }
+      });
+    });
+
+    /* ---- Role selector ---- */
+    const roleOptions = document.querySelectorAll('.role-option');
+    const roleInput = document.getElementById('reg-role');
+    roleOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        roleOptions.forEach(o => o.classList.remove('is-selected'));
+        opt.classList.add('is-selected');
+        roleInput.value = opt.dataset.role;
+      });
+    });
+
+    /* ---- Login ---- */
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pass  = document.getElementById('login-password').value;
+      const btn   = document.getElementById('login-btn');
+      btn.disabled = true;
+      btn.textContent = 'Entrando…';
+      errorEl.classList.remove('is-visible');
+
+      try {
+        await login(email, pass);
+      } catch (err) {
+        const msg = err.code === 'auth/user-not-found'
+          ? 'No existe una cuenta con este email.'
+          : err.code === 'auth/wrong-password'
+          ? 'Contraseña incorrecta.'
+          : 'Error al iniciar sesión. Inténtalo de nuevo.';
+        errorEl.textContent = msg;
+        errorEl.classList.add('is-visible');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+
+    /* ---- Register ---- */
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name  = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass  = document.getElementById('reg-password').value;
+      const role  = roleInput.value;
+      const btn   = document.getElementById('register-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta…';
+      errorEl.classList.remove('is-visible');
+
+      try {
+        await register({ name, email, password: pass, role });
+        redirectByRole(role);
+      } catch (err) {
+        const msg = err.code === 'auth/email-already-in-use'
+          ? 'Ya existe una cuenta con este email.'
+          : err.code === 'auth/weak-password'
+          ? 'La contraseña debe tener al menos 6 caracteres.'
+          : 'Error al crear la cuenta. Inténtalo de nuevo.';
+        errorEl.textContent = msg;
+        errorEl.classList.add('is-visible');
+        btn.disabled = false;
+        btn.textContent = 'Crear cuenta';
+      }
+    });
+  </script>
+
+</body>
+</html>
