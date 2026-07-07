@@ -42,6 +42,11 @@
         <!-- Error message -->
         <div class="auth-error" id="auth-error"></div>
 
+        <!-- Demo mode indicator -->
+        <div id="demo-banner" style="display:none;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:8px 12px;margin-bottom:16px;font-size:12px;color:var(--app-accent);text-align:center;">
+          Modo DEMO — datos guardados en este navegador
+        </div>
+
         <!-- ===== LOGIN FORM ===== -->
         <form id="login-form">
           <div class="app-field">
@@ -105,13 +110,25 @@
   </div>
 
   <script type="module">
-    import {
-      login,
-      register,
-      getUserProfile,
-      onAuthChange,
-      redirectByRole
-    } from './auth.js';
+    /* ---- Imports ---- */
+    let authModule;
+    try {
+      authModule = await import('./auth.js');
+    } catch (e) {
+      console.error('Import error:', e);
+      document.getElementById('auth-error').textContent = 'Error cargando módulos. Abre desde http://localhost:8080';
+      document.getElementById('auth-error').classList.add('is-visible');
+    }
+
+    if (!authModule) throw new Error('No se pudo cargar auth.js');
+
+    const { login, register, getUserProfile, onAuthChange, redirectByRole } = authModule;
+
+    /* Importar config para saber el modo */
+    const config = await import('./firebase-config.js');
+    if (!config.isFirebaseConfigured) {
+      document.getElementById('demo-banner').style.display = '';
+    }
 
     /* Si ya hay sesión, redirigir */
     onAuthChange(async (user) => {
@@ -121,12 +138,13 @@
       }
     });
 
-    /* ---- Tabs ---- */
+    /* ---- DOM refs ---- */
     const tabs = document.querySelectorAll('.auth-tab');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const errorEl = document.getElementById('auth-error');
 
+    /* ---- Tabs ---- */
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('is-active'));
@@ -166,6 +184,7 @@
       try {
         await login(email, pass);
       } catch (err) {
+        console.error('Login error:', err);
         const msg = err.code === 'auth/user-not-found'
           ? 'No existe una cuenta con este email.'
           : err.code === 'auth/wrong-password'
@@ -191,9 +210,12 @@
       errorEl.classList.remove('is-visible');
 
       try {
+        console.log('Registering:', { name, email, role });
         await register({ name, email, password: pass, role });
+        console.log('Register OK, redirecting...');
         redirectByRole(role);
       } catch (err) {
+        console.error('Register error:', err);
         const msg = err.code === 'auth/email-already-in-use'
           ? 'Ya existe una cuenta con este email.'
           : err.code === 'auth/weak-password'

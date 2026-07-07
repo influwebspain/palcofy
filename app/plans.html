@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Planes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* ---- Plans page styles ---- */
+    .plans-status {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .plan-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .plan-card {
+      background: var(--app-surface);
+      border: 1.5px solid var(--app-border);
+      border-radius: 14px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease;
+      overflow: hidden;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .plan-card.is-active {
+      border-color: var(--app-green);
+      box-shadow: 0 0 0 1px var(--app-green), 0 4px 24px rgba(34, 197, 94, 0.12);
+    }
+
+    .plan-card.is-active:hover {
+      transform: translateY(-1px);
+    }
+
+    .plan-card-popular {
+      border-color: var(--app-accent);
+    }
+
+    .plan-card-header {
+      padding: 28px 24px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--app-border);
+      position: relative;
+    }
+
+    .plan-badge-wrapper {
+      margin-bottom: 14px;
+      min-height: 24px;
+    }
+
+    .plan-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .plan-price {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      line-height: 1.1;
+    }
+
+    .plan-price span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--app-text-muted);
+      letter-spacing: 0;
+    }
+
+    .plan-price-range {
+      font-size: 14px;
+      color: var(--app-text-muted);
+      margin-top: 4px;
+    }
+
+    .plan-card-body {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--app-text);
+      line-height: 1.5;
+    }
+
+    .plan-features li .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .plan-features li .check-icon svg {
+      width: 11px;
+      height: 11px;
+      color: var(--app-green);
+    }
+
+    .plan-card-actions {
+      padding: 0 24px 24px;
+    }
+
+    .plan-card-actions .app-btn {
+      width: 100%;
+    }
+
+    .btn-plan-active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--app-green);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      cursor: default;
+    }
+
+    .btn-plan-active:hover {
+      background: rgba(34, 197, 94, 0.1);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-plan-change {
+      background: var(--app-accent);
+      color: white;
+      box-shadow: 0 2px 16px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-plan-change:hover {
+      background: #6D28D9;
+      box-shadow: 0 4px 24px rgba(124, 58, 237, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* ---- Confirmation dialog ---- */
+    .dialog-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dialog-overlay.is-open {
+      display: flex;
+    }
+
+    .dialog-box {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .dialog-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .dialog-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--app-accent);
+    }
+
+    .dialog-box h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .dialog-box p {
+      font-size: 14px;
+      color: var(--app-text-muted);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .dialog-plan-detail {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 16px 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dialog-plan-detail .detail-from,
+    .dialog-plan-detail .detail-to {
+      text-align: center;
+    }
+
+    .dialog-plan-detail .detail-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--app-text-muted);
+      margin-bottom: 4px;
+    }
+
+    .dialog-plan-detail .detail-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .dialog-plan-detail .detail-price {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .dialog-arrow {
+      color: var(--app-accent);
+      font-size: 20px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dialog-actions .app-btn {
+      flex: 1;
+    }
+
+    .btn-dialog-cancel {
+      background: transparent;
+      color: var(--app-text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-dialog-cancel:hover {
+      color: white;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 1100px) {
+      .plans-status {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .plan-cards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .plan-card-header {
+        padding: 22px 18px 16px;
+      }
+      .plan-name { font-size: 16px; }
+      .plan-price { font-size: 30px; }
+      .plan-card-body { padding: 18px; }
+      .plan-card-actions { padding: 0 18px 18px; }
+    }
+
+    @media (max-width: 900px) {
+      .plans-status {
+        grid-template-columns: 1fr;
+      }
+      .plan-cards {
+        grid-template-columns: 1fr;
+      }
+      .plan-card:hover {
+        transform: none;
+      }
+      .dialog-plan-detail {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .dialog-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Facturacion</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <a href="plans.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Planes
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuracion
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">V</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Venue</div>
+            <div class="sidebar-user-role">Venue &middot; <span id="user-plan">Sin plan</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesion
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Planes de suscripcion</h1>
+          <p class="topbar-sub">Gestiona tu plan y consulta los eventos incluidos.</p>
+        </div>
+      </div>
+
+      <!-- Current plan status -->
+      <div class="plans-status" id="plans-status">
+        <div class="stat-card">
+          <span class="stat-label">Plan actual</span>
+          <span class="stat-value accent" id="status-plan-name">Piloto</span>
+          <span class="stat-change" id="status-plan-badge" style="color:var(--app-green);">Activo</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Eventos este mes</span>
+          <span class="stat-value" id="status-events">0 / 4</span>
+          <span class="stat-change" id="status-events-sub" style="color:var(--app-text-muted);">Disponibles</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Coste mensual</span>
+          <span class="stat-value gold" id="status-cost">199&euro;</span>
+          <span class="stat-change" id="status-cost-sub" style="color:var(--app-text-muted);">Suscripcion</span>
+        </div>
+      </div>
+
+      <!-- Plan cards -->
+      <div class="plan-cards" id="plan-cards">
+
+        <!-- Piloto de Asalto -->
+        <div class="plan-card" id="card-piloto" data-plan="piloto">
+          <div class="plan-card-header">
+            <div class="plan-badge-wrapper" id="badge-piloto"></div>
+            <div class="plan-name">Piloto de Asalto</div>
+            <div class="plan-price">199&euro; <span>/mes</span></div>
+          </div>
+          <div class="plan-card-body">
+            <ul class="plan-features">
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                4 eventos al mes
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                0% comision sobre artistas
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Sustitucion de artista en menos de 3h
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Soporte por chat
+              </li>
+            </ul>
+          </div>
+          <div class="plan-card-actions">
+            <button class="app-btn btn-plan-active" id="btn-piloto" disabled>
+              Plan actual
+            </button>
+          </div>
+        </div>
+
+        <!-- Esencial Venue -->
+        <div class="plan-card" id="card-esencial" data-plan="esencial">
+          <div class="plan-card-header">
+            <div class="plan-badge-wrapper" id="badge-esencial"></div>
+            <div class="plan-name">Esencial Venue</div>
+            <div class="plan-price">350&euro; <span>/mes</span></div>
+          </div>
+          <div class="plan-card-body">
+            <ul class="plan-features">
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                4 eventos al mes
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                10% comision sobre artistas
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Factura unica mensual consolidada
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Cancelacion con 80% de reembolso
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Soporte prioritario
+              </li>
+            </ul>
+          </div>
+          <div class="plan-card-actions">
+            <button class="app-btn btn-plan-change" id="btn-esencial" data-target="esencial">
+              Cambiar a este plan
+            </button>
+          </div>
+        </div>
+
+        <!-- Premium Hospitality -->
+        <div class="plan-card plan-card-popular" id="card-premium" data-plan="premium">
+          <div class="plan-card-header">
+            <div class="plan-badge-wrapper" id="badge-premium"></div>
+            <div class="plan-name">Premium Hospitality</div>
+            <div class="plan-price">850-1.200&euro; <span>/mes</span></div>
+            <div class="plan-price-range">Segun volumen de eventos</div>
+          </div>
+          <div class="plan-card-body">
+            <ul class="plan-features">
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                8 a 12 eventos al mes
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Curacion premium de artistas
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Account manager dedicado
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Ingenieria de sonido incluida
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Cancelacion flexible sin penalizacion
+              </li>
+              <li>
+                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Soporte 24/7 con linea directa
+              </li>
+            </ul>
+          </div>
+          <div class="plan-card-actions">
+            <button class="app-btn btn-plan-change" id="btn-premium" data-target="premium">
+              Cambiar a este plan
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Confirmation dialog -->
+  <div class="dialog-overlay" id="dialog-overlay">
+    <div class="dialog-box">
+      <div class="dialog-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <h3 id="dialog-title">Cambiar de plan</h3>
+      <p id="dialog-message">Vas a cambiar tu plan de suscripcion. El cambio se aplicara inmediatamente.</p>
+      <div class="dialog-plan-detail" id="dialog-plan-detail">
+        <div class="detail-from">
+          <div class="detail-label">Plan actual</div>
+          <div class="detail-name" id="dialog-from-name">Piloto</div>
+          <div class="detail-price" id="dialog-from-price">199&euro;/mes</div>
+        </div>
+        <div class="dialog-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="detail-to">
+          <div class="detail-label">Nuevo plan</div>
+          <div class="detail-name" id="dialog-to-name">Esencial</div>
+          <div class="detail-price" id="dialog-to-price">350&euro;/mes</div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="app-btn btn-dialog-cancel" id="dialog-cancel">Cancelar</button>
+        <button class="app-btn app-btn--primary" id="dialog-confirm">Confirmar cambio</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, updateUserProfile } from './data.js';
+
+    /* =========================================================
+       PLAN DEFINITIONS
+       ========================================================= */
+    const PLANS = {
+      piloto: {
+        key: 'piloto',
+        name: 'Piloto de Asalto',
+        shortName: 'Piloto',
+        price: '199€',
+        priceNum: 199,
+        eventsLimit: 4
+      },
+      esencial: {
+        key: 'esencial',
+        name: 'Esencial Venue',
+        shortName: 'Esencial',
+        price: '350€',
+        priceNum: 350,
+        eventsLimit: 4
+      },
+      premium: {
+        key: 'premium',
+        name: 'Premium Hospitality',
+        shortName: 'Premium',
+        price: '850-1.200€',
+        priceNum: 850,
+        eventsLimit: 12
+      }
+    };
+
+    const PLAN_BADGE_HTML = {
+      piloto: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>',
+      esencial: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>',
+      premium: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>'
+    };
+
+    /* =========================================================
+       DOM REFS
+       ========================================================= */
+    const loadingEl  = document.getElementById('app-loading');
+    const shellEl    = document.getElementById('app-shell');
+    const dialogEl   = document.getElementById('dialog-overlay');
+    const cancelBtn  = document.getElementById('dialog-cancel');
+    const confirmBtn = document.getElementById('dialog-confirm');
+
+    let currentUser = null;
+    let currentProfile = null;
+    let pendingTargetPlan = null;
+
+    /* =========================================================
+       AUTH GUARD
+       ========================================================= */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+      if (profile.role !== 'venue') {
+        window.location.href = 'dashboard-artist.html';
+        return;
+      }
+
+      currentUser = user;
+      currentProfile = profile;
+
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const planKey = profile.plan || 'piloto';
+      const planDef = PLANS[planKey] || PLANS.piloto;
+
+      document.getElementById('user-plan').textContent = planDef.shortName + ' ' + planDef.price;
+
+      renderCurrentStatus(planKey, profile);
+      renderPlanCards(planKey);
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* =========================================================
+       RENDER CURRENT PLAN STATUS
+       ========================================================= */
+    function renderCurrentStatus(planKey, profile) {
+      const plan = PLANS[planKey] || PLANS.piloto;
+      document.getElementById('status-plan-name').textContent = plan.shortName;
+      document.getElementById('status-plan-badge').textContent = 'Activo';
+
+      const eventsUsed = profile.eventsUsed || 0;
+      const eventsLimit = plan.eventsLimit;
+      document.getElementById('status-events').textContent = eventsUsed + ' / ' + eventsLimit;
+      document.getElementById('status-events-sub').textContent = eventsLimit - eventsUsed > 0
+        ? (eventsLimit - eventsUsed) + ' disponibles'
+        : 'Limite alcanzado';
+
+      document.getElementById('status-cost').textContent = plan.price;
+      document.getElementById('status-cost-sub').textContent = 'Suscripcion mensual';
+    }
+
+    /* =========================================================
+       RENDER PLAN CARDS
+       ========================================================= */
+    function renderPlanCards(activePlanKey) {
+      const allKeys = ['piloto', 'esencial', 'premium'];
+
+      allKeys.forEach(function(key) {
+        const card = document.getElementById('card-' + key);
+        const badgeEl = document.getElementById('badge-' + key);
+        const btnEl = document.getElementById('btn-' + key);
+
+        if (key === activePlanKey) {
+          card.classList.add('is-active');
+          badgeEl.innerHTML = '<span class="badge badge--green"><span class="badge-dot"></span> Plan actual</span>';
+          btnEl.className = 'app-btn btn-plan-active';
+          btnEl.textContent = 'Plan actual';
+          btnEl.disabled = true;
+          btnEl.removeAttribute('data-target');
+        } else {
+          card.classList.remove('is-active');
+          badgeEl.innerHTML = '';
+          btnEl.className = 'app-btn btn-plan-change';
+          btnEl.textContent = 'Cambiar a este plan';
+          btnEl.disabled = false;
+          btnEl.setAttribute('data-target', key);
+        }
+      });
+    }
+
+    /* =========================================================
+       CHANGE PLAN BUTTON HANDLERS
+       ========================================================= */
+    document.querySelectorAll('.btn-plan-change').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const targetKey = btn.getAttribute('data-target');
+        if (!targetKey || !PLANS[targetKey]) return;
+        openDialog(targetKey);
+      });
+    });
+
+    /* =========================================================
+       DIALOG
+       ========================================================= */
+    function openDialog(targetKey) {
+      if (!currentProfile) return;
+
+      const currentKey = currentProfile.plan || 'piloto';
+      const fromPlan = PLANS[currentKey] || PLANS.piloto;
+      const toPlan = PLANS[targetKey];
+
+      pendingTargetPlan = targetKey;
+
+      document.getElementById('dialog-from-name').textContent = fromPlan.shortName;
+      document.getElementById('dialog-from-price').textContent = fromPlan.price + '/mes';
+      document.getElementById('dialog-to-name').textContent = toPlan.shortName;
+      document.getElementById('dialog-to-price').textContent = toPlan.price + '/mes';
+
+      dialogEl.classList.add('is-open');
+    }
+
+    function closeDialog() {
+      dialogEl.classList.remove('is-open');
+      pendingTargetPlan = null;
+    }
+
+    cancelBtn.addEventListener('click', closeDialog);
+
+    dialogEl.addEventListener('click', function(e) {
+      if (e.target === dialogEl) closeDialog();
+    });
+
+    confirmBtn.addEventListener('click', async function() {
+      if (!pendingTargetPlan || !currentUser) return;
+
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Cambiando...';
+
+      try {
+        const newPlan = PLANS[pendingTargetPlan];
+        await updateUserProfile(currentUser.uid, {
+          plan: pendingTargetPlan,
+          eventsLimit: newPlan.eventsLimit
+        });
+
+        currentProfile.plan = pendingTargetPlan;
+        currentProfile.eventsLimit = newPlan.eventsLimit;
+
+        renderCurrentStatus(pendingTargetPlan, currentProfile);
+        renderPlanCards(pendingTargetPlan);
+
+        document.getElementById('user-plan').textContent = newPlan.shortName + ' ' + newPlan.price;
+
+        closeDialog();
+      } catch (err) {
+        console.error('Error cambiando plan:', err);
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirmar cambio';
+      }
+    });
+
+    /* =========================================================
+       LOGOUT
+       ========================================================= */
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

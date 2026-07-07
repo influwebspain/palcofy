@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Configuración</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* ---- Settings page styles ---- */
+    .settings-section {
+      margin-bottom: 32px;
+    }
+
+    .settings-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .settings-section-header svg {
+      width: 20px;
+      height: 20px;
+      color: var(--app-accent);
+      flex-shrink: 0;
+    }
+
+    .settings-section-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.01em;
+    }
+
+    .settings-section-header .section-desc {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin-left: auto;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+
+    .field-grid .app-field.span-full {
+      grid-column: 1 / -1;
+    }
+
+    .app-field input[readonly] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--app-border);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .toggle-desc {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 200ms ease;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 200ms ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--app-accent);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* Danger zone */
+    .danger-card {
+      background: var(--app-surface);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--app-radius);
+      padding: 24px;
+    }
+
+    .danger-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--app-red);
+      margin-bottom: 6px;
+    }
+
+    .danger-card p {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .app-btn--danger {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--app-red);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      width: auto;
+      padding: 10px 20px;
+      font-size: 13px;
+    }
+
+    .app-btn--danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    /* Confirmation modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .modal-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.95);
+      transition: transform 200ms ease;
+    }
+
+    .modal-overlay.is-visible .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-card .modal-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .modal-card .modal-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--app-red);
+    }
+
+    .modal-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .modal-card p {
+      font-size: 14px;
+      color: var(--app-text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-actions .app-btn {
+      flex: 1;
+      padding: 11px;
+      font-size: 13px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--app-surface-2);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      transform: translateX(120%);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .toast.is-visible {
+      transform: translateX(0);
+    }
+
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .toast-icon svg {
+      width: 14px;
+      height: 14px;
+      color: var(--app-green);
+    }
+
+    .toast-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    /* Save bar */
+    .save-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--app-border);
+      margin-top: 8px;
+    }
+
+    .save-bar .unsaved-hint {
+      font-size: 13px;
+      color: var(--app-gold);
+      margin-right: auto;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+
+    .save-bar .unsaved-hint.is-visible {
+      opacity: 1;
+    }
+
+    .save-bar .app-btn {
+      width: auto;
+      padding: 11px 28px;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .save-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .save-bar .unsaved-hint {
+        margin-right: 0;
+        text-align: center;
+      }
+
+      .save-bar .app-btn {
+        width: 100%;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Facturacion</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Planes
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="settings.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuracion
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">V</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Venue</div>
+            <div class="sidebar-user-role">Venue · <span id="user-plan">Sin plan</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesion
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Configuracion</h1>
+          <p class="topbar-sub">Gestiona tu perfil, facturacion y preferencias.</p>
+        </div>
+      </div>
+
+      <!-- ============ Seccion 1: Perfil del venue ============ -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          <h2>Perfil del venue</h2>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <h3>Informacion personal</h3>
+          </div>
+          <div style="padding:20px;">
+            <div class="field-grid">
+              <div class="app-field">
+                <label for="field-name">Nombre completo</label>
+                <input type="text" id="field-name" placeholder="Tu nombre" />
+              </div>
+              <div class="app-field">
+                <label for="field-email">Email</label>
+                <input type="email" id="field-email" placeholder="tu@email.com" readonly />
+              </div>
+              <div class="app-field">
+                <label for="field-venue-name">Nombre del venue</label>
+                <input type="text" id="field-venue-name" placeholder="Nombre de tu local" />
+              </div>
+              <div class="app-field">
+                <label for="field-phone">Telefono</label>
+                <input type="tel" id="field-phone" placeholder="+34 600 000 000" />
+              </div>
+              <div class="app-field span-full">
+                <label for="field-address">Direccion</label>
+                <input type="text" id="field-address" placeholder="Calle, numero, ciudad, CP" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Seccion 2: Datos de facturacion ============ -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <h2>Datos de facturacion</h2>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <h3>Informacion fiscal</h3>
+          </div>
+          <div style="padding:20px;">
+            <div class="field-grid">
+              <div class="app-field">
+                <label for="field-nif">NIF / CIF</label>
+                <input type="text" id="field-nif" placeholder="B12345678" />
+              </div>
+              <div class="app-field">
+                <label for="field-razon">Razon social</label>
+                <input type="text" id="field-razon" placeholder="Nombre legal de la empresa" />
+              </div>
+              <div class="app-field span-full">
+                <label for="field-fiscal-address">Direccion fiscal</label>
+                <input type="text" id="field-fiscal-address" placeholder="Domicilio fiscal completo" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Seccion 3: Notificaciones ============ -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <h2>Notificaciones</h2>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <h3>Preferencias de aviso</h3>
+          </div>
+          <div style="padding:4px 20px;">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Notificaciones por email</span>
+                <span class="toggle-desc">Recibe resumenes y actualizaciones importantes en tu correo.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-email" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Alertas de reservas</span>
+                <span class="toggle-desc">Aviso cuando un artista confirma, cancela o modifica una reserva.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-bookings" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Alertas de facturacion</span>
+                <span class="toggle-desc">Aviso al generar una factura nueva o cuando una factura esta pendiente.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-invoices" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Save bar ============ -->
+      <div class="save-bar" id="save-bar">
+        <span class="unsaved-hint" id="unsaved-hint">Cambios sin guardar</span>
+        <button class="app-btn app-btn--ghost" id="discard-btn" style="display:none;">Descartar</button>
+        <button class="app-btn app-btn--primary" id="save-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Guardar cambios
+        </button>
+      </div>
+
+      <!-- ============ Seccion 4: Zona peligrosa ============ -->
+      <div class="settings-section" style="margin-top:48px;">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--app-red);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <h2 style="color:var(--app-red);">Zona peligrosa</h2>
+        </div>
+        <div class="danger-card">
+          <h3>Eliminar cuenta</h3>
+          <p>Esta accion es permanente e irreversible. Se eliminaran todos tus datos, reservas, facturas y configuracion. No podras recuperar tu cuenta.</p>
+          <button class="app-btn app-btn--danger" id="delete-account-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Eliminar cuenta
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Confirm delete modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3>Eliminar tu cuenta?</h3>
+      <p>Esta accion no se puede deshacer. Se eliminaran permanentemente todos tus datos, incluyendo reservas, facturas y configuracion.</p>
+      <div class="modal-actions">
+        <button class="app-btn app-btn--ghost" id="modal-cancel" style="margin-top:0;">Cancelar</button>
+        <button class="app-btn app-btn--danger" id="modal-confirm" style="margin-top:0;">Si, eliminar cuenta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <span class="toast-text" id="toast-text">Cambios guardados correctamente</span>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, updateUserProfile } from './data.js';
+
+    /* ---- DOM refs ---- */
+    const loadingEl      = document.getElementById('app-loading');
+    const shellEl        = document.getElementById('app-shell');
+    const saveBtn        = document.getElementById('save-btn');
+    const discardBtn     = document.getElementById('discard-btn');
+    const unsavedHint    = document.getElementById('unsaved-hint');
+    const deleteModal    = document.getElementById('delete-modal');
+    const deleteBtn      = document.getElementById('delete-account-btn');
+    const modalCancel    = document.getElementById('modal-cancel');
+    const modalConfirm   = document.getElementById('modal-confirm');
+    const toast          = document.getElementById('toast');
+    const toastText      = document.getElementById('toast-text');
+
+    /* ---- State ---- */
+    let currentUid   = null;
+    let savedValues  = {};
+    let isDirty      = false;
+
+    /* ---- Field definitions ---- */
+    const fields = {
+      name:         document.getElementById('field-name'),
+      email:        document.getElementById('field-email'),
+      venueName:    document.getElementById('field-venue-name'),
+      phone:        document.getElementById('field-phone'),
+      address:      document.getElementById('field-address'),
+      nif:          document.getElementById('field-nif'),
+      razon:        document.getElementById('field-razon'),
+      fiscalAddress: document.getElementById('field-fiscal-address'),
+    };
+
+    const toggleIds = {
+      emailNotifications: document.getElementById('toggle-email'),
+      bookingAlerts:      document.getElementById('toggle-bookings'),
+      invoiceAlerts:      document.getElementById('toggle-invoices'),
+    };
+
+    /* ---- Helpers ---- */
+    function collectValues() {
+      return {
+        name:             fields.name.value.trim(),
+        venueName:        fields.venueName.value.trim(),
+        phone:            fields.phone.value.trim(),
+        address:          fields.address.value.trim(),
+        nif:              fields.nif.value.trim(),
+        razon:            fields.razon.value.trim(),
+        fiscalAddress:    fields.fiscalAddress.value.trim(),
+        emailNotifications: toggleIds.emailNotifications.checked,
+        bookingAlerts:      toggleIds.bookingAlerts.checked,
+        invoiceAlerts:      toggleIds.invoiceAlerts.checked,
+      };
+    }
+
+    function detectChanges() {
+      const current = collectValues();
+      return Object.keys(savedValues).some(k => {
+        if (typeof current[k] === 'boolean') return current[k] !== savedValues[k];
+        return (current[k] || '') !== (savedValues[k] || '');
+      });
+    }
+
+    function updateDirtyState() {
+      isDirty = detectChanges();
+      unsavedHint.classList.toggle('is-visible', isDirty);
+      discardBtn.style.display = isDirty ? '' : 'none';
+    }
+
+    function populateFields(profile) {
+      fields.name.value        = profile.name || '';
+      fields.email.value       = profile.email || '';
+      fields.venueName.value   = profile.venueName || '';
+      fields.phone.value       = profile.phone || '';
+      fields.address.value     = profile.address || '';
+      fields.nif.value         = profile.nif || '';
+      fields.razon.value       = profile.razon || '';
+      fields.fiscalAddress.value = profile.fiscalAddress || '';
+
+      toggleIds.emailNotifications.checked = profile.emailNotifications !== false;
+      toggleIds.bookingAlerts.checked      = profile.bookingAlerts !== false;
+      toggleIds.invoiceAlerts.checked      = profile.invoiceAlerts !== false;
+    }
+
+    function showToast(message) {
+      toastText.textContent = message;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 3500);
+    }
+
+    /* ---- Event listeners: detect changes ---- */
+    Object.values(fields).forEach(el => {
+      el.addEventListener('input', updateDirtyState);
+    });
+    Object.values(toggleIds).forEach(el => {
+      el.addEventListener('change', updateDirtyState);
+    });
+
+    /* ---- Save ---- */
+    saveBtn.addEventListener('click', async () => {
+      if (!currentUid) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Guardando...';
+
+      try {
+        const values = collectValues();
+        await updateUserProfile(currentUid, values);
+        savedValues = { ...values };
+        isDirty = false;
+        unsavedHint.classList.remove('is-visible');
+        discardBtn.style.display = 'none';
+        showToast('Cambios guardados correctamente');
+      } catch (err) {
+        console.error('Error saving profile:', err);
+        showToast('Error al guardar. Intentalo de nuevo.');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Guardar cambios`;
+      }
+    });
+
+    /* ---- Discard ---- */
+    discardBtn.addEventListener('click', () => {
+      populateFields(savedValues);
+      isDirty = false;
+      unsavedHint.classList.remove('is-visible');
+      discardBtn.style.display = 'none';
+    });
+
+    /* ---- Delete account modal ---- */
+    deleteBtn.addEventListener('click', () => {
+      deleteModal.classList.add('is-visible');
+    });
+
+    modalCancel.addEventListener('click', () => {
+      deleteModal.classList.remove('is-visible');
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) deleteModal.classList.remove('is-visible');
+    });
+
+    modalConfirm.addEventListener('click', async () => {
+      modalConfirm.disabled = true;
+      modalConfirm.textContent = 'Eliminando...';
+
+      try {
+        if (currentUid) {
+          await updateUserProfile(currentUid, { deleted: true, deletedAt: new Date().toISOString() });
+        }
+        deleteModal.classList.remove('is-visible');
+        showToast('Cuenta eliminada. Redirigiendo...');
+        setTimeout(async () => {
+          await logout();
+          window.location.href = 'login.html';
+        }, 1500);
+      } catch (err) {
+        console.error('Error deleting account:', err);
+        deleteModal.classList.remove('is-visible');
+        showToast('Error al eliminar la cuenta.');
+        modalConfirm.disabled = false;
+        modalConfirm.textContent = 'Si, eliminar cuenta';
+      }
+    });
+
+    /* ---- Auth guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+      if (profile.role !== 'venue') {
+        window.location.href = 'dashboard-artist.html';
+        return;
+      }
+
+      currentUid = user.uid;
+
+      /* Sidebar user info */
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const plan = profile.plan || 'piloto';
+      const planNames = { piloto: 'Piloto 199EUR', esencial: 'Esencial 350EUR', premium: 'Premium 850EUR' };
+      document.getElementById('user-plan').textContent = planNames[plan] || plan;
+
+      /* Populate form */
+      populateFields(profile);
+      savedValues = collectValues();
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Logout ---- */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

@@ -1,35 +1,35 @@
 /* =========================================================
    PALCOFY · Firebase Configuration
-   Detecta si Firebase está configurado.
-   Si no lo está, auth.js y data.js usan localStorage.
+   Si no hay credenciales reales, todo funciona en DEMO
+   con localStorage — sin backend, sin npm, sin CORS.
    ========================================================= */
 
 const firebaseConfig = {
-  apiKey:            "TU_API_KEY",
-  authDomain:        "TU_PROYECTO.firebaseapp.com",
-  projectId:         "TU_PROYECTO",
-  storageBucket:     "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId:             "TU_APP_ID"
+  apiKey:            "AIzaSyA3LvaI3SUnnumEND0g3syPmlclDB1ZetQ",
+  authDomain:        "palcofy.firebaseapp.com",
+  projectId:         "palcofy",
+  storageBucket:     "palcofy.firebasestorage.app",
+  messagingSenderId: "68674800381",
+  appId:             "1:68674800381:web:8c34e693d54d3aa3944c94",
+  measurementId:     "G-8E0HS7XQJD"
 };
 
-/* ¿Firebase está configurado con credenciales reales? */
-export const isFirebaseConfigured =
-  firebaseConfig.apiKey !== 'TU_API_KEY' && firebaseConfig.apiKey !== '';
+/* ¿Firebase está configurado? */
+const isConfigured = firebaseConfig.apiKey !== 'TU_API_KEY' && firebaseConfig.apiKey.length > 10;
 
-/* Firebase instances (solo si está configurado) */
-export let firebaseApp  = null;
-export let auth         = null;
-export let db           = null;
+export const isFirebaseConfigured = isConfigured;
 
-/* Firebase module references (se cargan dinámicamente) */
-export let fbAuth = null;
+/* Exports que auth.js y data.js necesitan */
+export let firebaseApp = null;
+export let auth        = null;
+export let db          = null;
+export let fbAuth      = null;
 export let fbFirestore = null;
 
-if (isFirebaseConfigured) {
+if (isConfigured) {
   try {
-    const appModule     = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const authModule    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const appModule       = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const authModule      = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
     const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
     firebaseApp  = appModule.initializeApp(firebaseConfig);
@@ -38,10 +38,10 @@ if (isFirebaseConfigured) {
     fbAuth       = authModule;
     fbFirestore  = firestoreModule;
 
-    console.info('PALCOFY: Firebase connected.');
+    console.info('PALCOFY ✓ Firebase conectado.');
   } catch (e) {
-    console.warn('PALCOFY: Firebase init failed, running in demo mode.', e);
+    console.warn('PALCOFY: Firebase init error → modo demo.', e);
   }
 } else {
-  console.info('PALCOFY: No Firebase config found — running in DEMO mode (localStorage).');
+  console.info('PALCOFY ✓ Modo DEMO activo (localStorage).');
 }

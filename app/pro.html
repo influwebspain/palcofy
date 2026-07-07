@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — PRO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* Hero */
+    .pro-hero{border-radius:16px;padding:48px 40px;margin-bottom:36px;background:linear-gradient(135deg,#92400E 0%,#D97706 40%,#F59E0B 70%,#FCD34D 100%);position:relative;overflow:hidden;display:flex;align-items:center;gap:28px}
+    .pro-hero::before{content:'';position:absolute;top:-40%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+    .pro-hero::after{content:'';position:absolute;bottom:-30%;left:20%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+    .pro-hero-icon{width:72px;height:72px;border-radius:18px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
+    .pro-hero-icon svg{width:36px;height:36px;color:white;filter:drop-shadow(0 2px 6px rgba(0,0,0,.2))}
+    .pro-hero-content{flex:1;position:relative;z-index:1}
+    .pro-hero-title{font-size:34px;font-weight:800;color:white;letter-spacing:-.03em;margin-bottom:6px;line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.15)}
+    .pro-hero-title .pro-label{font-style:italic;text-shadow:0 2px 16px rgba(146,64,14,.4)}
+    .pro-hero-sub{font-size:15px;color:rgba(255,255,255,.8);max-width:52ch;line-height:1.5;text-shadow:0 1px 4px rgba(0,0,0,.1)}
+    .pro-hero-badge{position:relative;z-index:1}
+    .pro-badge-active{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);border-radius:50px;font-size:14px;font-weight:700;color:white;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+    .badge-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;display:inline-block;box-shadow:0 0 8px rgba(34,197,94,.6)}
+
+    /* Status grid */
+    .pro-status{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:36px}
+    .pro-status-card{background:var(--app-surface);border:1px solid var(--app-border);border-radius:14px;padding:24px;text-align:center}
+    .pro-status-card.is-pro{border-color:rgba(217,119,6,.3);background:linear-gradient(135deg,rgba(217,119,6,.06) 0%,rgba(124,58,237,.06) 100%)}
+    .pro-status-card.is-pro .status-value{color:var(--app-gold)}
+    .status-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+    .status-icon svg{width:24px;height:24px}
+    .status-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:6px}
+    .status-value{font-size:22px;font-weight:800;color:white;letter-spacing:-.02em;margin-bottom:4px}
+    .status-detail{font-size:12px;color:var(--app-text-muted)}
+    .icon-gold{background:linear-gradient(135deg,var(--app-gold),#B45309)}.icon-gold svg{color:white}
+    .icon-green{background:rgba(34,197,94,.12)}.icon-green svg{color:var(--app-green)}
+    .icon-purple{background:rgba(124,58,237,.12)}.icon-purple svg{color:var(--app-accent)}
+
+    /* Price card */
+    .pro-price-card{background:var(--app-surface);border:1.5px solid rgba(217,119,6,.25);border-radius:16px;padding:32px;margin-bottom:36px;display:flex;align-items:center;gap:32px}
+    .pro-price-amount{text-align:center;flex-shrink:0;min-width:180px}
+    .pro-price-amount .price-euro{font-size:56px;font-weight:800;color:white;letter-spacing:-.04em;line-height:1}
+    .pro-price-amount .price-euro span{font-size:24px;color:var(--app-text-muted);font-weight:600}
+    .pro-price-amount .price-period{font-size:14px;color:var(--app-text-muted);margin-top:4px}
+    .pro-price-amount .price-margin{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:5px 12px;border-radius:20px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:12px;font-weight:600;color:var(--app-green)}
+    .pro-price-details{flex:1}
+    .pro-price-details h3{font-size:18px;font-weight:700;color:white;margin-bottom:12px;letter-spacing:-.01em}
+    .pro-price-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+    .pro-price-list li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--app-text)}
+    .check-icon{width:20px;height:20px;border-radius:50%;background:rgba(217,119,6,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .check-icon svg{width:12px;height:12px;color:var(--app-gold)}
+    .pro-price-cta{flex-shrink:0;text-align:center;min-width:200px}
+    .pro-price-cta .app-btn{margin-bottom:8px}
+    .btn-pro-activate{background:linear-gradient(135deg,var(--app-gold),#B45309);color:white;box-shadow:0 4px 24px rgba(217,119,6,.35);font-size:15px;padding:14px 28px}
+    .btn-pro-activate:hover{box-shadow:0 6px 32px rgba(217,119,6,.5);transform:translateY(-2px)}
+    .btn-pro-activate:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-pro-active{background:rgba(34,197,94,.1);color:var(--app-green);border:1px solid rgba(34,197,94,.25);cursor:default}
+    .btn-pro-active:hover{background:rgba(34,197,94,.1);transform:none;box-shadow:none}
+    .pro-price-cta .cta-note{font-size:11px;color:var(--app-text-muted)}
+
+    /* Section header */
+    .section-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .section-header svg{width:20px;height:20px;color:var(--app-gold);flex-shrink:0}
+    .section-header h2{font-size:18px;font-weight:700;color:white;letter-spacing:-.01em}
+
+    /* Benefits grid */
+    .pro-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
+    .benefit-card{background:var(--app-surface);border:1px solid var(--app-border);border-radius:14px;padding:28px 24px;transition:border-color 250ms ease,transform 250ms ease,box-shadow 250ms ease;position:relative;overflow:hidden}
+    .benefit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--app-gold),var(--app-accent));opacity:0;transition:opacity 250ms ease}
+    .benefit-card:hover{border-color:rgba(217,119,6,.25);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+    .benefit-card:hover::before{opacity:1}
+    .benefit-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .benefit-icon svg{width:22px;height:22px}
+    .benefit-icon.bg-gold{background:linear-gradient(135deg,var(--app-gold),#B45309)}.benefit-icon.bg-gold svg{color:white}
+    .benefit-icon.bg-purple{background:linear-gradient(135deg,var(--app-accent),#6D28D9)}.benefit-icon.bg-purple svg{color:white}
+    .benefit-icon.bg-green{background:linear-gradient(135deg,#059669,#10B981)}.benefit-icon.bg-green svg{color:white}
+    .benefit-icon.bg-blue{background:linear-gradient(135deg,#2563EB,#3B82F6)}.benefit-icon.bg-blue svg{color:white}
+    .benefit-icon.bg-rose{background:linear-gradient(135deg,#DB2777,#EC4899)}.benefit-icon.bg-rose svg{color:white}
+    .benefit-icon.bg-cyan{background:linear-gradient(135deg,#0891B2,#06B6D4)}.benefit-icon.bg-cyan svg{color:white}
+    .benefit-card h3{font-size:15px;font-weight:700;color:white;margin-bottom:8px;letter-spacing:-.01em;line-height:1.3}
+    .benefit-card p{font-size:13px;color:var(--app-text-muted);line-height:1.5;margin:0}
+
+    /* Comparison table */
+    .comparison-table{width:100%;border-collapse:collapse;background:var(--app-surface);border:1px solid var(--app-border);border-radius:14px;overflow:hidden}
+    .comparison-table thead{background:rgba(255,255,255,.03)}
+    .comparison-table th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--app-text-muted);text-align:left;padding:14px 20px;border-bottom:1px solid var(--app-border)}
+    .comparison-table th.col-free{text-align:center;width:120px}
+    .comparison-table th.col-pro{text-align:center;width:120px;color:var(--app-gold);position:relative}
+    .comparison-table th.col-pro::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--app-gold),var(--app-accent))}
+    .comparison-table td{padding:14px 20px;font-size:13.5px;color:var(--app-text);border-bottom:1px solid var(--app-border)}
+    .comparison-table tr:last-child td{border-bottom:0}
+    .comparison-table tr:hover td{background:rgba(255,255,255,.02)}
+    .comparison-table td.col-free,.comparison-table td.col-pro{text-align:center}
+    .comparison-table td.col-pro{background:rgba(217,119,6,.03)}
+    .comp-check{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%}
+    .comp-check--yes{background:rgba(34,197,94,.12)}.comp-check--yes svg{width:14px;height:14px;color:var(--app-green)}
+    .comp-check--no{background:rgba(239,68,68,.1)}.comp-check--no svg{width:14px;height:14px;color:var(--app-red)}
+    .comp-text{font-size:12px;font-weight:600;color:var(--app-text-muted)}
+    .comp-text.text-gold{color:var(--app-gold)}
+    .comp-text.text-green{color:var(--app-green)}
+
+    /* Bottom CTA */
+    .pro-cta-bottom{text-align:center;padding:40px;background:var(--app-surface);border:1px solid var(--app-border);border-radius:16px;margin-bottom:40px}
+    .pro-cta-bottom h3{font-size:20px;font-weight:800;color:white;margin-bottom:8px;letter-spacing:-.02em}
+    .pro-cta-bottom p{font-size:14px;color:var(--app-text-muted);margin-bottom:24px;max-width:48ch;margin-left:auto;margin-right:auto}
+    .pro-cta-bottom .app-btn{width:auto;padding:14px 40px}
+
+    /* Toast */
+    .pro-toast{position:fixed;bottom:32px;right:32px;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;color:white;z-index:2000;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(20px);transition:opacity 300ms ease,transform 300ms ease;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+    .pro-toast.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+    .pro-toast--success{background:linear-gradient(135deg,#059669,#10B981);border:1px solid rgba(34,197,94,.3)}
+    .pro-toast--error{background:linear-gradient(135deg,#DC2626,#EF4444);border:1px solid rgba(239,68,68,.3)}
+    .pro-toast svg{width:18px;height:18px;flex-shrink:0}
+
+    /* Responsive */
+    @media(max-width:1100px){.pro-hero{padding:36px 28px;gap:20px}.pro-hero-title{font-size:28px}.pro-price-card{flex-direction:column;text-align:center}.pro-price-amount{min-width:auto}.pro-price-cta{min-width:auto}.pro-price-list{align-items:center}.pro-benefits{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.pro-hero{flex-direction:column;text-align:center;padding:32px 20px}.pro-hero-sub{max-width:100%}.pro-hero-title{font-size:24px}.pro-status,.pro-benefits{grid-template-columns:1fr}.comparison-table th,.comparison-table td{padding:10px 12px;font-size:12px}}
+  </style>
+</head>
+<body>
+
+  <!-- Loading spinner -->
+  <div class="app-loading" id="app-loading"><div class="spinner"></div></div>
+
+  <!-- App shell -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <a href="performances.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Mis actuaciones
+        </a>
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+        <a href="invoices-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <div class="sidebar-section">Cuenta</div>
+        <a href="pro.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PALCOFY PRO
+        </a>
+        <a href="settings-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuraci&oacute;n
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">Cerrar sesi&oacute;n</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <!-- Hero -->
+      <div class="pro-hero">
+        <div class="pro-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="pro-hero-content">
+          <h1 class="pro-hero-title">PALCOFY <span class="pro-label">PRO</span></h1>
+          <p class="pro-hero-sub">Potencia tu carrera art&iacute;stica con posicionamiento destacado, verificaci&oacute;n de calidad y acceso prioritario a los mejores eventos del mercado.</p>
+        </div>
+        <div class="pro-hero-badge" id="pro-hero-badge"></div>
+      </div>
+
+      <!-- Status cards -->
+      <div class="pro-status">
+        <div class="pro-status-card" id="status-plan">
+          <div class="status-icon icon-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="status-label">Plan actual</div>
+          <div class="status-value" id="status-plan-text">Free</div>
+          <div class="status-detail" id="status-plan-sub">Suscripci&oacute;n gratuita</div>
+        </div>
+        <div class="pro-status-card">
+          <div class="status-icon icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="status-label">Tu margen neto</div>
+          <div class="status-value" id="status-margin">90%</div>
+          <div class="status-detail" id="status-margin-sub">Comisi&oacute;n est&aacute;ndar</div>
+        </div>
+        <div class="pro-status-card">
+          <div class="status-icon icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="status-label">Liquidaci&oacute;n</div>
+          <div class="status-value" id="status-settlement">7 d&iacute;as</div>
+          <div class="status-detail" id="status-settlement-sub">Plazo est&aacute;ndar</div>
+        </div>
+      </div>
+
+      <!-- Price card -->
+      <div class="pro-price-card">
+        <div class="pro-price-amount">
+          <div class="price-euro">14,99<span>&euro;</span></div>
+          <div class="price-period">/mes</div>
+          <div class="price-margin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+            Margen neto 95%
+          </div>
+        </div>
+        <div class="pro-price-details">
+          <h3>Qu&eacute; incluye PRO</h3>
+          <ul class="pro-price-list">
+            <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Posicionamiento algor&iacute;tmico destacado en b&uacute;squedas</li>
+            <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Insignia de verificaci&oacute;n visible para venues</li>
+            <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Acceso prioritario a licitaciones corporativas</li>
+            <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Liquidaci&oacute;n en 24h y soporte prioritario</li>
+          </ul>
+        </div>
+        <div class="pro-price-cta" id="pro-price-cta"></div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <h2>Beneficios exclusivos PRO</h2>
+      </div>
+      <div class="pro-benefits">
+        <div class="benefit-card">
+          <div class="benefit-icon bg-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6" stroke-width="1.5"/></svg></div>
+          <h3>Posicionamiento algor&iacute;tmico destacado</h3>
+          <p>Mayor visibilidad en b&uacute;squedas. Aparece primero cuando los venues buscan artistas.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon bg-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c1.1 0 2.1-.4 2.8-1.2L22 14l-2-2-5.4 5.4a3.5 3.5 0 0 1-5.2 0L6 16l-2 2 .4 4.8c.2.8.8 1.2 1.6 1.2z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <h3>Insignia de verificaci&oacute;n</h3>
+          <p>Sello de calidad visible para venues que genera confianza y credibilidad inmediata.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon bg-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Acceso prioritario a licitaciones</h3>
+          <p>Eventos corporativos de alto cach&eacute; antes que el resto de artistas de la plataforma.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon bg-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M12 4v16" stroke-width="1.5"/></svg></div>
+          <h3>Liquidaci&oacute;n 24h</h3>
+          <p>Cobra al d&iacute;a siguiente. Olvida los 7 d&iacute;as de espera est&aacute;ndar.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon bg-rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/><path d="M10 16l2-2 2 2" stroke-width="1.5"/><path d="M10 12l2 2 2-2" stroke-width="1.5"/></svg></div>
+          <h3>Panel de calendario din&aacute;mico</h3>
+          <p>Tarifas din&aacute;micas por temporada. Configura precios diferenciados por d&iacute;a y demanda.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon bg-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 8v2M12 14h.01" stroke-width="1.5"/></svg></div>
+          <h3>Soporte prioritario</h3>
+          <p>Atenci&oacute;n directa con equipo dedicado. Incidencias resueltas en menos de 2 horas.</p>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        <h2>Comparativa FREE vs PRO</h2>
+      </div>
+      <div style="margin-bottom:40px;">
+        <table class="comparison-table">
+          <thead><tr><th>Caracter&iacute;stica</th><th class="col-free">FREE</th><th class="col-pro">PRO</th></tr></thead>
+          <tbody>
+            <tr><td>Perfil de artista</td><td class="col-free"><span class="comp-check comp-check--yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="col-pro"><span class="comp-check comp-check--yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+            <tr><td>Posicionamiento en b&uacute;squedas</td><td class="col-free"><span class="comp-text">Est&aacute;ndar</span></td><td class="col-pro"><span class="comp-text text-gold">Destacado</span></td></tr>
+            <tr><td>Insignia de verificaci&oacute;n</td><td class="col-free"><span class="comp-check comp-check--no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></span></td><td class="col-pro"><span class="comp-check comp-check--yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+            <tr><td>Acceso a licitaciones corporativas</td><td class="col-free"><span class="comp-check comp-check--no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></span></td><td class="col-pro"><span class="comp-text text-green">Prioritario</span></td></tr>
+            <tr><td>Velocidad de liquidaci&oacute;n</td><td class="col-free"><span class="comp-text">7 d&iacute;as</span></td><td class="col-pro"><span class="comp-text text-gold">24 horas</span></td></tr>
+            <tr><td>Margen neto por actuaci&oacute;n</td><td class="col-free"><span class="comp-text">90%</span></td><td class="col-pro"><span class="comp-text text-green">95%</span></td></tr>
+            <tr><td>Calendario din&aacute;mico (tarifas por temporada)</td><td class="col-free"><span class="comp-check comp-check--no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></span></td><td class="col-pro"><span class="comp-check comp-check--yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+            <tr><td>Soporte t&eacute;cnico</td><td class="col-free"><span class="comp-text">Chat general</span></td><td class="col-pro"><span class="comp-text text-gold">Prioritario (2h)</span></td></tr>
+            <tr><td>Coste mensual</td><td class="col-free"><span class="comp-text text-green">Gratis</span></td><td class="col-pro"><span class="comp-text text-gold">14,99&euro;/mes</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom CTA -->
+      <div class="pro-cta-bottom" id="pro-cta-bottom">
+        <h3 id="cta-bottom-title">&iquest;Listo para dar el salto?</h3>
+        <p id="cta-bottom-sub">Activa PRO y empieza a recibir m&aacute;s reservas, cobrar m&aacute;s r&aacute;pido y destacar frente a la competencia.</p>
+        <button class="app-btn btn-pro-activate" id="cta-bottom-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Activar PRO &mdash; 14,99&euro;/mes
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="pro-toast" id="pro-toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="toast-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span id="toast-message"></span>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, updateUserProfile } from './data.js';
+
+    /* DOM refs */
+    const loadingEl   = document.getElementById('app-loading');
+    const shellEl     = document.getElementById('app-shell');
+    const toastEl     = document.getElementById('pro-toast');
+    const toastMsgEl  = document.getElementById('toast-message');
+    const toastIconEl = document.getElementById('toast-icon');
+
+    let currentUser = null;
+    let userProfile = null;
+
+    /* ===== AUTH GUARD ===== */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+
+      if (!profile) {
+        profile = {
+          id: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: 'artist',
+          genre: '',
+          cache: 500,
+          pro: false,
+          available: true,
+          radius: 50
+        };
+        localStorage.setItem('palcofy.profile.' + user.uid, JSON.stringify(profile));
+      }
+
+      if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      currentUser = user;
+      userProfile = profile;
+
+      populateSidebar(profile);
+      renderAll(profile.pro === true);
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display   = '';
+    });
+
+    /* ===== SIDEBAR ===== */
+    function populateSidebar(profile) {
+      var name = profile.name || currentUser.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('user-pro-status').textContent = profile.pro ? 'PRO ✓' : 'Free';
+    }
+
+    /* ===== RENDER ALL ===== */
+    function renderAll(isPro) {
+      /* Hero badge */
+      var badge = document.getElementById('pro-hero-badge');
+      badge.innerHTML = isPro
+        ? '<span class="pro-badge-active"><span class="badge-dot"></span> PRO ACTIVO</span>'
+        : '';
+
+      /* Status cards */
+      var planCard  = document.getElementById('status-plan');
+      var planText  = document.getElementById('status-plan-text');
+      var planSub   = document.getElementById('status-plan-sub');
+      var margin    = document.getElementById('status-margin');
+      var marginSub = document.getElementById('status-margin-sub');
+      var settl     = document.getElementById('status-settlement');
+      var settlSub  = document.getElementById('status-settlement-sub');
+
+      if (isPro) {
+        planCard.classList.add('is-pro');
+        planText.textContent  = 'PRO';
+        planSub.textContent   = 'Suscripción activa';
+        margin.textContent    = '95%';
+        marginSub.textContent = 'Comisión reducida';
+        settl.textContent     = '24h';
+        settlSub.textContent  = 'Liquidación express';
+      } else {
+        planCard.classList.remove('is-pro');
+        planText.textContent  = 'Free';
+        planSub.textContent   = 'Suscripción gratuita';
+        margin.textContent    = '90%';
+        marginSub.textContent = 'Comisión estándar';
+        settl.textContent     = '7 días';
+        settlSub.textContent  = 'Plazo estándar';
+      }
+
+      /* Price CTA */
+      var ctaEl = document.getElementById('pro-price-cta');
+      if (isPro) {
+        ctaEl.innerHTML =
+          '<button class="app-btn btn-pro-active" disabled>' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+            ' PRO ACTIVO' +
+          '</button><div class="cta-note">Ya tienes PRO activado</div>';
+      } else {
+        ctaEl.innerHTML =
+          '<button class="app-btn btn-pro-activate" id="activate-pro-btn">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+            ' Activar PRO' +
+          '</button><div class="cta-note">Cancela cuando quieras, sin compromiso</div>';
+        var btn = document.getElementById('activate-pro-btn');
+        if (btn) btn.addEventListener('click', handleActivate);
+      }
+
+      /* Bottom CTA */
+      var bTitle = document.getElementById('cta-bottom-title');
+      var bSub   = document.getElementById('cta-bottom-sub');
+      var bBtn   = document.getElementById('cta-bottom-btn');
+
+      if (isPro) {
+        bTitle.textContent = '¿Ya eres PRO ✨';
+        bSub.textContent   = 'Disfruta de todos los beneficios exclusivos. Si tienes dudas, contacta con soporte prioritario.';
+        bBtn.className = 'app-btn btn-pro-active';
+        bBtn.disabled  = true;
+        bBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> PRO ACTIVO';
+      } else {
+        bTitle.textContent = '¿Listo para dar el salto?';
+        bSub.textContent   = 'Activa PRO y empieza a recibir más reservas, cobrar más rápido y destacar frente a la competencia.';
+        bBtn.className = 'app-btn btn-pro-activate';
+        bBtn.disabled  = false;
+        bBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Activar PRO — 14,99€/mes';
+        bBtn.addEventListener('click', handleActivate);
+      }
+    }
+
+    /* ===== ACTIVATE ===== */
+    async function handleActivate() {
+      if (!currentUser || !userProfile || userProfile.pro) return;
+
+      var btns = document.querySelectorAll('.btn-pro-activate');
+      btns.forEach(function(b) { b.disabled = true; b.textContent = 'Activando...'; });
+
+      try {
+        await updateUserProfile(currentUser.uid, { pro: true });
+        userProfile.pro = true;
+        localStorage.setItem('palcofy.profile.' + currentUser.uid, JSON.stringify(userProfile));
+
+        populateSidebar(userProfile);
+        renderAll(true);
+
+        showToast('success', 'PRO activado correctamente. ¡Bienvenido al club!');
+      } catch (err) {
+        console.error('Error activando PRO:', err);
+        showToast('error', 'Error al activar PRO. Inténtalo de nuevo.');
+        renderAll(false);
+      }
+    }
+
+    /* ===== TOAST ===== */
+    function showToast(type, message) {
+      toastEl.className   = 'pro-toast pro-toast--' + type;
+      toastMsgEl.textContent = message;
+      toastIconEl.innerHTML = type === 'success'
+        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+        : '<circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>';
+      requestAnimationFrame(function() { toastEl.classList.add('is-visible'); });
+      setTimeout(function() { toastEl.classList.remove('is-visible'); }, 4000);
+    }
+
+    /* ===== LOGOUT ===== */
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

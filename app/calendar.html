@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Calendario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* Calendar layout */
+    .calendar-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .calendar-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .calendar-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      overflow: hidden;
+    }
+
+    .calendar-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--app-border);
+    }
+
+    .calendar-card-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .calendar-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--app-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--app-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+
+    .calendar-nav-btn:hover {
+      color: white;
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .calendar-nav-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .calendar-month-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      min-width: 160px;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .calendar-card-body {
+      padding: 12px 16px 16px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .calendar-day-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--app-text-muted);
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--app-text);
+      cursor: pointer;
+      transition: background 180ms ease;
+      position: relative;
+      min-height: 48px;
+    }
+
+    .calendar-day:hover { background: rgba(255,255,255,0.04); }
+
+    .calendar-day.is-today {
+      background: var(--app-accent);
+      color: white;
+      font-weight: 700;
+    }
+
+    .calendar-day.is-selected {
+      outline: 2px solid var(--app-accent);
+      outline-offset: -2px;
+    }
+
+    .calendar-day.has-event {
+      /* Additional emphasis for event days */
+    }
+
+    .calendar-day.has-event .day-number {
+      font-weight: 700;
+    }
+
+    .calendar-day.is-empty {
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .day-number {
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .event-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 4px;
+      position: absolute;
+      bottom: 5px;
+    }
+
+    .event-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--app-gold);
+    }
+
+    .event-dot.confirmed {
+      background: var(--app-green);
+    }
+
+    .event-dot.pending {
+      background: var(--app-gold);
+    }
+
+    /* Event chips visible on wider days */
+    .event-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      padding: 0 2px;
+      margin-top: 4px;
+    }
+
+    .event-chip {
+      font-size: 8px;
+      font-weight: 600;
+      padding: 2px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .event-chip.confirmed {
+      background: rgba(34,197,94,0.15);
+      color: var(--app-green);
+    }
+
+    .event-chip.pending {
+      background: rgba(217,119,6,0.15);
+      color: var(--app-gold);
+    }
+
+    /* Detail panel */
+    .detail-panel {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      overflow: hidden;
+    }
+
+    .detail-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--app-border);
+    }
+
+    .detail-panel-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .detail-panel-date {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .detail-panel-body {
+      padding: 16px 20px;
+    }
+
+    .detail-event {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--app-border);
+    }
+
+    .detail-event:last-child {
+      border-bottom: none;
+    }
+
+    .detail-event-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .detail-event-icon.confirmed {
+      background: rgba(34,197,94,0.12);
+    }
+
+    .detail-event-icon.pending {
+      background: rgba(217,119,6,0.12);
+    }
+
+    .detail-event-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .detail-event-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .detail-event-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .detail-event-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-event-meta svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.6;
+    }
+
+    .detail-event-cache {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--app-gold);
+      flex-shrink: 0;
+    }
+
+    .detail-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--app-text-muted);
+    }
+
+    .detail-empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .detail-empty h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .detail-empty p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Legend */
+    .calendar-legend {
+      display: flex;
+      gap: 16px;
+      padding: 12px 20px 0;
+      border-top: 1px solid var(--app-border);
+      margin-top: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--app-text-muted);
+    }
+
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.confirmed { background: var(--app-green); }
+    .legend-dot.pending { background: var(--app-gold); }
+
+    /* Mobile detail panel - shown below calendar on small screens */
+    @media (max-width: 1100px) {
+      .detail-panel {
+        display: block;
+      }
+    }
+
+    /* Stats row for calendar */
+    .calendar-stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .calendar-stat {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      padding: 16px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .calendar-stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--app-text-muted);
+    }
+
+    .calendar-stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      line-height: 1;
+    }
+
+    .calendar-stat-value.accent { color: var(--app-accent); }
+    .calendar-stat-value.gold { color: var(--app-gold); }
+    .calendar-stat-value.green { color: var(--app-green); }
+
+    @media (max-width: 640px) {
+      .calendar-stats {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="calendar.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Facturación</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Planes
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuración
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">V</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Venue</div>
+            <div class="sidebar-user-role">Venue · <span id="user-plan">Sin plan</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="greeting">Buenos días</h1>
+          <p class="topbar-sub">Gestiona la programación de tu venue.</p>
+        </div>
+        <a href="search.html" class="app-btn app-btn--primary" style="width:auto;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Reservar artista
+        </a>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="calendar-stats" id="calendar-stats">
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Eventos este mes</span>
+          <span class="calendar-stat-value accent" id="stat-month-events">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Confirmados</span>
+          <span class="calendar-stat-value green" id="stat-confirmed">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Pendientes</span>
+          <span class="calendar-stat-value gold" id="stat-pending">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Caché total</span>
+          <span class="calendar-stat-value" id="stat-total-cache">0 €</span>
+        </div>
+      </div>
+
+      <!-- Calendar + Detail panel -->
+      <div class="calendar-wrapper">
+
+        <!-- Calendar card -->
+        <div class="calendar-card">
+          <div class="calendar-card-header">
+            <div class="calendar-nav">
+              <button class="calendar-nav-btn" id="prev-month" title="Mes anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span class="calendar-month-label" id="month-label">Julio 2026</span>
+              <button class="calendar-nav-btn" id="next-month" title="Mes siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <button class="calendar-nav-btn" id="today-btn" title="Ir a hoy" style="width:auto;padding:0 12px;font-size:12px;font-weight:600;color:var(--app-accent);border-color:rgba(124,58,237,0.3);">
+              Hoy
+            </button>
+          </div>
+          <div class="calendar-card-body">
+            <div class="calendar-grid" id="calendar-grid">
+              <!-- Day headers -->
+              <div class="calendar-day-header">Lun</div>
+              <div class="calendar-day-header">Mar</div>
+              <div class="calendar-day-header">Mie</div>
+              <div class="calendar-day-header">Jue</div>
+              <div class="calendar-day-header">Vie</div>
+              <div class="calendar-day-header">Sab</div>
+              <div class="calendar-day-header">Dom</div>
+              <!-- Days filled by JS -->
+            </div>
+          </div>
+          <div class="calendar-legend">
+            <div class="legend-item">
+              <div class="legend-dot confirmed"></div>
+              <span>Confirmado</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot pending"></div>
+              <span>Pendiente</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail panel -->
+        <div class="detail-panel" id="detail-panel">
+          <div class="detail-panel-header">
+            <div>
+              <h3 id="detail-title">Selecciona un día</h3>
+              <div class="detail-panel-date" id="detail-date-subtitle">Haz clic en un día del calendario para ver los eventos</div>
+            </div>
+          </div>
+          <div class="detail-panel-body" id="detail-body">
+            <div class="detail-empty" id="detail-empty">
+              <div class="detail-empty-icon">📅</div>
+              <h4>Sin selección</h4>
+              <p>Haz clic en un día con eventos para ver los detalles de la programación.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listBookings } from './data.js';
+
+    const loadingEl = document.getElementById('app-loading');
+    const shellEl   = document.getElementById('app-shell');
+
+    /* ---- State ---- */
+    let currentUserId = null;
+    let allBookings = [];
+    let currentYear, currentMonth; // 0-indexed month
+    let selectedDate = null; // 'YYYY-MM-DD'
+
+    const MONTH_NAMES = [
+      'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+
+    const DAY_NAMES_SHORT = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+    /* ---- Date helpers ---- */
+    function dateKey(y, m, d) {
+      return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+
+    function getDaysInMonth(y, m) {
+      return new Date(y, m + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(y, m) {
+      // getDay() returns 0=Sun. We want Monday=0.
+      const day = new Date(y, m, 1).getDay();
+      return day === 0 ? 6 : day - 1;
+    }
+
+    function formatLongDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const dayName = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][dt.getDay()];
+      return `${dayName}, ${d} de ${MONTH_NAMES[m - 1]} ${y}`;
+    }
+
+    function isToday(y, m, d) {
+      const now = new Date();
+      return now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
+    }
+
+    /* ---- Booking lookups ---- */
+    function bookingsForDate(key) {
+      return allBookings.filter(b => b.date === key && b.status !== 'cancelled');
+    }
+
+    /* ---- Render calendar grid ---- */
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+
+      // Keep the 7 day-header divs, remove day cells
+      const headers = grid.querySelectorAll('.calendar-day-header');
+      grid.innerHTML = '';
+      headers.forEach(h => grid.appendChild(h));
+
+      const label = document.getElementById('month-label');
+      label.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+      const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+      const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+
+      // Previous month padding
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+
+      for (let i = 0; i < firstDay; i++) {
+        const d = daysInPrevMonth - firstDay + 1 + i;
+        const cell = createDayCell(prevYear, prevMonth, d, true);
+        grid.appendChild(cell);
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = createDayCell(currentYear, currentMonth, d, false);
+        grid.appendChild(cell);
+      }
+
+      // Next month padding
+      const totalCells = firstDay + daysInMonth;
+      const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+      for (let d = 1; d <= remainingCells; d++) {
+        const cell = createDayCell(nextYear, nextMonth, d, true);
+        grid.appendChild(cell);
+      }
+
+      updateStats();
+    }
+
+    function createDayCell(y, m, d, isOtherMonth) {
+      const key = dateKey(y, m, d);
+      const today = isToday(y, m, d);
+      const bookings = isOtherMonth ? [] : bookingsForDate(key);
+      const hasEvents = bookings.length > 0;
+
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day';
+      if (isOtherMonth) cell.classList.add('is-empty');
+      if (today) cell.classList.add('is-today');
+      if (hasEvents) cell.classList.add('has-event');
+      if (selectedDate === key) cell.classList.add('is-selected');
+
+      // Day number
+      const num = document.createElement('span');
+      num.className = 'day-number';
+      num.textContent = d;
+      cell.appendChild(num);
+
+      // Event dots (small screen indicator)
+      if (hasEvents) {
+        const dots = document.createElement('div');
+        dots.className = 'event-dots';
+        bookings.slice(0, 3).forEach(b => {
+          const dot = document.createElement('div');
+          dot.className = `event-dot ${b.status}`;
+          dots.appendChild(dot);
+        });
+        cell.appendChild(dots);
+      }
+
+      // Click handler
+      if (!isOtherMonth) {
+        cell.addEventListener('click', () => {
+          selectedDate = key;
+          renderCalendar();
+          renderDetailPanel();
+        });
+      }
+
+      return cell;
+    }
+
+    /* ---- Render detail panel ---- */
+    function renderDetailPanel() {
+      const titleEl = document.getElementById('detail-title');
+      const subtitleEl = document.getElementById('detail-date-subtitle');
+      const bodyEl = document.getElementById('detail-body');
+
+      if (!selectedDate) {
+        titleEl.textContent = 'Selecciona un día';
+        subtitleEl.textContent = 'Haz clic en un día del calendario para ver los eventos';
+        bodyEl.innerHTML = `
+          <div class="detail-empty">
+            <div class="detail-empty-icon">📅</div>
+            <h4>Sin selección</h4>
+            <p>Haz clic en un día con eventos para ver los detalles de la programación.</p>
+          </div>`;
+        return;
+      }
+
+      const bookings = bookingsForDate(selectedDate);
+      const longDate = formatLongDate(selectedDate);
+
+      titleEl.textContent = bookings.length > 0
+        ? `${bookings.length} evento${bookings.length > 1 ? 's' : ''}`
+        : 'Sin eventos';
+
+      subtitleEl.textContent = longDate;
+
+      if (bookings.length === 0) {
+        bodyEl.innerHTML = `
+          <div class="detail-empty">
+            <div class="detail-empty-icon">🎵</div>
+            <h4>Sin eventos este día</h4>
+            <p>No hay artistas programados para esta fecha.</p>
+            <a href="search.html" class="app-btn app-btn--primary" style="width:auto;padding:10px 20px;margin-top:16px;display:inline-flex;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Reservar artista
+            </a>
+          </div>`;
+        return;
+      }
+
+      bodyEl.innerHTML = bookings.map(b => {
+        const isConfirmed = b.status === 'confirmed';
+        const statusBadge = isConfirmed
+          ? '<span class="badge badge--green"><span class="badge-dot"></span> Confirmado</span>'
+          : '<span class="badge badge--gold"><span class="badge-dot"></span> Pendiente</span>';
+
+        return `
+          <div class="detail-event">
+            <div class="detail-event-icon ${isConfirmed ? 'confirmed' : 'pending'}">
+              ${isConfirmed ? '✓' : '⏳'}
+            </div>
+            <div class="detail-event-info">
+              <div class="detail-event-name">${b.artistName || 'Artista'}</div>
+              <div class="detail-event-meta">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${b.time || '—'}
+                </span>
+                ${statusBadge}
+              </div>
+              ${b.notes ? `<div style="font-size:12px;color:var(--app-text-muted);margin-top:4px;">${b.notes}</div>` : ''}
+            </div>
+            <div class="detail-event-cache">${b.cache || 0} €</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ---- Update monthly stats ---- */
+    function updateStats() {
+      const monthBookings = allBookings.filter(b => {
+        if (b.status === 'cancelled') return false;
+        const [y, m] = b.date.split('-').map(Number);
+        return y === currentYear && (m - 1) === currentMonth;
+      });
+
+      const confirmed = monthBookings.filter(b => b.status === 'confirmed').length;
+      const pending = monthBookings.filter(b => b.status === 'pending').length;
+      const totalCache = monthBookings.reduce((sum, b) => sum + (b.cache || 0), 0);
+
+      document.getElementById('stat-month-events').textContent = monthBookings.length;
+      document.getElementById('stat-confirmed').textContent = confirmed;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-total-cache').textContent = `${totalCache.toLocaleString('es-ES')} €`;
+    }
+
+    /* ---- Navigation ---- */
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      selectedDate = null;
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      selectedDate = null;
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    document.getElementById('today-btn').addEventListener('click', () => {
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+      selectedDate = dateKey(currentYear, currentMonth, now.getDate());
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    /* ---- Auth guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+      if (profile.role !== 'venue') {
+        window.location.href = 'dashboard-artist.html';
+        return;
+      }
+
+      currentUserId = user.uid;
+
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const plan = profile.plan || 'piloto';
+      const planNames = { piloto: 'Piloto 199€', esencial: 'Esencial 350€', premium: 'Premium 850€' };
+      document.getElementById('user-plan').textContent = planNames[plan] || plan;
+
+      const hour = new Date().getHours();
+      const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+      document.getElementById('greeting').textContent = `${greeting}, ${name}`;
+
+      /* Load bookings */
+      try {
+        allBookings = await listBookings(user.uid);
+      } catch (e) {
+        allBookings = [];
+      }
+
+      /* Initialize calendar to current month */
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+
+      renderCalendar();
+      renderDetailPanel();
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Logout ---- */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

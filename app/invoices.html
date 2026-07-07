@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Facturas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Facturación</div>
+        <a href="invoices.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Planes
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="#" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuración
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">V</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Venue</div>
+            <div class="sidebar-user-role">Venue · <span id="user-plan">Sin plan</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="greeting">Facturas</h1>
+          <p class="topbar-sub">Gestiona la facturación de tu suscripción y eventos.</p>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total facturado este mes</span>
+          <span class="stat-value accent" id="stat-total-month">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Suscripción + eventos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pagado</span>
+          <span class="stat-value green" id="stat-paid">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Cobrado</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pendiente</span>
+          <span class="stat-value gold" id="stat-pending">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Por cobrar</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Número de facturas</span>
+          <span class="stat-value" id="stat-count">0</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Total emitidas</span>
+        </div>
+      </div>
+
+      <!-- Invoices table -->
+      <div class="data-card">
+        <div class="data-card-header">
+          <h3>Historial de facturas</h3>
+        </div>
+        <table class="data-table" id="invoices-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Mes</th>
+              <th>Suscripción</th>
+              <th>Eventos total</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="invoices-body">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">📄</div>
+                  <h3>Sin facturas</h3>
+                  <p>Aún no se han emitido facturas para tu cuenta.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listInvoices } from './data.js';
+
+    const loadingEl = document.getElementById('app-loading');
+    const shellEl   = document.getElementById('app-shell');
+
+    /* ---- Auth guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+      if (profile.role !== 'venue') {
+        window.location.href = 'dashboard-artist.html';
+        return;
+      }
+
+      /* Fill sidebar */
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const plan = profile.plan || 'piloto';
+      const planNames = { piloto: 'Piloto 199€', esencial: 'Esencial 350€', premium: 'Premium 850€' };
+      document.getElementById('user-plan').textContent = planNames[plan] || plan;
+
+      const hour = new Date().getHours();
+      const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+      document.getElementById('greeting').textContent = `Facturas`;
+      document.querySelector('.topbar-sub').textContent = `${greeting}, ${name}. Aquí tienes tu facturación.`;
+
+      /* Load invoices */
+      try {
+        const invoices = await listInvoices(user.uid);
+        renderInvoices(invoices);
+      } catch (e) {
+        /* demo mode or empty */
+      }
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Render invoices ---- */
+    function renderInvoices(invoices) {
+      if (!invoices || invoices.length === 0) return;
+
+      /* Compute stats — current month */
+      const now = new Date();
+      const thisMonthInv = invoices.filter(inv => {
+        const d = new Date(inv.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const paidTotal = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total || 0), 0);
+      const pendingTotal = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + (i.total || 0), 0);
+      const thisMonthTotal = thisMonthInv.reduce((s, i) => s + (i.total || 0), 0);
+
+      document.getElementById('stat-total-month').textContent = `${thisMonthTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-paid').textContent = `${paidTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-pending').textContent = `${pendingTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-count').textContent = invoices.length;
+
+      /* Render rows */
+      const tbody = document.getElementById('invoices-body');
+      tbody.innerHTML = invoices.map(inv => {
+        const badgeClass = inv.status === 'paid' ? 'badge--green' : 'badge--gold';
+        const statusLabel = inv.status === 'paid' ? 'Pagado' : 'Pendiente';
+        return `
+          <tr>
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--app-text-muted);">${inv.id}</code></td>
+            <td>${inv.month}</td>
+            <td>${(inv.subscription || 0).toLocaleString('es-ES')} €</td>
+            <td>${(inv.events || 0).toLocaleString('es-ES')} €</td>
+            <td style="font-weight:700;color:white;">${(inv.total || 0).toLocaleString('es-ES')} €</td>
+            <td><span class="badge ${badgeClass}"><span class="badge-dot"></span> ${statusLabel}</span></td>
+            <td><button class="app-btn app-btn--ghost" style="font-size:12px;padding:6px 12px;" onclick="alert('Próximamente')">Descargar</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* ---- Logout ---- */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

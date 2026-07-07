@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Configuración</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .settings-section { margin-bottom: 32px; }
+    .settings-section-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+    .settings-section-header svg { width:20px; height:20px; color:var(--app-accent); flex-shrink:0; }
+    .settings-section-header h2 { font-size:16px; font-weight:700; color:white; letter-spacing:-0.01em; }
+    .settings-section-header .section-desc { font-size:13px; color:var(--app-text-muted); margin-left:auto; }
+    .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; }
+    .field-grid .app-field.span-full { grid-column:1/-1; }
+    .app-field input[readonly] { opacity:0.5; cursor:not-allowed; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--app-border); }
+    .toggle-row:last-child { border-bottom:none; }
+    .toggle-info { display:flex; flex-direction:column; gap:2px; }
+    .toggle-label { font-size:14px; font-weight:600; color:white; }
+    .toggle-desc { font-size:12px; color:var(--app-text-muted); }
+    .toggle-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+    .toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:24px; cursor:pointer; transition:background 200ms ease; }
+    .toggle-slider::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:transform 200ms ease; }
+    .toggle-switch input:checked + .toggle-slider { background:var(--app-accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); }
+    .avail-hero { display:flex; align-items:center; gap:16px; padding:20px 24px; border-radius:var(--app-radius); margin-bottom:16px; transition:all 300ms ease; }
+    .avail-hero.is-available { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); }
+    .avail-hero.is-unavailable { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); }
+    .avail-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; transition:all 300ms ease; }
+    .avail-hero.is-available .avail-dot { background:var(--app-green); box-shadow:0 0 8px rgba(34,197,94,0.5); }
+    .avail-hero.is-unavailable .avail-dot { background:var(--app-red); box-shadow:0 0 8px rgba(239,68,68,0.5); }
+    .avail-text-group { flex:1; }
+    .avail-title { font-size:15px; font-weight:700; color:white; }
+    .avail-sub { font-size:12px; color:var(--app-text-muted); margin-top:2px; }
+    .avail-toggle { position:relative; width:52px; height:28px; flex-shrink:0; }
+    .avail-toggle input { opacity:0; width:0; height:0; position:absolute; }
+    .avail-toggle .toggle-slider { width:52px; height:28px; }
+    .avail-toggle .toggle-slider::before { width:22px; height:22px; }
+    .avail-toggle input:checked + .toggle-slider::before { transform:translateX(24px); }
+    .schedule-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+    .schedule-day { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .schedule-day-label { font-size:11px; font-weight:600; color:var(--app-text-muted); text-transform:uppercase; letter-spacing:0.04em; }
+    .schedule-chip { width:100%; padding:8px 4px; border:1px solid var(--app-border); border-radius:8px; background:transparent; color:var(--app-text-muted); font-size:11px; font-weight:600; text-align:center; cursor:pointer; transition:all 200ms ease; font-family:inherit; }
+    .schedule-chip:hover { border-color:var(--app-accent); color:white; }
+    .schedule-chip.is-active { background:var(--app-accent); border-color:var(--app-accent); color:white; }
+    .bank-card-preview { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.1)); border:1px solid rgba(124,58,237,0.25); border-radius:14px; padding:24px; margin-bottom:20px; position:relative; overflow:hidden; }
+    .bank-card-preview::before { content:''; position:absolute; top:-30px; right:-30px; width:100px; height:100px; border-radius:50%; background:rgba(168,85,247,0.1); }
+    .bank-card-preview::after { content:''; position:absolute; bottom:-40px; left:-20px; width:120px; height:120px; border-radius:50%; background:rgba(124,58,237,0.08); }
+    .bank-card-label { font-size:11px; font-weight:600; color:var(--app-text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; position:relative; z-index:1; }
+    .bank-card-iban { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:500; color:white; letter-spacing:0.08em; position:relative; z-index:1; }
+    .bank-card-holder { font-size:13px; color:var(--app-text-muted); margin-top:8px; position:relative; z-index:1; }
+    .danger-card { background:var(--app-surface); border:1px solid rgba(239,68,68,0.2); border-radius:var(--app-radius); padding:24px; }
+    .danger-card h3 { font-size:15px; font-weight:700; color:var(--app-red); margin-bottom:6px; }
+    .danger-card p { font-size:13px; color:var(--app-text-muted); margin-bottom:16px; line-height:1.5; }
+    .app-btn--danger { background:rgba(239,68,68,0.12); color:var(--app-red); border:1px solid rgba(239,68,68,0.25); width:auto; padding:10px 20px; font-size:13px; }
+    .app-btn--danger:hover { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; pointer-events:none; transition:opacity 200ms ease; }
+    .modal-overlay.is-visible { opacity:1; pointer-events:auto; }
+    .modal-card { background:var(--app-surface); border:1px solid var(--app-border); border-radius:16px; padding:32px; max-width:420px; width:90%; text-align:center; transform:scale(0.95); transition:transform 200ms ease; }
+    .modal-overlay.is-visible .modal-card { transform:scale(1); }
+    .modal-card .modal-icon { width:56px; height:56px; border-radius:50%; background:rgba(239,68,68,0.12); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+    .modal-card .modal-icon svg { width:28px; height:28px; color:var(--app-red); }
+    .modal-card h3 { font-size:18px; font-weight:700; color:white; margin-bottom:8px; }
+    .modal-card p { font-size:14px; color:var(--app-text-muted); margin-bottom:24px; line-height:1.5; }
+    .modal-actions { display:flex; gap:10px; }
+    .modal-actions .app-btn { flex:1; padding:11px; font-size:13px; }
+    .toast { position:fixed; top:24px; right:24px; background:var(--app-surface-2); border:1px solid rgba(34,197,94,0.3); border-radius:12px; padding:14px 20px; display:flex; align-items:center; gap:10px; z-index:2000; transform:translateX(120%); transition:transform 300ms cubic-bezier(0.4,0,0.2,1); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+    .toast.is-visible { transform:translateX(0); }
+    .toast-icon { width:24px; height:24px; border-radius:50%; background:rgba(34,197,94,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .toast-icon svg { width:14px; height:14px; color:var(--app-green); }
+    .toast-text { font-size:14px; font-weight:600; color:white; }
+    .save-bar { display:flex; align-items:center; justify-content:flex-end; gap:12px; padding-top:8px; border-top:1px solid var(--app-border); margin-top:8px; }
+    .save-bar .unsaved-hint { font-size:13px; color:var(--app-gold); margin-right:auto; opacity:0; transition:opacity 200ms ease; }
+    .save-bar .unsaved-hint.is-visible { opacity:1; }
+    .save-bar .app-btn { width:auto; padding:11px 28px; font-size:13px; }
+    .genre-pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .genre-pill { padding:7px 16px; border:1px solid var(--app-border); border-radius:20px; background:transparent; color:var(--app-text-muted); font-size:12px; font-weight:600; cursor:pointer; transition:all 200ms ease; font-family:inherit; }
+    .genre-pill:hover { border-color:var(--app-accent); color:white; }
+    .genre-pill.is-selected { background:var(--app-accent); border-color:var(--app-accent); color:white; }
+    .bio-field textarea { min-height:100px; resize:vertical; }
+    @media (max-width:900px) {
+      .field-grid { grid-template-columns:1fr; }
+      .schedule-grid { grid-template-columns:repeat(4,1fr); }
+      .save-bar { flex-direction:column; align-items:stretch; }
+      .save-bar .unsaved-hint { margin-right:0; text-align:center; }
+      .save-bar .app-btn { width:100%; }
+      .modal-actions { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-loading" id="app-loading"><div class="spinner"></div></div>
+
+  <div class="app-shell" id="app-shell" style="display:none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <a href="performances.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Mis actuaciones
+        </a>
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+        <a href="invoices-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+        <div class="sidebar-section">Cuenta</div>
+        <a href="pro.html" class="sidebar-link" id="pro-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PALCOFY PRO
+        </a>
+        <a href="settings-artist.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuraci&oacute;n
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">Cerrar sesi&oacute;n</button>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-topbar">
+        <div>
+          <h1>Configuraci&oacute;n</h1>
+          <p class="topbar-sub">Gestiona tu perfil art&iacute;stico, disponibilidad y preferencias.</p>
+        </div>
+      </div>
+
+      <!-- 1. Perfil artistico -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          <h2>Perfil art&iacute;stico</h2>
+          <span class="section-desc">Informaci&oacute;n visible para los venues</span>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header"><h3>Datos personales</h3></div>
+          <div style="padding:20px;">
+            <div class="field-grid">
+              <div class="app-field">
+                <label for="field-name">Nombre art&iacute;stico</label>
+                <input type="text" id="field-name" placeholder="Tu nombre o nombre art&iacute;stico" />
+              </div>
+              <div class="app-field">
+                <label for="field-email">Email</label>
+                <input type="email" id="field-email" placeholder="tu@email.com" readonly />
+              </div>
+              <div class="app-field span-full">
+                <label>G&eacute;nero musical</label>
+                <div class="genre-pills" id="genre-pills">
+                  <button type="button" class="genre-pill" data-genre="jazz">Jazz</button>
+                  <button type="button" class="genre-pill" data-genre="pop">Pop</button>
+                  <button type="button" class="genre-pill" data-genre="rock">Rock</button>
+                  <button type="button" class="genre-pill" data-genre="electronic">Electr&oacute;nica</button>
+                  <button type="button" class="genre-pill" data-genre="classical">Cl&aacute;sica</button>
+                  <button type="button" class="genre-pill" data-genre="flamenco">Flamenco</button>
+                  <button type="button" class="genre-pill" data-genre="reggae">Reggae</button>
+                  <button type="button" class="genre-pill" data-genre="latin">Latina</button>
+                  <button type="button" class="genre-pill" data-genre="indie">Indie</button>
+                  <button type="button" class="genre-pill" data-genre="folk">Folk</button>
+                  <button type="button" class="genre-pill" data-genre="blues">Blues</button>
+                  <button type="button" class="genre-pill" data-genre="soul">Soul</button>
+                </div>
+              </div>
+              <div class="app-field">
+                <label for="field-radius">Radio de actuaci&oacute;n (km)</label>
+                <input type="number" id="field-radius" placeholder="50" min="5" max="500" step="5" />
+              </div>
+              <div class="app-field">
+                <label for="field-cache">Cach&eacute; base (&euro;)</label>
+                <input type="number" id="field-cache" placeholder="500" min="50" max="10000" step="25" />
+              </div>
+              <div class="app-field span-full bio-field">
+                <label for="field-bio">Descripci&oacute;n / Biograf&iacute;a</label>
+                <textarea id="field-bio" rows="4" placeholder="Cu&eacute;ntanos sobre ti, tu estilo musical, trayectoria..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Disponibilidad -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <h2>Disponibilidad</h2>
+          <span class="section-desc">Controla cu&aacute;ndo puedes actuar</span>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header"><h3>Estado de disponibilidad</h3></div>
+          <div style="padding:4px 20px 20px;">
+            <div class="avail-hero is-available" id="avail-hero">
+              <div class="avail-dot" id="avail-dot"></div>
+              <div class="avail-text-group">
+                <div class="avail-title" id="avail-title">Disponible para actuar</div>
+                <div class="avail-sub" id="avail-sub">Los venues pueden encontrarte y enviarte propuestas</div>
+              </div>
+              <label class="avail-toggle">
+                <input type="checkbox" id="toggle-available" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="data-card-header"><h3>Horarios preferidos</h3></div>
+          <div style="padding:20px;">
+            <p style="font-size:13px;color:var(--app-text-muted);margin-bottom:14px;">Selecciona los d&iacute;as de la semana en los que prefieres actuar.</p>
+            <div class="schedule-grid" id="schedule-grid">
+              <div class="schedule-day"><span class="schedule-day-label">Lun</span><button type="button" class="schedule-chip" data-day="mon">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Mar</span><button type="button" class="schedule-chip" data-day="tue">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Mi&eacute;</span><button type="button" class="schedule-chip" data-day="wed">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Jue</span><button type="button" class="schedule-chip" data-day="thu">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Vie</span><button type="button" class="schedule-chip" data-day="fri">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">S&aacute;b</span><button type="button" class="schedule-chip" data-day="sat">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Dom</span><button type="button" class="schedule-chip" data-day="sun">Todo el d&iacute;a</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Datos bancarios -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+          <h2>Datos bancarios</h2>
+          <span class="section-desc">Para recibir tus liquidaciones</span>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header"><h3>Informaci&oacute;n de cobro</h3></div>
+          <div style="padding:20px;">
+            <div class="bank-card-preview" id="bank-card-preview">
+              <div class="bank-card-label">Cuenta bancaria</div>
+              <div class="bank-card-iban" id="bank-iban-display">ES ---- ---- ---- ----</div>
+              <div class="bank-card-holder" id="bank-holder-display">Titular no configurado</div>
+            </div>
+            <div class="field-grid">
+              <div class="app-field span-full">
+                <label for="field-iban">IBAN</label>
+                <input type="text" id="field-iban" placeholder="ES91 2100 0418 4502 0005 1332" maxlength="34" style="font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;" />
+              </div>
+              <div class="app-field span-full">
+                <label for="field-bank-holder">Titular de la cuenta</label>
+                <input type="text" id="field-bank-holder" placeholder="Nombre completo como aparece en el banco" />
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--app-text-muted);margin-top:12px;line-height:1.5;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              Datos de ejemplo a efectos de demostraci&oacute;n. Ninguna informaci&oacute;n bancaria real es almacenada ni transmitida.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Notificaciones -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <h2>Notificaciones</h2>
+          <span class="section-desc">Elige qu&eacute; alertas recibir</span>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header"><h3>Preferencias de aviso</h3></div>
+          <div style="padding:4px 20px;">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Alertas de reserva</span>
+                <span class="toggle-desc">Aviso cuando un venue te env&iacute;a una propuesta, confirma o cancela una actuaci&oacute;n.</span>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-booking-alerts" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Alertas de liquidaci&oacute;n</span>
+                <span class="toggle-desc">Aviso cuando se procesa un pago o cuando una liquidaci&oacute;n est&aacute; pendiente.</span>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-settlement-alerts" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Promociones PRO</span>
+                <span class="toggle-desc">Recibe ofertas exclusivas, descuentos y novedades de PALCOFY PRO.</span>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-pro-promos" /><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save bar -->
+      <div class="save-bar" id="save-bar">
+        <span class="unsaved-hint" id="unsaved-hint">Cambios sin guardar</span>
+        <button class="app-btn app-btn--ghost" id="discard-btn" style="display:none;">Descartar</button>
+        <button class="app-btn app-btn--primary" id="save-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Guardar cambios
+        </button>
+      </div>
+
+      <!-- 5. Zona peligrosa -->
+      <div class="settings-section" style="margin-top:48px;">
+        <div class="settings-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--app-red);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <h2 style="color:var(--app-red);">Zona peligrosa</h2>
+        </div>
+        <div class="danger-card">
+          <h3>Eliminar cuenta</h3>
+          <p>Esta acci&oacute;n es permanente e irreversible. Se eliminar&aacute;n todos tus datos, actuaciones, liquidaciones, facturas y configuraci&oacute;n.</p>
+          <button class="app-btn app-btn--danger" id="delete-account-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Eliminar cuenta
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3>&iquest;Eliminar tu cuenta?</h3>
+      <p>Esta acci&oacute;n no se puede deshacer. Se eliminar&aacute;n permanentemente todos tus datos, incluyendo actuaciones, liquidaciones, facturas y configuraci&oacute;n.</p>
+      <div class="modal-actions">
+        <button class="app-btn app-btn--ghost" id="modal-cancel" style="margin-top:0;">Cancelar</button>
+        <button class="app-btn app-btn--danger" id="modal-confirm" style="margin-top:0;">S&iacute;, eliminar cuenta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <span class="toast-text" id="toast-text">Cambios guardados correctamente</span>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, updateUserProfile } from './data.js';
+
+    /* =========================================================
+       DOM references
+       ========================================================= */
+    const loadingEl      = document.getElementById('app-loading');
+    const shellEl        = document.getElementById('app-shell');
+    const saveBtn        = document.getElementById('save-btn');
+    const discardBtn     = document.getElementById('discard-btn');
+    const unsavedHint    = document.getElementById('unsaved-hint');
+    const deleteModal    = document.getElementById('delete-modal');
+    const deleteBtn      = document.getElementById('delete-account-btn');
+    const modalCancel    = document.getElementById('modal-cancel');
+    const modalConfirm   = document.getElementById('modal-confirm');
+    const toast          = document.getElementById('toast');
+    const toastText      = document.getElementById('toast-text');
+    const availHero      = document.getElementById('avail-hero');
+    const availTitle     = document.getElementById('avail-title');
+    const availSub       = document.getElementById('avail-sub');
+    const bankIbanDisplay   = document.getElementById('bank-iban-display');
+    const bankHolderDisplay = document.getElementById('bank-holder-display');
+
+    /* =========================================================
+       Mutable state
+       ========================================================= */
+    let currentUid   = null;
+    let savedValues  = {};
+    let isDirty      = false;
+
+    /* =========================================================
+       Field element maps
+       ========================================================= */
+    const fields = {
+      name:       document.getElementById('field-name'),
+      email:      document.getElementById('field-email'),
+      radius:     document.getElementById('field-radius'),
+      cache:      document.getElementById('field-cache'),
+      bio:        document.getElementById('field-bio'),
+      iban:       document.getElementById('field-iban'),
+      bankHolder: document.getElementById('field-bank-holder'),
+    };
+
+    const toggleIds = {
+      available:        document.getElementById('toggle-available'),
+      bookingAlerts:    document.getElementById('toggle-booking-alerts'),
+      settlementAlerts: document.getElementById('toggle-settlement-alerts'),
+      proPromos:        document.getElementById('toggle-pro-promos'),
+    };
+
+    const genrePills    = document.querySelectorAll('.genre-pill');
+    const scheduleChips = document.querySelectorAll('.schedule-chip');
+
+    /* =========================================================
+       Helper functions
+       ========================================================= */
+
+    /** Return the currently selected genre slug, or empty string. */
+    function getSelectedGenre() {
+      const el = document.querySelector('.genre-pill.is-selected');
+      return el ? el.dataset.genre : '';
+    }
+
+    /** Return array of active day codes (e.g. ['fri','sat']). */
+    function getSelectedDays() {
+      const days = [];
+      scheduleChips.forEach(chip => {
+        if (chip.classList.contains('is-active')) days.push(chip.dataset.day);
+      });
+      return days;
+    }
+
+    /** Collect all form values into a flat object for comparison / saving. */
+    function collectValues() {
+      return {
+        name:             fields.name.value.trim(),
+        genre:            getSelectedGenre(),
+        radius:           parseInt(fields.radius.value, 10) || 50,
+        cache:            parseInt(fields.cache.value, 10) || 500,
+        bio:              fields.bio.value.trim(),
+        available:        toggleIds.available.checked,
+        scheduleDays:     getSelectedDays(),
+        iban:             fields.iban.value.trim(),
+        bankHolder:       fields.bankHolder.value.trim(),
+        bookingAlerts:    toggleIds.bookingAlerts.checked,
+        settlementAlerts: toggleIds.settlementAlerts.checked,
+        proPromos:        toggleIds.proPromos.checked,
+      };
+    }
+
+    /** Compare two sorted day arrays for equality. */
+    function daysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      const sa = [...a].sort();
+      const sb = [...b].sort();
+      return sa.every((v, i) => v === sb[i]);
+    }
+
+    /** Return true if any value differs from the saved snapshot. */
+    function detectChanges() {
+      const current = collectValues();
+      return Object.keys(savedValues).some(key => {
+        if (key === 'scheduleDays') return !daysEqual(current[key] || [], savedValues[key] || []);
+        if (typeof current[key] === 'boolean') return current[key] !== savedValues[key];
+        return (current[key] || '') !== (savedValues[key] || '');
+      });
+    }
+
+    /** Sync the unsaved-hint and discard button with the dirty flag. */
+    function updateDirtyState() {
+      isDirty = detectChanges();
+      unsavedHint.classList.toggle('is-visible', isDirty);
+      discardBtn.style.display = isDirty ? '' : 'none';
+    }
+
+    /* =========================================================
+       Populate form fields from a profile object
+       ========================================================= */
+    function populateFields(profile) {
+      fields.name.value       = profile.name || '';
+      fields.email.value      = profile.email || '';
+      fields.radius.value     = profile.radius || 50;
+      fields.cache.value      = profile.cache || 500;
+      fields.bio.value        = profile.description || profile.bio || '';
+      fields.iban.value       = profile.iban || '';
+      fields.bankHolder.value = profile.bankHolder || '';
+
+      // Genre pills
+      const genre = profile.genre || '';
+      genrePills.forEach(pill => {
+        pill.classList.toggle('is-selected', pill.dataset.genre === genre);
+      });
+
+      // Availability toggle + hero card
+      const available = profile.available !== false;
+      toggleIds.available.checked = available;
+      updateAvailabilityHero(available);
+
+      // Schedule day chips
+      const days = profile.scheduleDays || ['fri', 'sat'];
+      scheduleChips.forEach(chip => {
+        chip.classList.toggle('is-active', days.includes(chip.dataset.day));
+      });
+
+      // Notification toggles
+      toggleIds.bookingAlerts.checked    = profile.bookingAlerts !== false;
+      toggleIds.settlementAlerts.checked = profile.settlementAlerts !== false;
+      toggleIds.proPromos.checked        = profile.proPromos === true;
+
+      // Bank card live preview
+      updateBankPreview(fields.iban.value, fields.bankHolder.value);
+    }
+
+    /* =========================================================
+       Availability hero card update
+       ========================================================= */
+    function updateAvailabilityHero(available) {
+      availHero.classList.toggle('is-available', available);
+      availHero.classList.toggle('is-unavailable', !available);
+      availTitle.textContent = available
+        ? 'Disponible para actuar'
+        : 'No disponible';
+      availSub.textContent = available
+        ? 'Los venues pueden encontrarte y enviarte propuestas'
+        : 'No aparecerás en búsquedas de artistas';
+    }
+
+    /* =========================================================
+       Bank card preview (mockup)
+       ========================================================= */
+    function updateBankPreview(iban, holder) {
+      if (iban) {
+        const clean = iban.replace(/\s+/g, '').toUpperCase();
+        bankIbanDisplay.textContent = clean.replace(/(.{4})/g, '$1 ').trim();
+      } else {
+        bankIbanDisplay.textContent = 'ES ---- ---- ---- ----';
+      }
+      bankHolderDisplay.textContent = holder || 'Titular no configurado';
+    }
+
+    /* =========================================================
+       Toast notification
+       ========================================================= */
+    function showToast(message) {
+      toastText.textContent = message;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 3500);
+    }
+
+    /* =========================================================
+       Event listeners: dirty-state detection
+       ========================================================= */
+    Object.values(fields).forEach(el => {
+      el.addEventListener('input', updateDirtyState);
+    });
+
+    Object.values(toggleIds).forEach(el => {
+      el.addEventListener('change', updateDirtyState);
+    });
+
+    /* ---- Genre pill click ---- */
+    genrePills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        genrePills.forEach(p => p.classList.remove('is-selected'));
+        pill.classList.add('is-selected');
+        updateDirtyState();
+      });
+    });
+
+    /* ---- Schedule chip toggle ---- */
+    scheduleChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('is-active');
+        updateDirtyState();
+      });
+    });
+
+    /* ---- Availability hero toggle sync ---- */
+    toggleIds.available.addEventListener('change', () => {
+      updateAvailabilityHero(toggleIds.available.checked);
+    });
+
+    /* ---- Bank card live preview on input ---- */
+    fields.iban.addEventListener('input', () => {
+      updateBankPreview(fields.iban.value, fields.bankHolder.value);
+    });
+
+    fields.bankHolder.addEventListener('input', () => {
+      updateBankPreview(fields.iban.value, fields.bankHolder.value);
+    });
+
+    /* =========================================================
+       Save handler
+       ========================================================= */
+    saveBtn.addEventListener('click', async () => {
+      if (!currentUid) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Guardando...';
+
+      try {
+        const values = collectValues();
+        await updateUserProfile(currentUid, values);
+        savedValues = { ...values };
+        isDirty = false;
+        unsavedHint.classList.remove('is-visible');
+        discardBtn.style.display = 'none';
+        showToast('Cambios guardados correctamente');
+      } catch (err) {
+        console.error('Error saving profile:', err);
+        showToast('Error al guardar. Inténtalo de nuevo.');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Guardar cambios`;
+      }
+    });
+
+    /* =========================================================
+       Discard handler — revert to last saved snapshot
+       ========================================================= */
+    discardBtn.addEventListener('click', () => {
+      populateFields(savedValues);
+      isDirty = false;
+      unsavedHint.classList.remove('is-visible');
+      discardBtn.style.display = 'none';
+    });
+
+    /* =========================================================
+       Delete account modal
+       ========================================================= */
+    deleteBtn.addEventListener('click', () => {
+      deleteModal.classList.add('is-visible');
+    });
+
+    modalCancel.addEventListener('click', () => {
+      deleteModal.classList.remove('is-visible');
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) deleteModal.classList.remove('is-visible');
+    });
+
+    modalConfirm.addEventListener('click', async () => {
+      modalConfirm.disabled = true;
+      modalConfirm.textContent = 'Eliminando...';
+
+      try {
+        if (currentUid) {
+          await updateUserProfile(currentUid, { deleted: true, deletedAt: new Date().toISOString() });
+        }
+        deleteModal.classList.remove('is-visible');
+        showToast('Cuenta eliminada. Redirigiendo...');
+        setTimeout(async () => {
+          await logout();
+          window.location.href = 'login.html';
+        }, 1500);
+      } catch (err) {
+        console.error('Error deleting account:', err);
+        deleteModal.classList.remove('is-visible');
+        showToast('Error al eliminar la cuenta.');
+        modalConfirm.disabled = false;
+        modalConfirm.textContent = 'Sí, eliminar cuenta';
+      }
+    });
+
+    /* =========================================================
+       Auth guard — requires artist role
+       ========================================================= */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        /* Build a default artist profile when none exists in DB */
+        profile = {
+          id: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: 'artist',
+          genre: '',
+          cache: 500,
+          pro: false,
+          available: true,
+          radius: 50,
+          description: '',
+          scheduleDays: ['fri', 'sat'],
+          iban: '',
+          bankHolder: '',
+          bookingAlerts: true,
+          settlementAlerts: true,
+          proPromos: false,
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+
+      /* Redirect non-artists to venue dashboard */
+      if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      currentUid = user.uid;
+
+      /* Update sidebar user info */
+      const name = profile.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('user-pro-status').textContent = (profile.pro || false) ? 'PRO ✓' : 'Free';
+
+      /* Populate form with saved profile data */
+      populateFields(profile);
+
+      /* Snapshot current values for dirty-state tracking */
+      savedValues = collectValues();
+
+      /* Reveal the app shell */
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* =========================================================
+       Logout
+       ========================================================= */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

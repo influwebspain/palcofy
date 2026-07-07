@@ -12,8 +12,12 @@ import {
 /* =========================================================
    DEMO DATA
    ========================================================= */
-const DEMO_ARTISTS_KEY  = 'palcofy.demo.artists';
-const DEMO_BOOKINGS_KEY = 'palcofy.demo.bookings';
+const DEMO_ARTISTS_KEY       = 'palcofy.demo.artists';
+const DEMO_BOOKINGS_KEY      = 'palcofy.demo.bookings';
+const DEMO_INVOICES_KEY      = 'palcofy.demo.invoices';
+const DEMO_PERFORMANCES_KEY  = 'palcofy.demo.performances';
+const DEMO_SETTLEMENTS_KEY   = 'palcofy.demo.settlements';
+const DEMO_ARTIST_INV_KEY    = 'palcofy.demo.artistInvoices';
 
 function demoArtists() {
   try { return JSON.parse(localStorage.getItem(DEMO_ARTISTS_KEY)); } catch { return null; }
@@ -38,14 +42,103 @@ function seedArtists() {
   ]);
 }
 
+/* ---- Seed bookings (demo) ---- */
+function demoBookingsRaw() {
+  try { return JSON.parse(localStorage.getItem(DEMO_BOOKINGS_KEY)) || []; } catch { return []; }
+}
+function seedBookings(userId) {
+  if (demoBookingsRaw().length > 0) return;
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const fmt = (d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  demoSaveBookings([
+    { id:'b1', venueId:userId, artistId:'1', artistName:'Carlos Vives Trio', date:fmt(12), time:'21:00', notes:'Terraza principal', cache:800, status:'confirmed', createdAt:new Date().toISOString() },
+    { id:'b2', venueId:userId, artistId:'3', artistName:'The Neon Collective', date:fmt(19), time:'22:00', notes:'Rooftop', cache:1200, status:'confirmed', createdAt:new Date().toISOString() },
+    { id:'b3', venueId:userId, artistId:'7', artistName:'DJ Martín Vega', date:fmt(26), time:'23:00', notes:'Sala privada', cache:400, status:'pending', createdAt:new Date().toISOString() },
+  ]);
+}
+
+/* ---- Seed invoices (demo) ---- */
+function demoInvoices() {
+  try { return JSON.parse(localStorage.getItem(DEMO_INVOICES_KEY)) || []; } catch { return []; }
+}
+function demoSaveInvoices(inv) { localStorage.setItem(DEMO_INVOICES_KEY, JSON.stringify(inv)); }
+function seedInvoices(userId) {
+  if (demoInvoices().length > 0) return;
+  const now = new Date();
+  demoSaveInvoices([
+    { id:'INV-2026-001', venueId:userId, month:'Junio 2026', subscription:199, events:2400, total:2599, status:'paid',    date:'2026-06-30' },
+    { id:'INV-2026-002', venueId:userId, month:'Julio 2026', subscription:199, events:3200, total:3399, status:'pending', date:'2026-07-31' },
+  ]);
+}
+
+/* ---- Seed performances (demo) ---- */
+function demoPerformances() {
+  try { return JSON.parse(localStorage.getItem(DEMO_PERFORMANCES_KEY)) || []; } catch { return []; }
+}
+function demoSavePerformances(p) { localStorage.setItem(DEMO_PERFORMANCES_KEY, JSON.stringify(p)); }
+function seedPerformances(userId) {
+  if (demoPerformances().length > 0) return;
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const fmt = (d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  demoSavePerformances([
+    { id:'p1', artistId:userId, venueName:'Hotel Vertice Madrid', venueAddr:'Gran Vía 42, Madrid', date:fmt(5), time:'21:00-23:00', genre:'jazz', cache:800, status:'completed', rating:4.8 },
+    { id:'p2', artistId:userId, venueName:'Rooftop The Standard', venueAddr:'Plaza de España 8, Madrid', date:fmt(12), time:'22:00-00:00', genre:'pop', cache:600, status:'confirmed', rating:null },
+    { id:'p3', artistId:userId, venueName:'Bar Malasaña Live', venueAddr:'Calle Manuela Malasaña 14, Madrid', date:fmt(19), time:'21:30-23:30', genre:'rock', cache:500, status:'confirmed', rating:null },
+    { id:'p4', artistId:userId, venueName:'NH Collection Eurobuilding', venueAddr:'Calle del Padre Damián 23, Madrid', date:fmt(26), time:'20:00-22:00', genre:'jazz', cache:1200, status:'pending', rating:null },
+    { id:'p5', artistId:userId, venueName:'Hotel Urso', venueAddr:'Calle de la Puebla 5, Madrid', date:`${y}-${String(m).padStart(2,'0')}-28`, time:'21:00-23:00', genre:'jazz', cache:900, status:'completed', rating:4.9 },
+  ]);
+}
+
+/* ---- Seed settlements (demo) ---- */
+function demoSettlements() {
+  try { return JSON.parse(localStorage.getItem(DEMO_SETTLEMENTS_KEY)) || []; } catch { return []; }
+}
+function demoSaveSettlements(s) { localStorage.setItem(DEMO_SETTLEMENTS_KEY, JSON.stringify(s)); }
+function seedSettlements(userId) {
+  if (demoSettlements().length > 0) return;
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const fmt = (d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  demoSaveSettlements([
+    { id:'s1', artistId:userId, venueName:'Hotel Vertice Madrid', date:fmt(6), cache:800, commission:80, net:720, status:'paid', method:'Transferencia' },
+    { id:'s2', artistId:userId, venueName:'Hotel Urso', date:`${y}-${String(m).padStart(2,'0')}-29`, cache:900, commission:90, net:810, status:'paid', method:'Transferencia' },
+    { id:'s3', artistId:userId, venueName:'Rooftop The Standard', date:fmt(13), cache:600, commission:60, net:540, status:'pending', method:'Transferencia' },
+  ]);
+}
+
+/* ---- Seed artist invoices (demo) ---- */
+function demoArtistInvoices() {
+  try { return JSON.parse(localStorage.getItem(DEMO_ARTIST_INV_KEY)) || []; } catch { return []; }
+}
+function demoSaveArtistInvoices(i) { localStorage.setItem(DEMO_ARTIST_INV_KEY, JSON.stringify(i)); }
+function seedArtistInvoices(userId) {
+  if (demoArtistInvoices().length > 0) return;
+  demoSaveArtistInvoices([
+    { id:'AINV-2026-001', artistId:userId, month:'Junio 2026', concept:'Actuación × 2', amount:1440, status:'paid', date:'2026-06-30' },
+    { id:'AINV-2026-002', artistId:userId, month:'Julio 2026', concept:'Actuación × 1', amount:540, status:'pending', date:'2026-07-31' },
+  ]);
+}
+
 /* =========================================================
    PUBLIC API
    ========================================================= */
 
 export async function getUserProfile(uid) {
   if (isFirebaseConfigured && fbFirestore) {
+    const cacheKey = `palcofy.profile.${uid}`;
+    const cached = (() => { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
+    if (cached) {
+      fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid)).then(snap => {
+        if (snap.exists()) localStorage.setItem(cacheKey, JSON.stringify({ id: uid, ...snap.data() }));
+      }).catch(() => {});
+      return cached;
+    }
     const snap = await fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid));
-    return snap.exists() ? { id: uid, ...snap.data() } : null;
+    const profile = snap.exists() ? { id: uid, ...snap.data() } : null;
+    if (profile) localStorage.setItem(cacheKey, JSON.stringify(profile));
+    return profile;
   }
   const users = JSON.parse(localStorage.getItem('palcofy.demo.users') || '{}');
   return users[uid] || null;
@@ -53,6 +146,7 @@ export async function getUserProfile(uid) {
 
 export async function updateUserProfile(uid, data) {
   if (isFirebaseConfigured && fbFirestore) {
+    localStorage.removeItem(`palcofy.profile.${uid}`);
     return fbFirestore.updateDoc(fbFirestore.doc(db, 'users', uid), data);
   }
   const users = JSON.parse(localStorage.getItem('palcofy.demo.users') || '{}');
@@ -102,5 +196,91 @@ export async function listBookings(venueId) {
       return list.sort((a, b) => a.date > b.date ? -1 : 1);
     } catch { return []; }
   }
+  seedBookings(venueId);
   return demoBookings().filter(b => b.venueId === venueId).sort((a, b) => a.date > b.date ? -1 : 1);
+}
+
+export async function updateBookingStatus(bookingId, status) {
+  if (isFirebaseConfigured && fbFirestore) {
+    return fbFirestore.updateDoc(fbFirestore.doc(db, 'bookings', bookingId), { status });
+  }
+  const bookings = demoBookings();
+  const b = bookings.find(x => x.id === bookingId);
+  if (b) { b.status = status; demoSaveBookings(bookings); }
+}
+
+export async function listInvoices(venueId) {
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const q = fbFirestore.query(fbFirestore.collection(db, 'invoices'), fbFirestore.where('venueId', '==', venueId));
+      const snap = await fbFirestore.getDocs(q);
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      return list;
+    } catch { return []; }
+  }
+  seedInvoices(venueId);
+  return demoInvoices().filter(i => i.venueId === venueId);
+}
+
+export async function getBookingStats(venueId) {
+  const bookings = await listBookings(venueId);
+  const now = new Date();
+  const thisMonth = bookings.filter(b => {
+    const d = new Date(b.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const upcoming = thisMonth.filter(b => new Date(b.date) >= now && b.status !== 'cancelled');
+  const totalCache = thisMonth.reduce((sum, b) => sum + (b.cache || 0), 0);
+  return {
+    totalThisMonth: thisMonth.length,
+    upcoming: upcoming.length,
+    totalCache,
+    nextEvent: upcoming.sort((a, b) => a.date > b.date ? 1 : -1)[0] || null
+  };
+}
+
+/* ---- Performances (artist) ---- */
+export async function listPerformances(artistId) {
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const q = fbFirestore.query(fbFirestore.collection(db, 'performances'), fbFirestore.where('artistId', '==', artistId));
+      const snap = await fbFirestore.getDocs(q);
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      return list.sort((a, b) => a.date > b.date ? -1 : 1);
+    } catch { return []; }
+  }
+  seedPerformances(artistId);
+  return demoPerformances().filter(p => p.artistId === artistId).sort((a, b) => a.date > b.date ? -1 : 1);
+}
+
+/* ---- Settlements (artist) ---- */
+export async function listSettlements(artistId) {
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const q = fbFirestore.query(fbFirestore.collection(db, 'settlements'), fbFirestore.where('artistId', '==', artistId));
+      const snap = await fbFirestore.getDocs(q);
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      return list.sort((a, b) => a.date > b.date ? -1 : 1);
+    } catch { return []; }
+  }
+  seedSettlements(artistId);
+  return demoSettlements().filter(s => s.artistId === artistId).sort((a, b) => a.date > b.date ? -1 : 1);
+}
+
+/* ---- Artist invoices ---- */
+export async function listArtistInvoices(artistId) {
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const q = fbFirestore.query(fbFirestore.collection(db, 'artistInvoices'), fbFirestore.where('artistId', '==', artistId));
+      const snap = await fbFirestore.getDocs(q);
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      return list;
+    } catch { return []; }
+  }
+  seedArtistInvoices(artistId);
+  return demoArtistInvoices().filter(i => i.artistId === artistId);
 }

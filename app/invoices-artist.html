@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Facturas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .invoice-filters {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .invoice-filters select,
+    .invoice-filters input {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--app-text, #fff);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .invoice-filters select:focus,
+    .invoice-filters input:focus { border-color: var(--app-purple); }
+    .invoice-filters select option { background: #1a1a2e; color: #fff; }
+    .invoice-note-banner {
+      border-color: rgba(124, 58, 237, 0.25);
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(34, 197, 94, 0.06) 100%);
+      margin-bottom: 20px;
+    }
+    .invoice-note-inner {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .invoice-note-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(124, 58, 237, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .invoice-note-text {
+      font-size: 13px;
+      color: var(--app-text-muted, #888);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .invoice-amount-cell { font-weight: 700; color: white; white-space: nowrap; }
+    .invoice-date-cell { color: var(--app-text-muted, #888); font-size: 13px; white-space: nowrap; }
+    .invoice-download-btn {
+      font-size: 12px; padding: 6px 14px; cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+    .invoice-download-btn:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-1px); }
+    .invoice-footer-note {
+      padding: 20px 24px; border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .invoice-footer-note p { font-size: 12px; color: var(--app-text-muted, #888); margin: 0; line-height: 1.5; }
+    .invoice-footer-note svg { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading spinner -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="calendar-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <path d="M3 10h18M8 2v4M16 2v4"/>
+          </svg>
+          Calendario
+        </a>
+
+        <a href="performances.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+          Mis actuaciones
+        </a>
+
+        <div class="sidebar-section">Finanzas</div>
+
+        <a href="settlements.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Liquidaciones
+        </a>
+
+        <a href="invoices-artist.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+          Facturas
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+
+        <a href="pro.html" class="sidebar-link" id="pro-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          PALCOFY PRO
+        </a>
+
+        <a href="settings-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+          Configuraci&oacute;n
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesi&oacute;n
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="page-title">Facturas</h1>
+          <p class="topbar-sub" id="page-sub">Tus facturas generadas a partir de liquidaciones de actuaciones.</p>
+        </div>
+      </div>
+
+      <!-- Note banner -->
+      <div class="data-card invoice-note-banner">
+        <div class="invoice-note-inner">
+          <div class="invoice-note-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--app-purple)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+          </div>
+          <div>
+            <p class="invoice-note-text">
+              Las facturas se generan autom&aacute;ticamente tras cada liquidaci&oacute;n.
+              Si no ves alguna factura, revisa el estado de tus liquidaciones pendientes.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total facturado</span>
+          <span class="stat-value accent" id="stat-total">0 &euro;</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Todas las facturas</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pagado</span>
+          <span class="stat-value green" id="stat-paid">0 &euro;</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Cobrado</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pendiente</span>
+          <span class="stat-value gold" id="stat-pending">0 &euro;</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Por cobrar</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">N&uacute;mero de facturas</span>
+          <span class="stat-value" id="stat-count">0</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Total emitidas</span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="invoice-filters" id="invoice-filters">
+        <label style="font-size:13px;color:var(--app-text-muted);">Filtrar:</label>
+        <select id="filter-status">
+          <option value="all">Todos los estados</option>
+          <option value="paid">Pagado</option>
+          <option value="pending">Pendiente</option>
+        </select>
+        <select id="filter-month">
+          <option value="all">Todos los meses</option>
+        </select>
+      </div>
+
+      <!-- Invoices table -->
+      <div class="data-card">
+        <div class="data-card-header">
+          <h3>Historial de facturas</h3>
+          <span id="invoice-count-label" style="font-size:12px;color:var(--app-text-muted);"></span>
+        </div>
+
+        <table class="data-table" id="invoices-table">
+          <thead>
+            <tr>
+              <th>ID Factura</th>
+              <th>Mes</th>
+              <th>Concepto</th>
+              <th>Importe</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acci&oacute;n</th>
+            </tr>
+          </thead>
+          <tbody id="invoices-body">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">📄</div>
+                  <h3>Sin facturas</h3>
+                  <p>A&uacute;n no se han emitido facturas. Se generar&aacute;n autom&aacute;ticamente tras cada liquidaci&oacute;n.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="invoice-footer-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--app-text-muted)" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+          </svg>
+          <p>
+            Las facturas se generan autom&aacute;ticamente tras cada liquidaci&oacute;n.
+            Los importes reflejan el cach&eacute; neto cobrado por actuaciones verificadas.
+          </p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listArtistInvoices }    from './data.js';
+
+    /* DOM refs */
+    const loadingEl     = document.getElementById('app-loading');
+    const shellEl       = document.getElementById('app-shell');
+    const tbodyEl       = document.getElementById('invoices-body');
+    const countLabel    = document.getElementById('invoice-count-label');
+    const filterStatus  = document.getElementById('filter-status');
+    const filterMonth   = document.getElementById('filter-month');
+
+    let allInvoices = [];
+
+    /* Auth guard */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const profile = await waitForProfile(user.uid);
+      if (!profile) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      const name = profile.name || user.displayName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent     = name;
+      document.getElementById('user-avatar').textContent   = name.charAt(0).toUpperCase();
+
+      const isPro = profile.pro || false;
+      document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
+
+      const hour     = new Date().getHours();
+      const greeting = hour < 13
+        ? 'Buenos días'
+        : hour < 20
+          ? 'Buenas tardes'
+          : 'Buenas noches';
+      document.getElementById('page-title').textContent = 'Facturas';
+      document.getElementById('page-sub').textContent   =
+        `${greeting}, ${name}. Aquí tienes tu facturación.`;
+
+      try {
+        allInvoices = await listArtistInvoices(user.uid);
+      } catch (e) {
+        allInvoices = [];
+      }
+
+      populateMonthFilter(allInvoices);
+      renderFilteredInvoices();
+
+      filterStatus.addEventListener('change', renderFilteredInvoices);
+      filterMonth.addEventListener('change', renderFilteredInvoices);
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display   = '';
+    });
+
+    function populateMonthFilter(invoices) {
+      const months = new Set();
+      invoices.forEach(inv => {
+        if (inv.month) months.add(inv.month);
+      });
+
+      months.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        filterMonth.appendChild(opt);
+      });
+    }
+
+    function renderFilteredInvoices() {
+      const statusVal = filterStatus.value;
+      const monthVal  = filterMonth.value;
+
+      let filtered = [...allInvoices];
+
+      if (statusVal !== 'all') {
+        filtered = filtered.filter(i => i.status === statusVal);
+      }
+      if (monthVal !== 'all') {
+        filtered = filtered.filter(i => i.month === monthVal);
+      }
+
+      updateStats(allInvoices);
+      renderTableRows(filtered);
+    }
+
+    function updateStats(invoices) {
+      const paidTotal = invoices
+        .filter(i => i.status === 'paid')
+        .reduce((sum, i) => sum + (i.amount || 0), 0);
+
+      const pendingTotal = invoices
+        .filter(i => i.status === 'pending')
+        .reduce((sum, i) => sum + (i.amount || 0), 0);
+
+      const totalFacturado = paidTotal + pendingTotal;
+
+      document.getElementById('stat-total').textContent   =
+        `${totalFacturado.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-paid').textContent    =
+        `${paidTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-pending').textContent =
+        `${pendingTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-count').textContent   = invoices.length;
+    }
+
+    function renderTableRows(invoices) {
+      if (!invoices || invoices.length === 0) {
+        tbodyEl.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <h3>Sin facturas</h3>
+                <p>No hay facturas que coincidan con los filtros seleccionados.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        countLabel.textContent = '';
+        return;
+      }
+
+      countLabel.textContent = `${invoices.length} factura${invoices.length !== 1 ? 's' : ''}`;
+
+      tbodyEl.innerHTML = invoices.map(inv => {
+        const badgeClass  = inv.status === 'paid' ? 'badge--green' : 'badge--gold';
+        const statusLabel = inv.status === 'paid' ? 'Pagado' : 'Pendiente';
+        const dateFormatted = formatDate(inv.date);
+
+        return `
+          <tr>
+            <td>
+              <code>${esc(inv.id)}</code>
+            </td>
+            <td>${esc(inv.month)}</td>
+            <td>${esc(inv.concept)}</td>
+            <td class="invoice-amount-cell">
+              ${(inv.amount || 0).toLocaleString('es-ES')} €
+            </td>
+            <td>
+              <span class="badge ${badgeClass}">
+                <span class="badge-dot"></span>
+                ${statusLabel}
+              </span>
+            </td>
+            <td class="invoice-date-cell">${dateFormatted}</td>
+            <td>
+              <button
+                class="app-btn app-btn--ghost invoice-download-btn"
+                onclick="alert('Próximamente')"
+              >
+                Descargar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('es-ES', {
+          day:   'numeric',
+          month: 'short',
+          year:  'numeric'
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    function esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str || '';
+      return el.innerHTML;
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

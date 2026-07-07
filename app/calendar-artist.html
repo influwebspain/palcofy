@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Calendario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .calendar-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .calendar-wrapper { grid-template-columns: 1fr; } }
+
+    .calendar-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      overflow: hidden;
+    }
+    .calendar-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--app-border);
+    }
+    .calendar-card-header h3 { font-size: 15px; font-weight: 700; color: white; }
+
+    .calendar-nav { display: flex; align-items: center; gap: 8px; }
+    .calendar-nav-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--app-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--app-text-muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 180ms ease;
+    }
+    .calendar-nav-btn:hover { color: white; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); }
+    .calendar-nav-btn svg { width: 16px; height: 16px; }
+    .calendar-month-label { font-size: 14px; font-weight: 700; color: white; min-width: 160px; text-align: center; letter-spacing: -0.01em; }
+
+    .calendar-card-body { padding: 12px 16px 16px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .calendar-day-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--app-text-muted);
+      text-align: center; padding: 8px 0;
+    }
+    .calendar-day {
+      aspect-ratio: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border-radius: 8px; font-size: 13px; color: var(--app-text);
+      cursor: pointer; transition: background 180ms ease;
+      position: relative; min-height: 48px;
+    }
+    .calendar-day:hover { background: rgba(255,255,255,0.04); }
+    .calendar-day.is-today { background: var(--app-accent); color: white; font-weight: 700; }
+    .calendar-day.is-selected { outline: 2px solid var(--app-accent); outline-offset: -2px; }
+    .calendar-day.has-event .day-number { font-weight: 700; }
+    .calendar-day.is-empty { pointer-events: none; opacity: 0.3; }
+    .day-number { font-size: 13px; line-height: 1; }
+
+    .event-dots { display: flex; gap: 3px; margin-top: 4px; position: absolute; bottom: 5px; }
+    .event-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--app-gold); }
+    .event-dot.confirmed { background: var(--app-green); }
+    .event-dot.pending { background: var(--app-gold); }
+    .event-dot.completed { background: var(--app-accent); }
+
+    .event-chips { display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 0 2px; margin-top: 4px; }
+    .event-chip {
+      font-size: 8px; font-weight: 600; padding: 2px 4px; border-radius: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-align: center; line-height: 1.2;
+    }
+    .event-chip.confirmed { background: rgba(34,197,94,0.15); color: var(--app-green); }
+    .event-chip.pending { background: rgba(217,119,6,0.15); color: var(--app-gold); }
+    .event-chip.completed { background: rgba(124,58,237,0.15); color: var(--app-accent); }
+
+    /* Detail panel */
+    .detail-panel {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      overflow: hidden;
+    }
+    .detail-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--app-border);
+    }
+    .detail-panel-header h3 { font-size: 15px; font-weight: 700; color: white; }
+    .detail-panel-date { font-size: 12px; color: var(--app-text-muted); }
+    .detail-panel-body { padding: 16px 20px; }
+
+    .detail-event {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid var(--app-border);
+    }
+    .detail-event:last-child { border-bottom: none; }
+    .detail-event-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 18px;
+    }
+    .detail-event-icon.confirmed { background: rgba(34,197,94,0.12); }
+    .detail-event-icon.pending { background: rgba(217,119,6,0.12); }
+    .detail-event-icon.completed { background: rgba(124,58,237,0.12); }
+
+    .detail-event-info { flex: 1; min-width: 0; }
+    .detail-event-name { font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px; }
+    .detail-event-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--app-text-muted); }
+    .detail-event-meta span { display: flex; align-items: center; gap: 4px; }
+    .detail-event-meta svg { width: 12px; height: 12px; opacity: 0.6; }
+    .detail-event-cache { font-size: 14px; font-weight: 700; color: var(--app-gold); flex-shrink: 0; }
+    .detail-event-address { font-size: 11px; color: var(--app-text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .detail-event-address svg { width: 11px; height: 11px; opacity: 0.5; }
+
+    .detail-empty { text-align: center; padding: 40px 20px; color: var(--app-text-muted); }
+    .detail-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+    .detail-empty h4 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .detail-empty p { font-size: 13px; line-height: 1.5; }
+
+    .calendar-legend {
+      display: flex; gap: 16px; padding: 12px 20px 0;
+      border-top: 1px solid var(--app-border); margin-top: 8px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--app-text-muted); }
+    .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .legend-dot.confirmed { background: var(--app-green); }
+    .legend-dot.pending { background: var(--app-gold); }
+    .legend-dot.completed { background: var(--app-accent); }
+
+    .calendar-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+    .calendar-stat {
+      background: var(--app-surface); border: 1px solid var(--app-border);
+      border-radius: var(--app-radius); padding: 16px 20px; flex: 1;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .calendar-stat-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--app-text-muted);
+    }
+    .calendar-stat-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; color: white; line-height: 1; }
+    .calendar-stat-value.accent { color: var(--app-accent); }
+    .calendar-stat-value.gold { color: var(--app-gold); }
+    .calendar-stat-value.green { color: var(--app-green); }
+
+    @media (max-width: 640px) { .calendar-stats { flex-direction: column; } }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar (artist) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <a href="performances.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Mis actuaciones
+        </a>
+
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+        <a href="invoices-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="pro.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PALCOFY PRO
+        </a>
+        <a href="settings-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuración
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="greeting">Buenos días</h1>
+          <p class="topbar-sub">Gestiona tu agenda de actuaciones.</p>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="calendar-stats">
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Actuaciones este mes</span>
+          <span class="calendar-stat-value accent" id="stat-month-events">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Confirmadas</span>
+          <span class="calendar-stat-value green" id="stat-confirmed">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Pendientes</span>
+          <span class="calendar-stat-value gold" id="stat-pending">0</span>
+        </div>
+        <div class="calendar-stat">
+          <span class="calendar-stat-label">Cobrado total</span>
+          <span class="calendar-stat-value" id="stat-total-cache">0 €</span>
+        </div>
+      </div>
+
+      <!-- Calendar + Detail panel -->
+      <div class="calendar-wrapper">
+
+        <!-- Calendar card -->
+        <div class="calendar-card">
+          <div class="calendar-card-header">
+            <div class="calendar-nav">
+              <button class="calendar-nav-btn" id="prev-month" title="Mes anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span class="calendar-month-label" id="month-label">Julio 2026</span>
+              <button class="calendar-nav-btn" id="next-month" title="Mes siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <button class="calendar-nav-btn" id="today-btn" title="Ir a hoy" style="width:auto;padding:0 12px;font-size:12px;font-weight:600;color:var(--app-accent);border-color:rgba(124,58,237,0.3);">
+              Hoy
+            </button>
+          </div>
+          <div class="calendar-card-body">
+            <div class="calendar-grid" id="calendar-grid">
+              <div class="calendar-day-header">Lun</div>
+              <div class="calendar-day-header">Mar</div>
+              <div class="calendar-day-header">Mié</div>
+              <div class="calendar-day-header">Jue</div>
+              <div class="calendar-day-header">Vie</div>
+              <div class="calendar-day-header">Sáb</div>
+              <div class="calendar-day-header">Dom</div>
+            </div>
+          </div>
+          <div class="calendar-legend">
+            <div class="legend-item">
+              <div class="legend-dot confirmed"></div>
+              <span>Confirmado</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot pending"></div>
+              <span>Pendiente</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot completed"></div>
+              <span>Completado</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail panel -->
+        <div class="detail-panel" id="detail-panel">
+          <div class="detail-panel-header">
+            <div>
+              <h3 id="detail-title">Selecciona un día</h3>
+              <div class="detail-panel-date" id="detail-date-subtitle">Haz clic en un día del calendario para ver tus actuaciones</div>
+            </div>
+          </div>
+          <div class="detail-panel-body" id="detail-body">
+            <div class="detail-empty">
+              <div class="detail-empty-icon">📅</div>
+              <h4>Sin selección</h4>
+              <p>Haz clic en un día con actuaciones para ver los detalles.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listPerformances } from './data.js';
+
+    const loadingEl = document.getElementById('app-loading');
+    const shellEl   = document.getElementById('app-shell');
+
+    /* ---- State ---- */
+    let currentUserId = null;
+    let allPerformances = [];
+    let currentYear, currentMonth; // 0-indexed month
+    let selectedDate = null; // 'YYYY-MM-DD'
+
+    const MONTH_NAMES = [
+      'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+
+    /* ---- Date helpers ---- */
+    function dateKey(y, m, d) {
+      return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+
+    function getDaysInMonth(y, m) {
+      return new Date(y, m + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(y, m) {
+      const day = new Date(y, m, 1).getDay();
+      return day === 0 ? 6 : day - 1;
+    }
+
+    function formatLongDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const dayName = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][dt.getDay()];
+      return `${dayName}, ${d} de ${MONTH_NAMES[m - 1]} ${y}`;
+    }
+
+    function isToday(y, m, d) {
+      const now = new Date();
+      return now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
+    }
+
+    /* ---- Performance lookups ---- */
+    function performancesForDate(key) {
+      return allPerformances.filter(p => p.date === key && p.status !== 'cancelled');
+    }
+
+    function statusBadge(status) {
+      if (status === 'confirmed') return '<span class="badge badge--green"><span class="badge-dot"></span> Confirmado</span>';
+      if (status === 'completed') return '<span class="badge badge--purple"><span class="badge-dot"></span> Completado</span>';
+      return '<span class="badge badge--gold"><span class="badge-dot"></span> Pendiente</span>';
+    }
+
+    function statusIcon(status) {
+      if (status === 'confirmed') return '✓';
+      if (status === 'completed') return '✔️';
+      return '⏳';
+    }
+
+    /* ---- Render calendar grid ---- */
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      const headers = grid.querySelectorAll('.calendar-day-header');
+      grid.innerHTML = '';
+      headers.forEach(h => grid.appendChild(h));
+
+      document.getElementById('month-label').textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+      const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+      const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+
+      // Previous month padding
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.appendChild(createDayCell(prevYear, prevMonth, daysInPrevMonth - firstDay + 1 + i, true));
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        grid.appendChild(createDayCell(currentYear, currentMonth, d, false));
+      }
+
+      // Next month padding
+      const totalCells = firstDay + daysInMonth;
+      const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+      for (let d = 1; d <= remainingCells; d++) {
+        grid.appendChild(createDayCell(nextYear, nextMonth, d, true));
+      }
+
+      updateStats();
+    }
+
+    function createDayCell(y, m, d, isOtherMonth) {
+      const key = dateKey(y, m, d);
+      const today = isToday(y, m, d);
+      const perfs = isOtherMonth ? [] : performancesForDate(key);
+      const hasEvents = perfs.length > 0;
+
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day';
+      if (isOtherMonth) cell.classList.add('is-empty');
+      if (today) cell.classList.add('is-today');
+      if (hasEvents) cell.classList.add('has-event');
+      if (selectedDate === key) cell.classList.add('is-selected');
+
+      const num = document.createElement('span');
+      num.className = 'day-number';
+      num.textContent = d;
+      cell.appendChild(num);
+
+      if (hasEvents) {
+        const dots = document.createElement('div');
+        dots.className = 'event-dots';
+        perfs.slice(0, 3).forEach(p => {
+          const dot = document.createElement('div');
+          dot.className = `event-dot ${p.status}`;
+          dots.appendChild(dot);
+        });
+        cell.appendChild(dots);
+      }
+
+      if (!isOtherMonth) {
+        cell.addEventListener('click', () => {
+          selectedDate = key;
+          renderCalendar();
+          renderDetailPanel();
+        });
+      }
+
+      return cell;
+    }
+
+    /* ---- Render detail panel ---- */
+    function renderDetailPanel() {
+      const titleEl = document.getElementById('detail-title');
+      const subtitleEl = document.getElementById('detail-date-subtitle');
+      const bodyEl = document.getElementById('detail-body');
+
+      if (!selectedDate) {
+        titleEl.textContent = 'Selecciona un día';
+        subtitleEl.textContent = 'Haz clic en un día del calendario para ver tus actuaciones';
+        bodyEl.innerHTML = `
+          <div class="detail-empty">
+            <div class="detail-empty-icon">📅</div>
+            <h4>Sin selección</h4>
+            <p>Haz clic en un día con actuaciones para ver los detalles.</p>
+          </div>`;
+        return;
+      }
+
+      const perfs = performancesForDate(selectedDate);
+      const longDate = formatLongDate(selectedDate);
+
+      titleEl.textContent = perfs.length > 0
+        ? `${perfs.length} actuación${perfs.length > 1 ? 'es' : ''}`
+        : 'Sin actuaciones';
+
+      subtitleEl.textContent = longDate;
+
+      if (perfs.length === 0) {
+        bodyEl.innerHTML = `
+          <div class="detail-empty">
+            <div class="detail-empty-icon">🎵</div>
+            <h4>Sin actuaciones este día</h4>
+            <p>No tienes actuaciones programadas para esta fecha.</p>
+          </div>`;
+        return;
+      }
+
+      bodyEl.innerHTML = perfs.map(p => `
+        <div class="detail-event">
+          <div class="detail-event-icon ${p.status}">${statusIcon(p.status)}</div>
+          <div class="detail-event-info">
+            <div class="detail-event-name">${p.venueName || 'Venue'}</div>
+            <div class="detail-event-meta">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${p.time || '—'}
+              </span>
+              ${statusBadge(p.status)}
+            </div>
+            ${p.venueAddr ? `
+              <div class="detail-event-address">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${p.venueAddr}
+              </div>` : ''}
+            ${p.genre ? `<div style="font-size:11px;color:var(--app-text-muted);margin-top:4px;">Género: ${p.genre}</div>` : ''}
+          </div>
+          <div class="detail-event-cache">${p.cache || 0} €</div>
+        </div>`).join('');
+    }
+
+    /* ---- Update monthly stats ---- */
+    function updateStats() {
+      const monthPerfs = allPerformances.filter(p => {
+        if (p.status === 'cancelled') return false;
+        const [y, m] = p.date.split('-').map(Number);
+        return y === currentYear && (m - 1) === currentMonth;
+      });
+
+      const confirmed = monthPerfs.filter(p => p.status === 'confirmed').length;
+      const pending = monthPerfs.filter(p => p.status === 'pending').length;
+      const totalCache = monthPerfs.reduce((sum, p) => sum + (p.cache || 0), 0);
+
+      document.getElementById('stat-month-events').textContent = monthPerfs.length;
+      document.getElementById('stat-confirmed').textContent = confirmed;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-total-cache').textContent = `${totalCache.toLocaleString('es-ES')} €`;
+    }
+
+    /* ---- Navigation ---- */
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      selectedDate = null;
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      selectedDate = null;
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    document.getElementById('today-btn').addEventListener('click', () => {
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+      selectedDate = dateKey(currentYear, currentMonth, now.getDate());
+      renderCalendar();
+      renderDetailPanel();
+    });
+
+    /* ---- Auth guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = {
+          id: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: 'artist',
+          genre: '', cache: 500, pro: false, available: true, radius: 50
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+      if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      currentUserId = user.uid;
+
+      const name = profile.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const isPro = profile.pro || false;
+      document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
+
+      const hour = new Date().getHours();
+      const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+      document.getElementById('greeting').textContent = `${greeting}, ${name}`;
+
+      /* Load performances */
+      try {
+        allPerformances = await listPerformances(user.uid);
+      } catch (e) {
+        allPerformances = [];
+      }
+
+      /* Initialize calendar to current month */
+      const now = new Date();
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+
+      renderCalendar();
+      renderDetailPanel();
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Logout ---- */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

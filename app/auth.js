@@ -38,14 +38,18 @@ function _notify(user) { if (_authCb) _authCb(user); }
 export async function register({ name, email, password, role }) {
   if (isFirebaseConfigured && fbAuth) {
     const cred = await fbAuth.createUserWithEmailAndPassword(auth, email, password);
-    await fbAuth.updateProfile(cred.user, { displayName: name });
-    await fbFirestore.setDoc(fbFirestore.doc(db, 'users', cred.user.uid), {
+
+    /* Fire-and-forget: perfil + Firestore en background (no bloquear UI) */
+    const profileData = {
       name, email, role,
       createdAt: new Date().toISOString(),
       ...(role === 'venue'
         ? { venueName: name, plan: 'piloto', eventsUsed: 0, eventsLimit: 4 }
         : { genre: '', cache: 500, pro: false, available: true, radius: 50 })
-    });
+    };
+    fbAuth.updateProfile(cred.user, { displayName: name }).catch(() => {});
+    fbFirestore.setDoc(fbFirestore.doc(db, 'users', cred.user.uid), profileData).catch(() => {});
+
     return cred.user;
   }
 
@@ -95,8 +99,22 @@ export async function logout() {
 
 export async function getUserProfile(uid) {
   if (isFirebaseConfigured && fbFirestore) {
+    /* Cache: serve from localStorage first, fetch in background */
+    const cacheKey = `palcofy.profile.${uid}`;
+    const cached = (() => { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
+
+    if (cached) {
+      /* Return cache immediately, refresh in background */
+      fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid)).then(snap => {
+        if (snap.exists()) localStorage.setItem(cacheKey, JSON.stringify({ id: uid, ...snap.data() }));
+      }).catch(() => {});
+      return cached;
+    }
+
     const snap = await fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid));
-    return snap.exists() ? { id: uid, ...snap.data() } : null;
+    const profile = snap.exists() ? { id: uid, ...snap.data() } : null;
+    if (profile) localStorage.setItem(cacheKey, JSON.stringify(profile));
+    return profile;
   }
   const users = demoUsers();
   return users[uid] || null;
@@ -121,4 +139,15 @@ export function onAuthChange(callback) {
 
 export function redirectByRole(role) {
   window.location.href = role === 'venue' ? 'dashboard-venue.html' : 'dashboard-artist.html';
+}
+
+/* ----- Esperar perfil con reintentos (evita redirect loop) -- */
+export async function waitForProfile(uid, maxRetries = 3, delayMs = 500) {
+  for (let i = 0; i < maxRetries; i++) {
+    const p = await getUserProfile(uid);
+    if (p) return p;
+    await new Promise(r => setTimeout(r, delayMs));
+  }
+  /* Último recurso: crear perfil por defecto */
+  return null;
 }

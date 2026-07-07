@@ -37,31 +37,31 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           Dashboard
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="calendar-artist.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
           Calendario
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="performances.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           Mis actuaciones
         </a>
 
         <div class="sidebar-section">Finanzas</div>
-        <a href="#" class="sidebar-link">
+        <a href="settlements.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Liquidaciones
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="invoices-artist.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           Facturas
         </a>
 
         <div class="sidebar-section">Cuenta</div>
-        <a href="#" class="sidebar-link" id="pro-link">
+        <a href="pro.html" class="sidebar-link" id="pro-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           PALCOFY PRO
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="settings-artist.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
           Configuración
         </a>
@@ -199,8 +199,24 @@
         return;
       }
 
-      const profile = await getUserProfile(user.uid);
-      if (!profile || profile.role !== 'artist') {
+      /* Esperar a que Firestore sincronice el perfil (máx 3 intentos) */
+      let profile = null;
+      for (let i = 0; i < 3; i++) {
+        profile = await getUserProfile(user.uid);
+        if (profile) break;
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      if (!profile) {
+        profile = {
+          id: user.uid, name: user.displayName || user.email.split('@')[0],
+          email: user.email, role: 'artist',
+          genre: '', cache: 500, pro: false, available: true, radius: 50
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+
+      if (profile.role !== 'artist') {
         window.location.href = 'dashboard-venue.html';
         return;
       }

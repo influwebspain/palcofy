@@ -43,23 +43,23 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
           Buscar artistas
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="calendar.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
           Calendario
         </a>
 
         <div class="sidebar-section">Facturación</div>
-        <a href="#" class="sidebar-link">
+        <a href="invoices.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           Facturas
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="plans.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Planes
         </a>
 
         <div class="sidebar-section">Cuenta</div>
-        <a href="#" class="sidebar-link">
+        <a href="settings.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
           Configuración
         </a>
@@ -180,7 +180,7 @@
 
   <script type="module">
     import { onAuthChange, logout } from './auth.js';
-    import { getUserProfile, listBookings } from './data.js';
+    import { getUserProfile, listBookings, getBookingStats } from './data.js';
 
     const loadingEl = document.getElementById('app-loading');
     const shellEl   = document.getElementById('app-shell');
@@ -192,8 +192,26 @@
         return;
       }
 
-      const profile = await getUserProfile(user.uid);
-      if (!profile || profile.role !== 'venue') {
+      /* Esperar a que Firestore sincronice el perfil (máx 3 intentos) */
+      let profile = null;
+      for (let i = 0; i < 3; i++) {
+        profile = await getUserProfile(user.uid);
+        if (profile) break;
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      /* Si aún no existe, crear perfil por defecto en localStorage */
+      if (!profile) {
+        profile = {
+          id: user.uid, name: user.displayName || user.email.split('@')[0],
+          email: user.email, role: 'venue',
+          venueName: user.displayName || '', plan: 'piloto',
+          eventsUsed: 0, eventsLimit: 4
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+
+      if (profile.role !== 'venue') {
         window.location.href = 'dashboard-artist.html';
         return;
       }
@@ -215,27 +233,35 @@
       const eventsLimit = profile.eventsLimit || 4;
       document.getElementById('stat-events').textContent = `${eventsUsed} / ${eventsLimit}`;
 
-      /* Cargar bookings */
+      /* Cargar bookings y stats */
       try {
-        const bookings = await listBookings(user.uid);
-        if (bookings.length > 0) {
-          const upcoming = bookings.filter(b => b.status !== 'cancelled').slice(0, 5);
-          document.getElementById('stat-artists').textContent = new Set(upcoming.map(b => b.artistId)).size;
-          document.getElementById('stat-next').textContent = upcoming[0]?.date || '—';
-          document.getElementById('stat-next-sub').textContent = upcoming[0] ? `${upcoming[0].artistName} · ${upcoming[0].time}` : 'Sin eventos';
+        const stats = await getBookingStats(user.uid);
+        document.getElementById('stat-events').textContent = `${stats.totalThisMonth} / ${eventsLimit}`;
+        document.getElementById('stat-spend').textContent = `${(stats.totalCache + (plan === 'piloto' ? 199 : plan === 'esencial' ? 350 : 850)).toLocaleString('es-ES')} €`;
+        document.getElementById('stat-artists').textContent = new Set((await listBookings(user.uid)).map(b => b.artistId)).size;
 
+        if (stats.nextEvent) {
+          document.getElementById('stat-next').textContent = stats.nextEvent.date;
+          document.getElementById('stat-next-sub').textContent = `${stats.nextEvent.artistName} · ${stats.nextEvent.time}`;
+          document.getElementById('stat-next-sub').style.color = 'var(--app-green)';
+        }
+
+        const bookings = await listBookings(user.uid);
+        const upcoming = bookings.filter(b => b.status !== 'cancelled').slice(0, 5);
+        if (upcoming.length > 0) {
+          const genreMap = { jazz:'Jazz', pop:'Pop', rock:'Rock', electronic:'Electrónica', classical:'Clásica' };
           const tbody = document.getElementById('events-body');
           tbody.innerHTML = upcoming.map(b => `
-            <tr>
+            <tr style="cursor:pointer;" onclick="window.location.href='calendar.html'">
               <td>${b.date}</td>
               <td>${b.artistName}</td>
+              <td>${genreMap[b.genre] || b.cache ? '—' : '—'}</td>
               <td>${b.cache || '—'}€</td>
-              <td>—</td>
               <td><span class="badge badge--${b.status === 'confirmed' ? 'green' : 'gold'}"><span class="badge-dot"></span> ${b.status === 'confirmed' ? 'Confirmado' : 'Pendiente'}</span></td>
             </tr>
           `).join('');
         }
-      } catch(e) { /* demo mode or empty */ }
+      } catch(e) { console.warn('Stats load error:', e); }
 
       loadingEl.style.display = 'none';
       shellEl.style.display = '';

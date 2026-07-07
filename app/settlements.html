@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Liquidaciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App shell (hidden until auth) -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <a href="performances.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Mis actuaciones
+        </a>
+
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+        <a href="invoices-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="pro.html" class="sidebar-link" id="pro-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PALCOFY PRO
+        </a>
+        <a href="settings-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuración
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <!-- Top bar -->
+      <div class="app-topbar">
+        <div>
+          <h1>Liquidaciones</h1>
+          <p class="topbar-sub" id="topbar-sub">Tus cobros y pagos por actuaciones.</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="app-btn app-btn--ghost" id="export-btn" style="width:auto;padding:10px 18px;font-size:13px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total cobrado este mes</span>
+          <span class="stat-value green" id="stat-month-paid">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);" id="stat-month-count">0 liquidaciones</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pendiente</span>
+          <span class="stat-value gold" id="stat-pending">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);" id="stat-pending-count">0 liquidaciones</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total histórico</span>
+          <span class="stat-value accent" id="stat-historical">0 €</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Todos los tiempos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Número de liquidaciones</span>
+          <span class="stat-value" id="stat-total-count">0</span>
+          <span class="stat-change" style="color:var(--app-text-muted);">Total realizadas</span>
+        </div>
+      </div>
+
+      <!-- Payment note -->
+      <div class="data-card" style="border-left:3px solid var(--app-accent);margin-bottom:24px;">
+        <div style="padding:16px 20px;display:flex;align-items:flex-start;gap:14px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,58,237,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--app-accent)" stroke-width="2" width="20" height="20">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px;">Información sobre pagos</div>
+            <p style="font-size:12.5px;color:var(--app-text-muted);line-height:1.6;margin:0;">
+              Los pagos se ejecutan en 24h tras la validación del show vía geolocalización. El caché bruto se abona menos una comisión del 10% por gestión de la plataforma. Los importes se transfieren a la cuenta bancaria asociada a tu perfil.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick summary -->
+      <div class="data-card" style="margin-bottom:24px;">
+        <div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+          <div style="text-align:center;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:6px;">Caché promedio</div>
+            <div style="font-size:22px;font-weight:800;color:white;letter-spacing:-0.02em;" id="stat-avg-cache">0 €</div>
+            <div style="font-size:11px;color:var(--app-text-muted);margin-top:2px;">Por actuación</div>
+          </div>
+          <div style="text-align:center;border-left:1px solid var(--app-border);border-right:1px solid var(--app-border);">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:6px;">Mejor caché</div>
+            <div style="font-size:22px;font-weight:800;color:var(--app-gold);letter-spacing:-0.02em;" id="stat-max-cache">0 €</div>
+            <div style="font-size:11px;color:var(--app-text-muted);margin-top:2px;">Actuación más alta</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:6px;">Comisión total</div>
+            <div style="font-size:22px;font-weight:800;color:var(--app-red);letter-spacing:-0.02em;" id="stat-total-commission">0 €</div>
+            <div style="font-size:11px;color:var(--app-text-muted);margin-top:2px;">Retenido por plataforma</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="search-bar">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input type="text" id="search-input" placeholder="Buscar por venue o fecha..." />
+        </div>
+        <select class="filter-select" id="filter-status">
+          <option value="all">Todos los estados</option>
+          <option value="paid">Pagados</option>
+          <option value="pending">Pendientes</option>
+        </select>
+        <select class="filter-select" id="filter-method">
+          <option value="all">Todos los métodos</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="PayPal">PayPal</option>
+          <option value="Bizum">Bizum</option>
+        </select>
+        <button class="app-btn app-btn--ghost" id="clear-filters-btn" style="width:auto;padding:12px 16px;font-size:12px;display:none;">
+          Limpiar filtros
+        </button>
+      </div>
+      <div id="filter-results-info" style="font-size:12px;color:var(--app-text-muted);margin-bottom:16px;display:none;">
+        Mostrando <span id="filter-count">0</span> de <span id="filter-total">0</span> liquidaciones
+      </div>
+
+      <!-- Settlements table -->
+      <div class="data-card">
+        <div class="data-card-header">
+          <h3>Historial de liquidaciones</h3>
+          <span class="badge badge--green"><span class="badge-dot"></span> Pagos en 24h</span>
+        </div>
+        <table class="data-table" id="settlements-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Venue</th>
+              <th>Caché bruto</th>
+              <th>Comisión (10%)</th>
+              <th>Neto cobrado</th>
+              <th>Estado</th>
+              <th>Método</th>
+            </tr>
+          </thead>
+          <tbody id="settlements-body">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">💰</div>
+                  <h3>Cargando liquidaciones...</h3>
+                  <p>Espera un momento mientras recuperamos tus datos.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Resumen del mes -->
+      <div class="data-card">
+        <div class="data-card-header">
+          <h3>Resumen del mes</h3>
+          <span style="font-size:12px;color:var(--app-text-muted);" id="month-label"></span>
+        </div>
+        <div style="padding:20px;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:8px;">Actuaciones realizadas</div>
+              <div style="font-size:18px;font-weight:800;color:white;" id="month-performances">0</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:8px;">Ingresos brutos</div>
+              <div style="font-size:18px;font-weight:800;color:white;" id="month-gross">0 €</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:8px;">Comisiones cobradas</div>
+              <div style="font-size:18px;font-weight:800;color:var(--app-red);" id="month-commissions">0 €</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:8px;">Neto recibido</div>
+              <div style="font-size:18px;font-weight:800;color:var(--app-green);" id="month-net">0 €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listSettlements } from './data.js';
+
+    const loadingEl  = document.getElementById('app-loading');
+    const shellEl    = document.getElementById('app-shell');
+    const tbodyEl    = document.getElementById('settlements-body');
+    const searchEl   = document.getElementById('search-input');
+    const filterStat = document.getElementById('filter-status');
+    const filterMeth = document.getElementById('filter-method');
+    const exportBtn  = document.getElementById('export-btn');
+    const clearBtn   = document.getElementById('clear-filters-btn');
+    const filterInfo = document.getElementById('filter-results-info');
+    const filterCnt  = document.getElementById('filter-count');
+    const filterTot  = document.getElementById('filter-total');
+
+    let currentUser   = null;
+    let userProfile   = null;
+    let allSettlements = [];
+
+    /* ===========================================================
+       AUTH GUARD
+       =========================================================== */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = {
+          id: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: 'artist',
+          genre: '',
+          cache: 500,
+          pro: false,
+          available: true,
+          radius: 50
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
+      }
+
+      if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      currentUser = user;
+      userProfile = profile;
+
+      /* Fill sidebar user info */
+      const name = profile.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const isPro = profile.pro || false;
+      document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
+
+      /* Greeting */
+      const hour = new Date().getHours();
+      const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+      document.getElementById('topbar-sub').textContent =
+        `${greeting}, ${name}. Consulta tus cobros y pagos.`;
+
+      /* Load settlements */
+      try {
+        const settlements = await listSettlements(user.uid);
+        allSettlements = settlements || [];
+        renderSettlements(allSettlements);
+        updateStats(allSettlements);
+        updateMonthSummary(allSettlements);
+      } catch (e) {
+        renderEmpty('No se pudieron cargar las liquidaciones.');
+      }
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display   = '';
+    });
+
+    /* ===========================================================
+       RENDER SETTLEMENTS
+       =========================================================== */
+    function renderSettlements(settlements) {
+      if (!settlements || settlements.length === 0) {
+        tbodyEl.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">💰</div>
+                <h3>Sin liquidaciones</h3>
+                <p>Cuando actúes, tu caché se liquidará en 24h vía escrow tras la validación del show.</p>
+              </div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbodyEl.innerHTML = settlements.map(s => {
+        const dateStr    = formatDate(s.date);
+        const badgeClass = s.status === 'paid' ? 'badge--green' : 'badge--gold';
+        const statusLbl  = s.status === 'paid' ? 'Pagado' : 'Pendiente';
+        const method     = s.method || 'Transferencia';
+        const cache      = (s.cache || 0).toLocaleString('es-ES');
+        const commission = (s.commission || 0).toLocaleString('es-ES');
+        const net        = (s.net || 0).toLocaleString('es-ES');
+
+        return `
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--app-text-muted);">${dateStr}</td>
+            <td style="font-weight:600;color:white;">${escapeHtml(s.venueName || '—')}</td>
+            <td>${cache} €</td>
+            <td style="color:var(--app-red);">−${commission} €</td>
+            <td style="font-weight:700;color:var(--app-green);">${net} €</td>
+            <td><span class="badge ${badgeClass}"><span class="badge-dot"></span> ${statusLbl}</span></td>
+            <td style="font-size:12.5px;color:var(--app-text-muted);">${escapeHtml(method)}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    /* ===========================================================
+       UPDATE MONTH SUMMARY
+       =========================================================== */
+    function updateMonthSummary(settlements) {
+      const now   = new Date();
+      const month = now.getMonth();
+      const year  = now.getFullYear();
+      const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                          'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+      document.getElementById('month-label').textContent = `${monthNames[month]} ${year}`;
+
+      const thisMonth = settlements.filter(s => {
+        const d = new Date(s.date);
+        return d.getMonth() === month && d.getFullYear() === year;
+      });
+
+      const gross     = thisMonth.reduce((sum, s) => sum + (s.cache || 0), 0);
+      const comms     = thisMonth.reduce((sum, s) => sum + (s.commission || 0), 0);
+      const net       = thisMonth.reduce((sum, s) => sum + (s.net || 0), 0);
+
+      document.getElementById('month-performances').textContent = thisMonth.length;
+      document.getElementById('month-gross').textContent = `${gross.toLocaleString('es-ES')} €`;
+      document.getElementById('month-commissions').textContent = `−${comms.toLocaleString('es-ES')} €`;
+      document.getElementById('month-net').textContent = `${net.toLocaleString('es-ES')} €`;
+    }
+
+    /* ===========================================================
+       UPDATE STATS
+       =========================================================== */
+    function updateStats(settlements) {
+      const now = new Date();
+      const thisMonth = settlements.filter(s => {
+        const d = new Date(s.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const monthPaid   = thisMonth.filter(s => s.status === 'paid');
+      const pending     = settlements.filter(s => s.status === 'pending');
+
+      const monthPaidTotal = monthPaid.reduce((sum, s) => sum + (s.net || 0), 0);
+      const pendingTotal   = pending.reduce((sum, s) => sum + (s.net || 0), 0);
+      const historicalTotal = settlements.reduce((sum, s) => sum + (s.net || 0), 0);
+
+      document.getElementById('stat-month-paid').textContent = `${monthPaidTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-month-count').textContent = `${monthPaid.length} liquidacion${monthPaid.length !== 1 ? 'es' : ''}`;
+      document.getElementById('stat-pending').textContent = `${pendingTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-pending-count').textContent = `${pending.length} pendiente${pending.length !== 1 ? 's' : ''}`;
+      document.getElementById('stat-historical').textContent = `${historicalTotal.toLocaleString('es-ES')} €`;
+      document.getElementById('stat-total-count').textContent = settlements.length;
+
+      /* Quick summary stats */
+      if (settlements.length > 0) {
+        const totalCache = settlements.reduce((sum, s) => sum + (s.cache || 0), 0);
+        const avgCache   = totalCache / settlements.length;
+        const maxCache   = Math.max(...settlements.map(s => s.cache || 0));
+        const totalComm  = settlements.reduce((sum, s) => sum + (s.commission || 0), 0);
+
+        document.getElementById('stat-avg-cache').textContent = `${Math.round(avgCache).toLocaleString('es-ES')} €`;
+        document.getElementById('stat-max-cache').textContent = `${maxCache.toLocaleString('es-ES')} €`;
+        document.getElementById('stat-total-commission').textContent = `${totalComm.toLocaleString('es-ES')} €`;
+      } else {
+        document.getElementById('stat-avg-cache').textContent = '0 €';
+        document.getElementById('stat-max-cache').textContent = '0 €';
+        document.getElementById('stat-total-commission').textContent = '0 €';
+      }
+    }
+
+    /* ===========================================================
+       FILTERING
+       =========================================================== */
+    function applyFilters() {
+      const query    = searchEl.value.toLowerCase().trim();
+      const status   = filterStat.value;
+      const method   = filterMeth.value;
+
+      let filtered = allSettlements.slice();
+
+      /* Status filter */
+      if (status !== 'all') {
+        filtered = filtered.filter(s => s.status === status);
+      }
+
+      /* Method filter */
+      if (method !== 'all') {
+        filtered = filtered.filter(s => (s.method || 'Transferencia') === method);
+      }
+
+      /* Search filter */
+      if (query) {
+        filtered = filtered.filter(s => {
+          const venue  = (s.venueName || '').toLowerCase();
+          const date   = (s.date || '').toLowerCase();
+          const method = (s.method || '').toLowerCase();
+          return venue.includes(query) || date.includes(query) || method.includes(query);
+        });
+      }
+
+      renderSettlements(filtered);
+      updateStats(filtered);
+      updateMonthSummary(filtered);
+
+      /* Show/hide filter info and clear button */
+      const isFiltered = status !== 'all' || method !== 'all' || query.length > 0;
+      if (isFiltered) {
+        filterInfo.style.display = '';
+        filterCnt.textContent = filtered.length;
+        filterTot.textContent = allSettlements.length;
+        clearBtn.style.display = '';
+      } else {
+        filterInfo.style.display = 'none';
+        clearBtn.style.display = 'none';
+      }
+    }
+
+    searchEl.addEventListener('input', applyFilters);
+    filterStat.addEventListener('change', applyFilters);
+    filterMeth.addEventListener('change', applyFilters);
+
+    clearBtn.addEventListener('click', () => {
+      searchEl.value = '';
+      filterStat.value = 'all';
+      filterMeth.value = 'all';
+      applyFilters();
+    });
+
+    /* Keyboard shortcut: Escape to clear filters */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        searchEl.value = '';
+        filterStat.value = 'all';
+        filterMeth.value = 'all';
+        applyFilters();
+        searchEl.blur();
+      }
+    });
+
+    /* ===========================================================
+       EXPORT CSV
+       =========================================================== */
+    exportBtn.addEventListener('click', () => {
+      if (allSettlements.length === 0) {
+        alert('No hay liquidaciones para exportar.');
+        return;
+      }
+
+      const header = 'Fecha,Venue,Caché Bruto,Comisión (10%),Neto Cobrado,Estado,Método\n';
+      const rows = allSettlements.map(s =>
+        [
+          s.date || '',
+          `"${(s.venueName || '').replace(/"/g, '""')}"`,
+          s.cache || 0,
+          s.commission || 0,
+          s.net || 0,
+          s.status === 'paid' ? 'Pagado' : 'Pendiente',
+          s.method || 'Transferencia'
+        ].join(',')
+      ).join('\n');
+
+      const csv = header + rows;
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `liquidaciones_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    /* ===========================================================
+       HELPERS
+       =========================================================== */
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      try {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderEmpty(msg) {
+      tbodyEl.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="empty-icon">⚠️</div>
+              <h3>Algo salió mal</h3>
+              <p>${escapeHtml(msg)}</p>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    /* ===========================================================
+       LOGOUT
+       =========================================================== */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "PowerShell(python --version 2>&1; node --version 2>&1)",
+      "PowerShell(Start-Process -FilePath \"python\" -ArgumentList \"-m\",\"http.server\",\"8080\" -WorkingDirectory \"G:\\\\Mi unidad\\\\PALCOFY\" -WindowStyle Hidden)",
+      "PowerShell(Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest -Uri \"http://localhost:8080/app/login.html\" -UseBasicParsing -TimeoutSec 3; \"Server OK: $\\($r.StatusCode\\)\" } catch { \"Server error: $_\" })",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:8080/app/login.html\" -UseBasicParsing; if \\($r.Content -match 'demo-banner'\\) { \"login.html OK — demo banner found\" } else { \"login.html OK but demo-banner missing\" }; $r2 = Invoke-WebRequest -Uri \"http://localhost:8080/app/firebase-config.js\" -UseBasicParsing; if \\($r2.Content -match 'isFirebaseConfigured'\\) { \"firebase-config.js OK\" } else { \"firebase-config.js MISSING\" }; $r3 = Invoke-WebRequest -Uri \"http://localhost:8080/app/auth.js\" -UseBasicParsing; if \\($r3.Content -match 'demoUsers'\\) { \"auth.js OK\" } else { \"auth.js MISSING\" })",
+      "PowerShell(\\(Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\calendar.html\"\\).Count)",
+      "WebFetch(domain:palcofy.firebaseapp.com)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyA3LvaI3SUnnumEND0g3syPmlclDB1ZetQ\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"test@test.com\",\"password\":\"123456\",\"returnSecureToken\":true}' -UseBasicParsing; $r.Content } catch { $_.Exception.Response.StatusCode.value__; try { $stream = $_.Exception.Response.GetResponseStream\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $reader.ReadToEnd\\(\\) } catch { \"Could not read error\" } })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://firestore.googleapis.com/v1/projects/palcofy/databases/\\(default\\)/documents/users\" -Method GET -UseBasicParsing -TimeoutSec 5; \"Firestore accessible: $\\($r.StatusCode\\)\" } catch { $code = $_.Exception.Response.StatusCode.value__; \"Firestore response: $code — $\\(if\\($code -eq 403\\){'Reglas bloqueando escritura'}elseif\\($code -eq 404\\){'Firestore no creado aún'}else{'Error desconocido'}\\)\" })",
+      "PowerShell(\\(Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\invoices-artist.html\"\\).Count)",
+      "PowerShell(\\(Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\settlements.html\"\\).Count)",
+      "PowerShell(\\(Get-Content 'G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\calendar-artist.html'\\).Count)",
+      "PowerShell(\\(Get-Content 'G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\performances.html' | Measure-Object -Line\\).Lines)",
+      "PowerShell(\\(Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\pro.html\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(\\(Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\settings-artist.html\"\\).Count)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:8080/app/pro.html\" -UseBasicParsing -TimeoutSec 5; \"Status: $\\($r.StatusCode\\), Length: $\\($r.Content.Length\\)\" } catch { \"Error: $_\" })",
+      "PowerShell($c = Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\pro.html\" -Raw; $body = $c.Substring\\($c.IndexOf\\('<body>'\\), $c.IndexOf\\('<script type=\"module\">'\\) - $c.IndexOf\\('<body>'\\)\\); $opens = \\([regex]::Matches\\($body, '<div[\\\\s>]'\\)\\).Count; $closes = \\([regex]::Matches\\($body, '</div>'\\)\\).Count; \"divs: $opens open, $closes close \\(diff: $\\($opens - $closes\\)\\)\"; $as = \\([regex]::Matches\\($body, '<aside[\\\\s>]'\\)\\).Count; $acs = \\([regex]::Matches\\($body, '</aside>'\\)\\).Count; \"aside: $as open, $acs close\"; $ms = \\([regex]::Matches\\($body, '<main[\\\\s>]'\\)\\).Count; $mcs = \\([regex]::Matches\\($body, '</main>'\\)\\).Count; \"main: $ms open, $mcs close\"; $sects = \\([regex]::Matches\\($body, '<section[\\\\s>]'\\)\\).Count; $sectcs = \\([regex]::Matches\\($body, '</section>'\\)\\).Count; \"section: $sects open, $sectcs close\"; $navs = \\([regex]::Matches\\($body, '<nav[\\\\s>]'\\)\\).Count; $navcs = \\([regex]::Matches\\($body, '</nav>'\\)\\).Count; \"nav: $navs open, $navcs close\")",
+      "PowerShell($c = Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\pro.html\" -Raw; $start = $c.IndexOf\\('<style>'\\); $end = $c.IndexOf\\('</style>'\\); $css = $c.Substring\\($start, $end - $start + 8\\); $opens = \\([regex]::Matches\\($css, '\\\\{'\\)\\).Count; $closes = \\([regex]::Matches\\($css, '\\\\}'\\)\\).Count; \"CSS braces: $opens open, $closes close \\(diff: $\\($opens - $closes\\)\\)\")",
+      "PowerShell($c = Get-Content \"G:\\\\Mi unidad\\\\PALCOFY\\\\app\\\\pro.html\" -Raw; $start = $c.IndexOf\\('<script type=\"module\">'\\); $js = $c.Substring\\($start\\); $opens = \\([regex]::Matches\\($js, '\\\\{'\\)\\).Count; $closes = \\([regex]::Matches\\($js, '\\\\}'\\)\\).Count; \"JS braces: $opens open, $closes close \\(diff: $\\($opens - $closes\\)\\)\")"
     ]
   }
 }

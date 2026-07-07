@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Mis actuaciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    /* ---- Performances page overrides ---- */
+    .perf-topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .perf-topbar h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.02em;
+    }
+
+    .perf-topbar .topbar-sub {
+      font-size: 14px;
+      color: var(--app-text-muted);
+      margin-top: 4px;
+    }
+
+    .perf-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .perf-filter-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--app-border);
+      background: transparent;
+      color: var(--app-text-muted);
+      transition: all 200ms ease;
+    }
+
+    .perf-filter-btn:hover {
+      border-color: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    .perf-filter-btn.is-active {
+      border-color: var(--app-accent);
+      background: var(--app-accent-glow);
+      color: white;
+    }
+
+    .perf-filter-btn .filter-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.08);
+      font-size: 10px;
+      margin-left: 5px;
+      padding: 0 5px;
+    }
+
+    .perf-filter-btn.is-active .filter-count {
+      background: rgba(124,58,237,0.3);
+    }
+
+    /* Stars */
+    .stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 14px;
+      color: var(--app-gold);
+    }
+
+    .stars--empty {
+      color: rgba(255,255,255,0.12);
+    }
+
+    .stars .rating-num {
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 6px;
+      color: var(--app-gold);
+    }
+
+    /* Table cell enhancements */
+    .venue-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .venue-cell .venue-name {
+      font-weight: 600;
+      color: white;
+    }
+
+    .venue-cell .venue-addr {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .cache-cell {
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--app-green);
+    }
+
+    .date-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .date-cell .date-main {
+      font-weight: 600;
+      color: white;
+    }
+
+    .date-cell .date-time {
+      font-size: 12px;
+      color: var(--app-text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .genre-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .genre-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .genre-dot--jazz     { background: linear-gradient(135deg, #7C3AED, #DB2777); }
+    .genre-dot--pop      { background: linear-gradient(135deg, #EA580C, #EAB308); }
+    .genre-dot--rock     { background: linear-gradient(135deg, #0F172A, #1D4ED8); }
+    .genre-dot--electronic { background: linear-gradient(135deg, #22C55E, #06B6D4); }
+    .genre-dot--classical  { background: linear-gradient(135deg, #D97706, #DC2626); }
+    .genre-dot--default    { background: linear-gradient(135deg, #6D28D9, #BE185D); }
+
+    .no-rating {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    /* Summary row below stats */
+    .perf-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .perf-summary .summary-text {
+      font-size: 13px;
+      color: var(--app-text-muted);
+    }
+
+    .perf-summary .summary-text strong {
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Table responsive scroll */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    /* Row status indicator */
+    .status-row--completed td:first-child {
+      border-left: 3px solid var(--app-green);
+    }
+
+    .status-row--confirmed td:first-child {
+      border-left: 3px solid var(--app-gold);
+    }
+
+    .status-row--pending td:first-child {
+      border-left: 3px solid var(--app-text-muted);
+    }
+
+    /* Stats value accent color for earnings */
+    .stat-card .stat-value.earnings {
+      color: var(--app-green);
+    }
+
+    @media (max-width: 900px) {
+      .perf-topbar {
+        flex-direction: column;
+      }
+
+      .table-wrapper {
+        margin: 0 -20px;
+        padding: 0 20px;
+      }
+
+      .data-table {
+        min-width: 700px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <a href="performances.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Mis actuaciones
+        </a>
+
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+        <a href="invoices-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          Facturas
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="pro.html" class="sidebar-link" id="pro-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          PALCOFY PRO
+        </a>
+        <a href="settings-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuraci&oacute;n
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Artista</div>
+            <div class="sidebar-user-role"><span id="user-pro-status">Free</span></div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesi&oacute;n
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+
+      <!-- Top bar -->
+      <div class="perf-topbar">
+        <div>
+          <h1>Mis actuaciones</h1>
+          <p class="topbar-sub">Historial completo de todas tus actuaciones en venues.</p>
+        </div>
+        <div class="perf-filters" id="filter-bar">
+          <button class="perf-filter-btn is-active" data-filter="all">
+            Todas <span class="filter-count" id="count-all">0</span>
+          </button>
+          <button class="perf-filter-btn" data-filter="completed">
+            Completadas <span class="filter-count" id="count-completed">0</span>
+          </button>
+          <button class="perf-filter-btn" data-filter="confirmed">
+            Confirmadas <span class="filter-count" id="count-confirmed">0</span>
+          </button>
+          <button class="perf-filter-btn" data-filter="pending">
+            Pendientes <span class="filter-count" id="count-pending">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total actuaciones</span>
+          <span class="stat-value accent" id="stat-total">0</span>
+          <span class="stat-change" id="stat-total-sub" style="color:var(--app-text-muted);">Cargando...</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Completadas</span>
+          <span class="stat-value green" id="stat-completed">0</span>
+          <span class="stat-change" id="stat-completed-sub" style="color:var(--app-text-muted);">Sin datos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pr&oacute;xima</span>
+          <span class="stat-value gold" id="stat-next">&mdash;</span>
+          <span class="stat-change" id="stat-next-sub" style="color:var(--app-text-muted);">Sin eventos programados</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Ingresos totales</span>
+          <span class="stat-value earnings" id="stat-earnings">0 &euro;</span>
+          <span class="stat-change" id="stat-earnings-sub" style="color:var(--app-text-muted);">Neto de comisi&oacute;n</span>
+        </div>
+      </div>
+
+      <!-- Performances table -->
+      <div class="data-card">
+        <div class="data-card-header">
+          <h3>Historial de actuaciones</h3>
+          <span class="summary-text" id="summary-text"></span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Venue</th>
+                <th>G&eacute;nero</th>
+                <th>Cach&eacute;</th>
+                <th>Estado</th>
+                <th>Valoraci&oacute;n</th>
+              </tr>
+            </thead>
+            <tbody id="performances-body">
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state" id="loading-state">
+                    <div class="spinner" style="margin:0 auto 16px;"></div>
+                    <p>Cargando actuaciones...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { getUserProfile, listPerformances } from './data.js';
+
+    /* =========================================================
+       State
+       ========================================================= */
+    const loadingEl  = document.getElementById('app-loading');
+    const shellEl    = document.getElementById('app-shell');
+    let currentUser  = null;
+    let userProfile  = null;
+    let allPerformances = [];
+    let activeFilter = 'all';
+
+    /* =========================================================
+       Auth Guard
+       ========================================================= */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const profile = await waitForProfile(user.uid);
+
+      if (!profile) {
+        /* Crear perfil por defecto si no existe */
+        const fallback = {
+          id: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: 'artist',
+          genre: '',
+          cache: 500,
+          pro: false,
+          available: true,
+          radius: 50
+        };
+        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(fallback));
+        userProfile = fallback;
+      } else if (profile.role !== 'artist') {
+        window.location.href = 'dashboard-venue.html';
+        return;
+      } else {
+        userProfile = profile;
+      }
+
+      currentUser = user;
+
+      /* Update sidebar user info */
+      const name = userProfile.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+      const isPro = userProfile.pro || false;
+      document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
+
+      /* Load performances */
+      await loadPerformances();
+
+      /* Show shell */
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* =========================================================
+       Load performances
+       ========================================================= */
+    async function loadPerformances() {
+      if (!currentUser) return;
+
+      allPerformances = await listPerformances(currentUser.uid);
+      updateStats();
+      updateFilterCounts();
+      renderTable();
+    }
+
+    /* =========================================================
+       Stats
+       ========================================================= */
+    function updateStats() {
+      const total = allPerformances.length;
+      const completed = allPerformances.filter(p => p.status === 'completed');
+      const confirmed = allPerformances.filter(p => p.status === 'confirmed');
+      const pending   = allPerformances.filter(p => p.status === 'pending');
+
+      /* Total */
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-total-sub').textContent =
+        total === 0 ? 'Sin actuaciones aun' :
+        `${completed.length} completadas, ${confirmed.length + pending.length} pendientes`;
+
+      /* Completadas */
+      document.getElementById('stat-completed').textContent = completed.length;
+      const completedPct = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+      document.getElementById('stat-completed-sub').textContent =
+        total === 0 ? 'Sin datos' : `${completedPct}% del total`;
+
+      /* Proxima */
+      const now = new Date();
+      const upcoming = allPerformances
+        .filter(p => (p.status === 'confirmed' || p.status === 'pending') && new Date(p.date) >= now)
+        .sort((a, b) => a.date > b.date ? 1 : -1);
+
+      if (upcoming.length > 0) {
+        const next = upcoming[0];
+        const nextDate = formatDateShort(next.date);
+        document.getElementById('stat-next').textContent = nextDate;
+        document.getElementById('stat-next-sub').textContent =
+          `${next.venueName} • ${next.time}`;
+      } else {
+        document.getElementById('stat-next').textContent = '—';
+        document.getElementById('stat-next-sub').textContent = 'Sin eventos programados';
+      }
+
+      /* Ingresos totales */
+      const totalEarnings = completed.reduce((sum, p) => sum + (p.cache || 0), 0);
+      document.getElementById('stat-earnings').textContent = formatCurrency(totalEarnings);
+      document.getElementById('stat-earnings-sub').textContent =
+        completed.length === 0 ? 'Sin cobros registrados' : `${completed.length} actuaciones cobradas`;
+    }
+
+    /* =========================================================
+       Filter counts
+       ========================================================= */
+    function updateFilterCounts() {
+      document.getElementById('count-all').textContent = allPerformances.length;
+      document.getElementById('count-completed').textContent =
+        allPerformances.filter(p => p.status === 'completed').length;
+      document.getElementById('count-confirmed').textContent =
+        allPerformances.filter(p => p.status === 'confirmed').length;
+      document.getElementById('count-pending').textContent =
+        allPerformances.filter(p => p.status === 'pending').length;
+    }
+
+    /* =========================================================
+       Render table
+       ========================================================= */
+    function renderTable() {
+      const tbody = document.getElementById('performances-body');
+      const filtered = activeFilter === 'all'
+        ? allPerformances
+        : allPerformances.filter(p => p.status === activeFilter);
+
+      /* Update summary text */
+      const summaryEl = document.getElementById('summary-text');
+      if (filtered.length === 0) {
+        summaryEl.textContent = '';
+      } else {
+        summaryEl.innerHTML = `Mostrando <strong>${filtered.length}</strong> de <strong>${allPerformances.length}</strong> actuaciones`;
+      }
+
+      /* Empty state */
+      if (filtered.length === 0) {
+        const emptyMsg = activeFilter === 'all'
+          ? { icon: '🎤', title: 'Sin actuaciones aun', text: 'Cuando actues en un venue, tus actuaciones apareceran aqui.' }
+          : activeFilter === 'completed'
+            ? { icon: '✅', title: 'Sin actuaciones completadas', text: 'Tus actuaciones completadas y valoradas se mostraran aqui.' }
+            : activeFilter === 'confirmed'
+              ? { icon: '🔔', title: 'Sin actuaciones confirmadas', text: 'Las actuaciones confirmadas por venues apareceran aqui.' }
+              : { icon: '⏳', title: 'Sin actuaciones pendientes', text: 'No tienes actuaciones pendientes de confirmar.' };
+
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon">${emptyMsg.icon}</div>
+                <h3>${emptyMsg.title}</h3>
+                <p>${emptyMsg.text}</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      /* Build rows */
+      let html = '';
+      for (const p of filtered) {
+        const statusBadge = getStatusBadge(p.status);
+        const starsHtml   = getStarsHtml(p);
+        const genreInfo   = getGenreInfo(p.genre);
+
+        html += `
+          <tr class="status-row--${p.status}">
+            <td>
+              <div class="date-cell">
+                <span class="date-main">${formatDateShort(p.date)}</span>
+                <span class="date-time">${p.time || ''}</span>
+              </div>
+            </td>
+            <td>
+              <div class="venue-cell">
+                <span class="venue-name">${escapeHtml(p.venueName)}</span>
+                <span class="venue-addr">${escapeHtml(p.venueAddr)}</span>
+              </div>
+            </td>
+            <td>
+              <div class="genre-cell">
+                <span class="genre-dot genre-dot--${genreInfo.cls}"></span>
+                ${genreInfo.label}
+              </div>
+            </td>
+            <td><span class="cache-cell">${formatCurrency(p.cache)}</span></td>
+            <td>${statusBadge}</td>
+            <td>${starsHtml}</td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    /* =========================================================
+       Helpers — Status badge
+       ========================================================= */
+    function getStatusBadge(status) {
+      switch (status) {
+        case 'completed':
+          return '<span class="badge badge--green"><span class="badge-dot"></span> Completada</span>';
+        case 'confirmed':
+          return '<span class="badge badge--gold"><span class="badge-dot"></span> Confirmada</span>';
+        case 'pending':
+          return '<span class="badge badge--gray"><span class="badge-dot"></span> Pendiente</span>';
+        default:
+          return `<span class="badge badge--gray"><span class="badge-dot"></span> ${escapeHtml(status)}</span>`;
+      }
+    }
+
+    /* =========================================================
+       Helpers — Stars rating
+       ========================================================= */
+    function getStarsHtml(performance) {
+      if (performance.status !== 'completed' || performance.rating == null) {
+        return '<span class="no-rating">Sin valorar</span>';
+      }
+
+      const rating = Number(performance.rating);
+      const fullStars  = Math.floor(rating);
+      const halfStar   = (rating - fullStars) >= 0.3;
+      const totalSlots = 5;
+
+      let stars = '';
+      for (let i = 0; i < totalSlots; i++) {
+        if (i < fullStars) {
+          stars += '★';
+        } else if (i === fullStars && halfStar) {
+          stars += '★';
+        } else {
+          stars += '☆';
+        }
+      }
+
+      return `<span class="stars">${stars}<span class="rating-num">${rating.toFixed(1)}</span></span>`;
+    }
+
+    /* =========================================================
+       Helpers — Genre info
+       ========================================================= */
+    function getGenreInfo(genre) {
+      const map = {
+        jazz:       { cls: 'jazz',       label: 'Jazz' },
+        pop:        { cls: 'pop',        label: 'Pop' },
+        rock:       { cls: 'rock',       label: 'Rock' },
+        electronic: { cls: 'electronic', label: 'Electrónica' },
+        classical:  { cls: 'classical',  label: 'Clásica' }
+      };
+      return map[genre] || { cls: 'default', label: genre || 'Otro' };
+    }
+
+    /* =========================================================
+       Helpers — Formatting
+       ========================================================= */
+    function formatCurrency(amount) {
+      if (amount == null || isNaN(amount)) return '0 €';
+      return Number(amount).toLocaleString('es-ES') + ' €';
+    }
+
+    function formatDateShort(dateStr) {
+      if (!dateStr) return '—';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      const months = [
+        'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+      ];
+      const day   = parseInt(parts[2], 10);
+      const month = months[parseInt(parts[1], 10) - 1] || '';
+      return `${day} ${month}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /* =========================================================
+       Filter buttons
+       ========================================================= */
+    document.getElementById('filter-bar').addEventListener('click', (e) => {
+      const btn = e.target.closest('.perf-filter-btn');
+      if (!btn) return;
+
+      const filter = btn.dataset.filter;
+      if (filter === activeFilter) return;
+
+      activeFilter = filter;
+
+      /* Update button states */
+      document.querySelectorAll('.perf-filter-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      /* Re-render table */
+      renderTable();
+    });
+
+    /* =========================================================
+       Logout
+       ========================================================= */
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>
