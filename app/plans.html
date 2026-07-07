@@ -9,350 +9,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="app.css" />
   <style>
-    /* ---- Plans page styles ---- */
-    .plans-status {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 36px;
-    }
-
-    .plan-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-
-    .plan-card {
-      background: var(--app-surface);
-      border: 1.5px solid var(--app-border);
-      border-radius: 14px;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease;
-      overflow: hidden;
-    }
-
-    .plan-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .plan-card.is-active {
-      border-color: var(--app-green);
-      box-shadow: 0 0 0 1px var(--app-green), 0 4px 24px rgba(34, 197, 94, 0.12);
-    }
-
-    .plan-card.is-active:hover {
-      transform: translateY(-1px);
-    }
-
-    .plan-card-popular {
-      border-color: var(--app-accent);
-    }
-
-    .plan-card-header {
-      padding: 28px 24px 20px;
-      text-align: center;
-      border-bottom: 1px solid var(--app-border);
-      position: relative;
-    }
-
-    .plan-badge-wrapper {
-      margin-bottom: 14px;
-      min-height: 24px;
-    }
-
-    .plan-name {
-      font-size: 19px;
-      font-weight: 800;
-      color: white;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    .plan-price {
-      font-size: 36px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: white;
-      line-height: 1.1;
-    }
-
-    .plan-price span {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--app-text-muted);
-      letter-spacing: 0;
-    }
-
-    .plan-price-range {
-      font-size: 14px;
-      color: var(--app-text-muted);
-      margin-top: 4px;
-    }
-
-    .plan-card-body {
-      padding: 24px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .plan-features {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 24px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex: 1;
-    }
-
-    .plan-features li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13.5px;
-      color: var(--app-text);
-      line-height: 1.5;
-    }
-
-    .plan-features li .check-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(34, 197, 94, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .plan-features li .check-icon svg {
-      width: 11px;
-      height: 11px;
-      color: var(--app-green);
-    }
-
-    .plan-card-actions {
-      padding: 0 24px 24px;
-    }
-
-    .plan-card-actions .app-btn {
-      width: 100%;
-    }
-
-    .btn-plan-active {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--app-green);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      cursor: default;
-    }
-
-    .btn-plan-active:hover {
-      background: rgba(34, 197, 94, 0.1);
-      transform: none;
-      box-shadow: none;
-    }
-
-    .btn-plan-change {
-      background: var(--app-accent);
-      color: white;
-      box-shadow: 0 2px 16px rgba(124, 58, 237, 0.3);
-    }
-
-    .btn-plan-change:hover {
-      background: #6D28D9;
-      box-shadow: 0 4px 24px rgba(124, 58, 237, 0.45);
-      transform: translateY(-1px);
-    }
-
-    /* ---- Confirmation dialog ---- */
-    .dialog-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dialog-overlay.is-open {
-      display: flex;
-    }
-
-    .dialog-box {
-      background: var(--app-surface);
-      border: 1px solid var(--app-border);
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    .dialog-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: rgba(124, 58, 237, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-    }
-
-    .dialog-icon svg {
-      width: 28px;
-      height: 28px;
-      color: var(--app-accent);
-    }
-
-    .dialog-box h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 8px;
-    }
-
-    .dialog-box p {
-      font-size: 14px;
-      color: var(--app-text-muted);
-      line-height: 1.6;
-      margin-bottom: 8px;
-    }
-
-    .dialog-plan-detail {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--app-border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin: 16px 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .dialog-plan-detail .detail-from,
-    .dialog-plan-detail .detail-to {
-      text-align: center;
-    }
-
-    .dialog-plan-detail .detail-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--app-text-muted);
-      margin-bottom: 4px;
-    }
-
-    .dialog-plan-detail .detail-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: white;
-    }
-
-    .dialog-plan-detail .detail-price {
-      font-size: 12px;
-      color: var(--app-text-muted);
-    }
-
-    .dialog-arrow {
-      color: var(--app-accent);
-      font-size: 20px;
-    }
-
-    .dialog-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .dialog-actions .app-btn {
-      flex: 1;
-    }
-
-    .btn-dialog-cancel {
-      background: transparent;
-      color: var(--app-text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .btn-dialog-cancel:hover {
-      color: white;
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    /* ---- Responsive ---- */
-    @media (max-width: 1100px) {
-      .plans-status {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .plan-cards {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-      }
-      .plan-card-header {
-        padding: 22px 18px 16px;
-      }
-      .plan-name { font-size: 16px; }
-      .plan-price { font-size: 30px; }
-      .plan-card-body { padding: 18px; }
-      .plan-card-actions { padding: 0 18px 18px; }
-    }
-
-    @media (max-width: 900px) {
-      .plans-status {
-        grid-template-columns: 1fr;
-      }
-      .plan-cards {
-        grid-template-columns: 1fr;
-      }
-      .plan-card:hover {
-        transform: none;
-      }
-      .dialog-plan-detail {
-        flex-direction: column;
-        gap: 10px;
-      }
-      .dialog-arrow {
-        transform: rotate(90deg);
-      }
+    .plans-status{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+    .plan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px}
+    .plan-card{background:var(--app-surface);border:1.5px solid var(--app-border);border-radius:14px;display:flex;flex-direction:column;position:relative;transition:border-color 250ms ease,transform 250ms ease,box-shadow 250ms ease;overflow:hidden}
+    .plan-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+    .plan-card.is-active{border-color:var(--app-green);box-shadow:0 0 0 1px var(--app-green),0 4px 24px rgba(34,197,94,.12)}
+    .plan-card.is-active:hover{transform:translateY(-1px)}
+    .plan-card.popular{border-color:var(--app-accent)}
+    .plan-card-header{padding:28px 24px 20px;text-align:center;border-bottom:1px solid var(--app-border)}
+    .plan-badge-slot{margin-bottom:14px;min-height:24px}
+    .plan-name{font-size:19px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:6px}
+    .plan-price{font-size:36px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.1}
+    .plan-price span{font-size:14px;font-weight:500;color:var(--app-text-muted);letter-spacing:0}
+    .plan-price-range{font-size:14px;color:var(--app-text-muted);margin-top:4px}
+    .plan-card-body{padding:24px;flex:1;display:flex;flex-direction:column}
+    .plan-features{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px;flex:1}
+    .plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--app-text);line-height:1.5}
+    .ck{width:18px;height:18px;border-radius:50%;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .ck svg{width:11px;height:11px;color:var(--app-green)}
+    .plan-card-footer{padding:0 24px 24px}
+    .plan-card-footer .app-btn{width:100%}
+    .btn-active{background:rgba(34,197,94,.1);color:var(--app-green);border:1px solid rgba(34,197,94,.25);cursor:default}
+    .btn-active:hover{background:rgba(34,197,94,.1);transform:none;box-shadow:none}
+    .btn-change{background:var(--app-accent);color:#fff;box-shadow:0 2px 16px rgba(124,58,237,.3)}
+    .btn-change:hover{background:#6D28D9;box-shadow:0 4px 24px rgba(124,58,237,.45);transform:translateY(-1px)}
+    .popular-badge{display:inline-block;background:var(--app-accent);color:#fff;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+    .dlg-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+    .dlg-overlay.open{display:flex}
+    .dlg-box{background:var(--app-surface);border:1px solid var(--app-border);border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .dlg-icon{width:56px;height:56px;border-radius:50%;background:rgba(124,58,237,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .dlg-icon svg{width:28px;height:28px;color:var(--app-accent)}
+    .dlg-box h3{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+    .dlg-box p{font-size:14px;color:var(--app-text-muted);line-height:1.6;margin-bottom:0}
+    .dlg-detail{background:rgba(255,255,255,.04);border:1px solid var(--app-border);border-radius:10px;padding:14px 18px;margin:16px 0 24px;display:flex;align-items:center;justify-content:space-between}
+    .dlg-detail .dl{text-align:center}
+    .dlg-detail .dl-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--app-text-muted);margin-bottom:4px}
+    .dlg-detail .dl-name{font-size:14px;font-weight:700;color:#fff}
+    .dlg-detail .dl-price{font-size:12px;color:var(--app-text-muted)}
+    .dlg-arrow{color:var(--app-accent);font-size:20px}
+    .dlg-actions{display:flex;gap:10px}
+    .dlg-actions .app-btn{flex:1}
+    .btn-dlg-cancel{background:transparent;color:var(--app-text-muted);border:1px solid rgba(255,255,255,.08)}
+    .btn-dlg-cancel:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+    @media(max-width:900px){
+      .plans-status,.plan-cards{grid-template-columns:1fr}
+      .plan-card:hover{transform:none}
+      .dlg-detail{flex-direction:column;gap:10px}
+      .dlg-arrow{transform:rotate(90deg)}
     }
   </style>
 </head>
 <body>
+  <div class="app-loading" id="app-loading"><div class="spinner"></div></div>
 
-  <!-- Loading state -->
-  <div class="app-loading" id="app-loading">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- App shell (hidden until auth) -->
   <div class="app-shell" id="app-shell" style="display:none;">
-
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none">
-            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
-            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
-            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
-            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
-          </svg>
-        </div>
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="10" width="2" height="5" rx="1" fill="currentColor"/><rect x="7.5" y="6" width="2" height="13" rx="1" fill="currentColor"/><rect x="12" y="2" width="2" height="20" rx="1" fill="white"/><rect x="16.5" y="7" width="2" height="11" rx="1" fill="currentColor"/></svg></div>
         <span class="logo-text">PALCOFY</span>
       </div>
-
       <nav class="sidebar-nav">
         <div class="sidebar-section">Principal</div>
         <a href="dashboard-venue.html" class="sidebar-link">
@@ -363,13 +78,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
           Buscar artistas
         </a>
-        <a href="#" class="sidebar-link">
+        <a href="calendar.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
           Calendario
         </a>
-
         <div class="sidebar-section">Facturacion</div>
-        <a href="#" class="sidebar-link">
+        <a href="invoices.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           Facturas
         </a>
@@ -377,14 +91,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Planes
         </a>
-
         <div class="sidebar-section">Cuenta</div>
-        <a href="#" class="sidebar-link">
+        <a href="settings.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
           Configuracion
         </a>
       </nav>
-
       <div class="sidebar-footer">
         <div class="sidebar-user" id="sidebar-user">
           <div class="sidebar-avatar" id="user-avatar">V</div>
@@ -393,15 +105,11 @@
             <div class="sidebar-user-role">Venue &middot; <span id="user-plan">Sin plan</span></div>
           </div>
         </div>
-        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
-          Cerrar sesion
-        </button>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">Cerrar sesion</button>
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="app-main">
-
       <div class="app-topbar">
         <div>
           <h1>Planes de suscripcion</h1>
@@ -409,399 +117,194 @@
         </div>
       </div>
 
-      <!-- Current plan status -->
       <div class="plans-status" id="plans-status">
         <div class="stat-card">
           <span class="stat-label">Plan actual</span>
-          <span class="stat-value accent" id="status-plan-name">Piloto</span>
-          <span class="stat-change" id="status-plan-badge" style="color:var(--app-green);">Activo</span>
+          <span class="stat-value accent" id="stat-plan-name">Piloto</span>
+          <span class="stat-change" id="stat-plan-badge" style="color:var(--app-green);">Activo</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Eventos este mes</span>
-          <span class="stat-value" id="status-events">0 / 4</span>
-          <span class="stat-change" id="status-events-sub" style="color:var(--app-text-muted);">Disponibles</span>
+          <span class="stat-value" id="stat-events">0 / 4</span>
+          <span class="stat-change" id="stat-events-sub" style="color:var(--app-text-muted);">Disponibles</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Coste mensual</span>
-          <span class="stat-value gold" id="status-cost">199&euro;</span>
-          <span class="stat-change" id="status-cost-sub" style="color:var(--app-text-muted);">Suscripcion</span>
+          <span class="stat-value gold" id="stat-cost">199&euro;</span>
+          <span class="stat-change" id="stat-cost-sub" style="color:var(--app-text-muted);">Suscripcion</span>
         </div>
       </div>
 
-      <!-- Plan cards -->
       <div class="plan-cards" id="plan-cards">
-
-        <!-- Piloto de Asalto -->
-        <div class="plan-card" id="card-piloto" data-plan="piloto">
+        <div class="plan-card" id="card-piloto">
           <div class="plan-card-header">
-            <div class="plan-badge-wrapper" id="badge-piloto"></div>
+            <div class="plan-badge-slot" id="badge-piloto"></div>
             <div class="plan-name">Piloto de Asalto</div>
             <div class="plan-price">199&euro; <span>/mes</span></div>
           </div>
-          <div class="plan-card-body">
-            <ul class="plan-features">
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                4 eventos al mes
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                0% comision sobre artistas
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Sustitucion de artista en menos de 3h
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Soporte por chat
-              </li>
-            </ul>
-          </div>
-          <div class="plan-card-actions">
-            <button class="app-btn btn-plan-active" id="btn-piloto" disabled>
-              Plan actual
-            </button>
+          <div class="plan-card-body"><ul class="plan-features" id="features-piloto"></ul></div>
+          <div class="plan-card-footer">
+            <button class="app-btn btn-active" id="btn-piloto" disabled>Plan actual</button>
           </div>
         </div>
-
-        <!-- Esencial Venue -->
-        <div class="plan-card" id="card-esencial" data-plan="esencial">
+        <div class="plan-card" id="card-esencial">
           <div class="plan-card-header">
-            <div class="plan-badge-wrapper" id="badge-esencial"></div>
+            <div class="plan-badge-slot" id="badge-esencial"></div>
             <div class="plan-name">Esencial Venue</div>
             <div class="plan-price">350&euro; <span>/mes</span></div>
           </div>
-          <div class="plan-card-body">
-            <ul class="plan-features">
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                4 eventos al mes
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                10% comision sobre artistas
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Factura unica mensual consolidada
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Cancelacion con 80% de reembolso
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Soporte prioritario
-              </li>
-            </ul>
-          </div>
-          <div class="plan-card-actions">
-            <button class="app-btn btn-plan-change" id="btn-esencial" data-target="esencial">
-              Cambiar a este plan
-            </button>
+          <div class="plan-card-body"><ul class="plan-features" id="features-esencial"></ul></div>
+          <div class="plan-card-footer">
+            <button class="app-btn btn-change" id="btn-esencial" data-target="esencial">Cambiar a este plan</button>
           </div>
         </div>
-
-        <!-- Premium Hospitality -->
-        <div class="plan-card plan-card-popular" id="card-premium" data-plan="premium">
+        <div class="plan-card popular" id="card-premium">
           <div class="plan-card-header">
-            <div class="plan-badge-wrapper" id="badge-premium"></div>
+            <div class="plan-badge-slot" id="badge-premium"></div>
+            <span class="popular-badge">Mas popular</span>
             <div class="plan-name">Premium Hospitality</div>
             <div class="plan-price">850-1.200&euro; <span>/mes</span></div>
             <div class="plan-price-range">Segun volumen de eventos</div>
           </div>
-          <div class="plan-card-body">
-            <ul class="plan-features">
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                8 a 12 eventos al mes
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Curacion premium de artistas
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Account manager dedicado
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Ingenieria de sonido incluida
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Cancelacion flexible sin penalizacion
-              </li>
-              <li>
-                <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
-                Soporte 24/7 con linea directa
-              </li>
-            </ul>
-          </div>
-          <div class="plan-card-actions">
-            <button class="app-btn btn-plan-change" id="btn-premium" data-target="premium">
-              Cambiar a este plan
-            </button>
+          <div class="plan-card-body"><ul class="plan-features" id="features-premium"></ul></div>
+          <div class="plan-card-footer">
+            <button class="app-btn btn-change" id="btn-premium" data-target="premium">Cambiar a este plan</button>
           </div>
         </div>
-
       </div>
-
     </main>
   </div>
 
   <!-- Confirmation dialog -->
-  <div class="dialog-overlay" id="dialog-overlay">
-    <div class="dialog-box">
-      <div class="dialog-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
+  <div class="dlg-overlay" id="dlg-overlay">
+    <div class="dlg-box">
+      <div class="dlg-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </div>
-      <h3 id="dialog-title">Cambiar de plan</h3>
-      <p id="dialog-message">Vas a cambiar tu plan de suscripcion. El cambio se aplicara inmediatamente.</p>
-      <div class="dialog-plan-detail" id="dialog-plan-detail">
-        <div class="detail-from">
-          <div class="detail-label">Plan actual</div>
-          <div class="detail-name" id="dialog-from-name">Piloto</div>
-          <div class="detail-price" id="dialog-from-price">199&euro;/mes</div>
+      <h3>Cambiar de plan</h3>
+      <p>Vas a cambiar tu plan de suscripcion. El cambio se aplicara inmediatamente.</p>
+      <div class="dlg-detail" id="dlg-detail">
+        <div class="dl">
+          <div class="dl-label">Plan actual</div>
+          <div class="dl-name" id="dlg-from-name">Piloto</div>
+          <div class="dl-price" id="dlg-from-price">199&euro;/mes</div>
         </div>
-        <div class="dialog-arrow">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-        <div class="detail-to">
-          <div class="detail-label">Nuevo plan</div>
-          <div class="detail-name" id="dialog-to-name">Esencial</div>
-          <div class="detail-price" id="dialog-to-price">350&euro;/mes</div>
+        <div class="dlg-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="dl">
+          <div class="dl-label">Nuevo plan</div>
+          <div class="dl-name" id="dlg-to-name">Esencial</div>
+          <div class="dl-price" id="dlg-to-price">350&euro;/mes</div>
         </div>
       </div>
-      <div class="dialog-actions">
-        <button class="app-btn btn-dialog-cancel" id="dialog-cancel">Cancelar</button>
-        <button class="app-btn app-btn--primary" id="dialog-confirm">Confirmar cambio</button>
+      <div class="dlg-actions">
+        <button class="app-btn btn-dlg-cancel" id="dlg-cancel">Cancelar</button>
+        <button class="app-btn app-btn--primary" id="dlg-confirm">Confirmar cambio</button>
       </div>
     </div>
   </div>
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, updateUserProfile } from './data.js';
+    import { updateUserProfile } from './data.js';
 
-    /* =========================================================
-       PLAN DEFINITIONS
-       ========================================================= */
-    const PLANS = {
-      piloto: {
-        key: 'piloto',
-        name: 'Piloto de Asalto',
-        shortName: 'Piloto',
-        price: '199€',
-        priceNum: 199,
-        eventsLimit: 4
-      },
-      esencial: {
-        key: 'esencial',
-        name: 'Esencial Venue',
-        shortName: 'Esencial',
-        price: '350€',
-        priceNum: 350,
-        eventsLimit: 4
-      },
-      premium: {
-        key: 'premium',
-        name: 'Premium Hospitality',
-        shortName: 'Premium',
-        price: '850-1.200€',
-        priceNum: 850,
-        eventsLimit: 12
-      }
+    var CK = '<span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>';
+
+    var PLANS = {
+      piloto:  { key:'piloto',  name:'Piloto de Asalto',    short:'Piloto',   price:'199€',       priceNum:199, events:4,
+        features:['4 eventos al mes','0% comision sobre artistas','Sustitucion de artista en menos de 3h','Soporte por chat'] },
+      esencial:{ key:'esencial', name:'Esencial Venue',      short:'Esencial', price:'350€',       priceNum:350, events:4,
+        features:['4 eventos al mes','10% comision sobre artistas','Factura unica mensual consolidada','Cancelacion con 80% de reembolso','Soporte prioritario'] },
+      premium: { key:'premium',  name:'Premium Hospitality', short:'Premium',  price:'850-1.200€', priceNum:850, events:12,
+        features:['8 a 12 eventos al mes','Curacion premium de artistas','Account manager dedicado','Ingenieria de sonido incluida','Cancelacion flexible sin penalizacion','Soporte 24/7 con linea directa'] }
     };
 
-    const PLAN_BADGE_HTML = {
-      piloto: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>',
-      esencial: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>',
-      premium: '<span class="badge badge--purple"><span class="badge-dot"></span> Plan actual</span>'
-    };
+    var $loading = document.getElementById('app-loading');
+    var $shell   = document.getElementById('app-shell');
+    var $dlg     = document.getElementById('dlg-overlay');
+    var user = null, profile = null, pendingTarget = null;
 
-    /* =========================================================
-       DOM REFS
-       ========================================================= */
-    const loadingEl  = document.getElementById('app-loading');
-    const shellEl    = document.getElementById('app-shell');
-    const dialogEl   = document.getElementById('dialog-overlay');
-    const cancelBtn  = document.getElementById('dialog-cancel');
-    const confirmBtn = document.getElementById('dialog-confirm');
-
-    let currentUser = null;
-    let currentProfile = null;
-    let pendingTargetPlan = null;
-
-    /* =========================================================
-       AUTH GUARD
-       ========================================================= */
-    onAuthChange(async (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      let profile = await waitForProfile(user.uid);
-      if (!profile) {
-        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
-        localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
-      }
-      if (profile.role !== 'venue') {
-        window.location.href = 'dashboard-artist.html';
-        return;
-      }
-
-      currentUser = user;
-      currentProfile = profile;
-
-      const name = profile.name || profile.venueName || user.email.split('@')[0];
-      document.getElementById('user-name').textContent = name;
-      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-
-      const planKey = profile.plan || 'piloto';
-      const planDef = PLANS[planKey] || PLANS.piloto;
-
-      document.getElementById('user-plan').textContent = planDef.shortName + ' ' + planDef.price;
-
-      renderCurrentStatus(planKey, profile);
-      renderPlanCards(planKey);
-
-      loadingEl.style.display = 'none';
-      shellEl.style.display = '';
+    /* ---- Populate feature lists from data ---- */
+    Object.keys(PLANS).forEach(function(k) {
+      var ul = document.getElementById('features-' + k);
+      if (ul) ul.innerHTML = PLANS[k].features.map(function(f){ return '<li>' + CK + f + '</li>'; }).join('');
     });
 
-    /* =========================================================
-       RENDER CURRENT PLAN STATUS
-       ========================================================= */
-    function renderCurrentStatus(planKey, profile) {
-      const plan = PLANS[planKey] || PLANS.piloto;
-      document.getElementById('status-plan-name').textContent = plan.shortName;
-      document.getElementById('status-plan-badge').textContent = 'Activo';
+    /* ---- Auth guard ---- */
+    onAuthChange(async function(u) {
+      if (!u) { window.location.href = 'login.html'; return; }
+      var p = await waitForProfile(u.uid);
+      if (!p) {
+        p = { id:u.uid, name:u.displayName||u.email.split('@')[0], email:u.email, role:'venue', plan:'piloto', eventsUsed:0, eventsLimit:4 };
+        localStorage.setItem('palcofy.profile.'+u.uid, JSON.stringify(p));
+      }
+      if (p.role !== 'venue') { window.location.href = 'dashboard-artist.html'; return; }
+      user = u; profile = p;
+      populateSidebar(p); renderStats(p); renderCards(p.plan||'piloto');
+      $loading.style.display = 'none'; $shell.style.display = '';
+    });
 
-      const eventsUsed = profile.eventsUsed || 0;
-      const eventsLimit = plan.eventsLimit;
-      document.getElementById('status-events').textContent = eventsUsed + ' / ' + eventsLimit;
-      document.getElementById('status-events-sub').textContent = eventsLimit - eventsUsed > 0
-        ? (eventsLimit - eventsUsed) + ' disponibles'
-        : 'Limite alcanzado';
-
-      document.getElementById('status-cost').textContent = plan.price;
-      document.getElementById('status-cost-sub').textContent = 'Suscripcion mensual';
+    function populateSidebar(p) {
+      var n = p.name||p.venueName||user.email.split('@')[0];
+      document.getElementById('user-name').textContent = n;
+      document.getElementById('user-avatar').textContent = n.charAt(0).toUpperCase();
+      var d = PLANS[p.plan||'piloto'] || PLANS.piloto;
+      document.getElementById('user-plan').textContent = d.short+' '+d.price;
     }
 
-    /* =========================================================
-       RENDER PLAN CARDS
-       ========================================================= */
-    function renderPlanCards(activePlanKey) {
-      const allKeys = ['piloto', 'esencial', 'premium'];
+    function renderStats(p) {
+      var d = PLANS[p.plan||'piloto']||PLANS.piloto, used = p.eventsUsed||0, lim = d.events;
+      document.getElementById('stat-plan-name').textContent = d.short;
+      document.getElementById('stat-plan-badge').textContent = 'Activo';
+      document.getElementById('stat-events').textContent = used+' / '+lim;
+      document.getElementById('stat-events-sub').textContent = (lim-used>0)?(lim-used)+' disponibles':'Limite alcanzado';
+      document.getElementById('stat-cost').textContent = d.price;
+      document.getElementById('stat-cost-sub').textContent = 'Suscripcion mensual';
+    }
 
-      allKeys.forEach(function(key) {
-        const card = document.getElementById('card-' + key);
-        const badgeEl = document.getElementById('badge-' + key);
-        const btnEl = document.getElementById('btn-' + key);
-
-        if (key === activePlanKey) {
+    function renderCards(activeKey) {
+      ['piloto','esencial','premium'].forEach(function(k) {
+        var card = document.getElementById('card-'+k), badge = document.getElementById('badge-'+k), btn = document.getElementById('btn-'+k);
+        if (k===activeKey) {
           card.classList.add('is-active');
-          badgeEl.innerHTML = '<span class="badge badge--green"><span class="badge-dot"></span> Plan actual</span>';
-          btnEl.className = 'app-btn btn-plan-active';
-          btnEl.textContent = 'Plan actual';
-          btnEl.disabled = true;
-          btnEl.removeAttribute('data-target');
+          badge.innerHTML = '<span class="badge badge--green"><span class="badge-dot"></span> Plan actual</span>';
+          btn.className='app-btn btn-active'; btn.textContent='Plan actual'; btn.disabled=true; btn.removeAttribute('data-target');
         } else {
-          card.classList.remove('is-active');
-          badgeEl.innerHTML = '';
-          btnEl.className = 'app-btn btn-plan-change';
-          btnEl.textContent = 'Cambiar a este plan';
-          btnEl.disabled = false;
-          btnEl.setAttribute('data-target', key);
+          card.classList.remove('is-active'); badge.innerHTML='';
+          btn.className='app-btn btn-change'; btn.textContent='Cambiar a este plan'; btn.disabled=false; btn.setAttribute('data-target',k);
         }
       });
     }
 
-    /* =========================================================
-       CHANGE PLAN BUTTON HANDLERS
-       ========================================================= */
-    document.querySelectorAll('.btn-plan-change').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        const targetKey = btn.getAttribute('data-target');
-        if (!targetKey || !PLANS[targetKey]) return;
-        openDialog(targetKey);
-      });
-    });
+    document.querySelectorAll('.btn-change').forEach(function(b){ b.addEventListener('click',function(){ var t=b.getAttribute('data-target'); if(t&&PLANS[t]) openDlg(t); }); });
 
-    /* =========================================================
-       DIALOG
-       ========================================================= */
-    function openDialog(targetKey) {
-      if (!currentProfile) return;
-
-      const currentKey = currentProfile.plan || 'piloto';
-      const fromPlan = PLANS[currentKey] || PLANS.piloto;
-      const toPlan = PLANS[targetKey];
-
-      pendingTargetPlan = targetKey;
-
-      document.getElementById('dialog-from-name').textContent = fromPlan.shortName;
-      document.getElementById('dialog-from-price').textContent = fromPlan.price + '/mes';
-      document.getElementById('dialog-to-name').textContent = toPlan.shortName;
-      document.getElementById('dialog-to-price').textContent = toPlan.price + '/mes';
-
-      dialogEl.classList.add('is-open');
+    function openDlg(targetKey) {
+      if(!profile) return;
+      var f = PLANS[profile.plan||'piloto']||PLANS.piloto, t = PLANS[targetKey];
+      pendingTarget = targetKey;
+      document.getElementById('dlg-from-name').textContent = f.short;
+      document.getElementById('dlg-from-price').textContent = f.price+'/mes';
+      document.getElementById('dlg-to-name').textContent = t.short;
+      document.getElementById('dlg-to-price').textContent = t.price+'/mes';
+      $dlg.classList.add('open');
     }
+    function closeDlg() { $dlg.classList.remove('open'); pendingTarget=null; }
 
-    function closeDialog() {
-      dialogEl.classList.remove('is-open');
-      pendingTargetPlan = null;
-    }
+    document.getElementById('dlg-cancel').addEventListener('click', closeDlg);
+    $dlg.addEventListener('click', function(e){ if(e.target===$dlg) closeDlg(); });
 
-    cancelBtn.addEventListener('click', closeDialog);
-
-    dialogEl.addEventListener('click', function(e) {
-      if (e.target === dialogEl) closeDialog();
-    });
-
-    confirmBtn.addEventListener('click', async function() {
-      if (!pendingTargetPlan || !currentUser) return;
-
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Cambiando...';
-
+    document.getElementById('dlg-confirm').addEventListener('click', async function() {
+      if(!pendingTarget||!user) return;
+      var b=this; b.disabled=true; b.textContent='Cambiando...';
       try {
-        const newPlan = PLANS[pendingTargetPlan];
-        await updateUserProfile(currentUser.uid, {
-          plan: pendingTargetPlan,
-          eventsLimit: newPlan.eventsLimit
-        });
-
-        currentProfile.plan = pendingTargetPlan;
-        currentProfile.eventsLimit = newPlan.eventsLimit;
-
-        renderCurrentStatus(pendingTargetPlan, currentProfile);
-        renderPlanCards(pendingTargetPlan);
-
-        document.getElementById('user-plan').textContent = newPlan.shortName + ' ' + newPlan.price;
-
-        closeDialog();
-      } catch (err) {
-        console.error('Error cambiando plan:', err);
-      } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Confirmar cambio';
-      }
+        var d=PLANS[pendingTarget];
+        await updateUserProfile(user.uid,{plan:pendingTarget,eventsLimit:d.events});
+        profile.plan=pendingTarget; profile.eventsLimit=d.events;
+        renderStats(profile); renderCards(pendingTarget); populateSidebar(profile); closeDlg();
+      } catch(e){ console.error('Error cambiando plan:',e); }
+      finally { b.disabled=false; b.textContent='Confirmar cambio'; }
     });
 
-    /* =========================================================
-       LOGOUT
-       ========================================================= */
-    document.getElementById('logout-btn').addEventListener('click', async function() {
-      await logout();
-      window.location.href = 'login.html';
-    });
+    document.getElementById('logout-btn').addEventListener('click', async function(){ await logout(); window.location.href='login.html'; });
   </script>
-
 </body>
 </html>
