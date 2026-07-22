@@ -532,3 +532,127 @@ export async function listArtistInvoices(artistId) {
   seedArtistInvoices(artistId);
   return demoArtistInvoices().filter(i => i.artistId === artistId);
 }
+
+/* =========================================================
+   ADMIN USER MANAGEMENT
+   ========================================================= */
+
+export async function listAllUsers() {
+  let usersList = [];
+
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const snap = await fbFirestore.getDocs(fbFirestore.collection(db, 'users'));
+      snap.forEach(docSnap => {
+        usersList.push({ id: docSnap.id, ...docSnap.data() });
+      });
+    } catch (e) {
+      console.warn('PALCOFY: Error al obtener usuarios de Firestore:', e);
+    }
+  }
+
+  const localUsersRaw = (() => {
+    try { return JSON.parse(localStorage.getItem('palcofy.demo.users')) || {}; } catch { return {}; }
+  })();
+
+  Object.keys(localUsersRaw).forEach(uid => {
+    if (!usersList.some(u => u.id === uid || u.email === localUsersRaw[uid].email)) {
+      usersList.push({ id: uid, ...localUsersRaw[uid] });
+    }
+  });
+
+  const seedV = demoVenues() || [];
+  seedV.forEach(v => {
+    if (!usersList.some(u => u.id === v.id || u.email === (v.email || `${v.id}@hotel.com`))) {
+      usersList.push({
+        id: v.id,
+        name: v.venueName || v.name,
+        venueName: v.venueName || v.name,
+        email: v.email || `${v.id}@hotel.com`,
+        role: 'venue',
+        city: v.city || 'Madrid',
+        address: v.address || 'Ubicación verificada',
+        capacity: v.capacity || 150,
+        type: v.type || 'hotel',
+        status: v.status || 'pending',
+        createdAt: new Date().toISOString()
+      });
+    }
+  });
+
+  const seedA = demoArtists() || [];
+  seedA.forEach(a => {
+    if (!usersList.some(u => u.id === a.id || u.email === (a.email || `${a.id}@cantante.com`))) {
+      usersList.push({
+        id: a.id,
+        name: a.name,
+        email: a.email || `${a.id}@cantante.com`,
+        role: 'artist',
+        genre: a.genre || 'pop',
+        cache: a.cache || 500,
+        radius: a.radius || 50,
+        photoUrl: a.photoUrl || '',
+        videoUrl: a.videoUrl || '',
+        iban: a.iban || 'ES91 2100 0418 4502 0005 1332',
+        bankHolder: a.bankHolder || a.name,
+        bankCert: a.bankCert || 'Certificado_BBVA.pdf',
+        bankVerified: true,
+        status: a.status || 'pending',
+        createdAt: new Date().toISOString()
+      });
+    }
+  });
+
+  return usersList;
+}
+
+export async function updateUserStatus({ userId, status, reason = '' }) {
+  if (!userId || !status) return false;
+
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      await fbFirestore.updateDoc(fbFirestore.doc(db, 'users', userId), {
+        status,
+        statusUpdatedAt: new Date().toISOString(),
+        statusReason: reason
+      });
+    } catch (e) {
+      console.warn('PALCOFY: Error al actualizar estado en Firestore:', e);
+    }
+  }
+
+  const cacheKey = `palcofy.profile.${userId}`;
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey));
+    if (cached) {
+      cached.status = status;
+      localStorage.setItem(cacheKey, JSON.stringify(cached));
+    }
+  } catch (e) {}
+
+  try {
+    const users = JSON.parse(localStorage.getItem('palcofy.demo.users')) || {};
+    if (users[userId]) {
+      users[userId].status = status;
+      localStorage.setItem('palcofy.demo.users', JSON.stringify(users));
+    }
+  } catch (e) {}
+
+  try {
+    const venues = demoVenues() || [];
+    const idxV = venues.findIndex(v => v.id === userId);
+    if (idxV !== -1) {
+      venues[idxV].status = status;
+      demoSaveVenues(venues);
+    }
+
+    const artists = demoArtists() || [];
+    const idxA = artists.findIndex(a => a.id === userId);
+    if (idxA !== -1) {
+      artists[idxA].status = status;
+      demoSaveArtists(artists);
+    }
+  } catch (e) {}
+
+  return true;
+}

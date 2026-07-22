@@ -328,14 +328,16 @@
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, listPerformances } from './data.js';
+    import { getUserProfile, listPerformances, listEventCalls, applyToEventCall } from './data.js';
 
     const loadingEl = document.getElementById('app-loading');
     const shellEl   = document.getElementById('app-shell');
 
     /* ---- State ---- */
     let currentUserId = null;
+    let currentUserProfile = null;
     let allPerformances = [];
+    let hotelCalls = [];
     let currentYear, currentMonth; // 0-indexed month
     let selectedDate = null; // 'YYYY-MM-DD'
 
@@ -370,9 +372,13 @@
       return now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
     }
 
-    /* ---- Performance lookups ---- */
+    /* ---- Lookups ---- */
     function performancesForDate(key) {
       return allPerformances.filter(p => p.date === key && p.status !== 'cancelled');
+    }
+
+    function openHotelCallsForDate(key) {
+      return hotelCalls.filter(c => c.date === key && c.status === 'open');
     }
 
     function statusBadge(status) {
@@ -399,7 +405,6 @@
       const daysInMonth = getDaysInMonth(currentYear, currentMonth);
       const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
 
-      // Previous month padding
       const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
       const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
@@ -408,12 +413,10 @@
         grid.appendChild(createDayCell(prevYear, prevMonth, daysInPrevMonth - firstDay + 1 + i, true));
       }
 
-      // Current month days
       for (let d = 1; d <= daysInMonth; d++) {
         grid.appendChild(createDayCell(currentYear, currentMonth, d, false));
       }
 
-      // Next month padding
       const totalCells = firstDay + daysInMonth;
       const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
@@ -426,11 +429,12 @@
       updateStats();
     }
 
-    function createDayCell(y, m, d, isOtherMonth) {
-      const key = dateKey(y, m, d);
-      const today = isToday(y, m, d);
+    function createDayCell(year, month, day, isOtherMonth) {
+      const key = dateKey(year, month, day);
+      const today = isToday(year, month, day);
       const perfs = isOtherMonth ? [] : performancesForDate(key);
-      const hasEvents = perfs.length > 0;
+      const calls = isOtherMonth ? [] : openHotelCallsForDate(key);
+      const hasEvents = perfs.length > 0 || calls.length > 0;
 
       const cell = document.createElement('div');
       cell.className = 'calendar-day';
@@ -441,17 +445,27 @@
 
       const num = document.createElement('span');
       num.className = 'day-number';
-      num.textContent = d;
+      num.textContent = day;
       cell.appendChild(num);
 
       if (hasEvents) {
         const dots = document.createElement('div');
         dots.className = 'event-dots';
-        perfs.slice(0, 3).forEach(p => {
+
+        perfs.slice(0, 2).forEach(p => {
           const dot = document.createElement('div');
           dot.className = `event-dot ${p.status}`;
           dots.appendChild(dot);
         });
+
+        calls.slice(0, 2).forEach(() => {
+          const dot = document.createElement('div');
+          dot.className = 'event-dot';
+          dot.style.background = 'var(--app-accent)';
+          dot.title = 'Oferta de Hotel disponible';
+          dots.appendChild(dot);
+        });
+
         cell.appendChild(dots);
       }
 
@@ -474,56 +488,126 @@
 
       if (!selectedDate) {
         titleEl.textContent = 'Selecciona un día';
-        subtitleEl.textContent = 'Haz clic en un día del calendario para ver tus actuaciones';
+        subtitleEl.textContent = 'Haz clic en un día con actuaciones u ofertas de hoteles.';
         bodyEl.innerHTML = `
           <div class="detail-empty">
             <div class="detail-empty-icon">📅</div>
             <h4>Sin selección</h4>
-            <p>Haz clic en un día con actuaciones para ver los detalles.</p>
+            <p>Haz clic en un día del calendario para ver tus actuaciones y convocatorias de hoteles.</p>
           </div>`;
         return;
       }
 
       const perfs = performancesForDate(selectedDate);
+      const calls = openHotelCallsForDate(selectedDate);
       const longDate = formatLongDate(selectedDate);
 
-      titleEl.textContent = perfs.length > 0
-        ? `${perfs.length} actuación${perfs.length > 1 ? 'es' : ''}`
-        : 'Sin actuaciones';
-
+      titleEl.textContent = `${perfs.length + calls.length} actividad(es)`;
       subtitleEl.textContent = longDate;
 
-      if (perfs.length === 0) {
+      if (perfs.length === 0 && calls.length === 0) {
         bodyEl.innerHTML = `
           <div class="detail-empty">
             <div class="detail-empty-icon">🎵</div>
-            <h4>Sin actuaciones este día</h4>
-            <p>No tienes actuaciones programadas para esta fecha.</p>
+            <h4>Sin eventos este día</h4>
+            <p>No tienes actuaciones programadas ni ofertas de hoteles para esta fecha.</p>
           </div>`;
         return;
       }
 
-      bodyEl.innerHTML = perfs.map(p => `
-        <div class="detail-event">
-          <div class="detail-event-icon ${p.status}">${statusIcon(p.status)}</div>
-          <div class="detail-event-info">
-            <div class="detail-event-name">${p.venueName || 'Venue'}</div>
-            <div class="detail-event-meta">
-              <span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ${p.time || '—'}
-              </span>
-              ${statusBadge(p.status)}
+      let html = '';
+
+      /* Ofertas de Hoteles para esta fecha */
+      if (calls.length > 0) {
+        html += `
+          <div style="font-size:11px;font-weight:700;color:var(--app-accent);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">
+            📢 Convocatorias Abiertas de Hoteles
+          </div>`;
+
+        html += calls.map(c => {
+          const candidates = c.candidates || [];
+          const hasApplied = candidates.some(cand => cand.artistId === currentUserId);
+
+          return `
+            <div style="background:var(--app-surface-2);border:1px solid var(--app-border);border-radius:12px;padding:12px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-weight:700;font-size:13px;color:white;">${c.venueName || 'Hotel Partner'}</div>
+                <div style="font-weight:800;font-size:14px;color:var(--app-green);">${c.budget} €</div>
+              </div>
+              <div style="font-size:12px;color:white;margin-top:2px;">${c.title}</div>
+              <div style="font-size:11px;color:var(--app-text-muted);margin-top:2px;">⏰ ${c.time} • ${c.genre}</div>
+
+              <div style="margin-top:10px;">
+                ${hasApplied ? `
+                  <span class="badge badge--green" style="font-size:10px;padding:4px 8px;">Postulado ✓</span>
+                ` : `
+                  <button class="app-btn app-btn--primary apply-cal-btn" data-evt="${c.id}" style="font-size:11px;padding:6px 12px;width:100%;">
+                    Postularme a esta convocatoria
+                  </button>
+                `}
+              </div>
             </div>
-            ${p.venueAddr ? `
-              <div class="detail-event-address">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                ${p.venueAddr}
-              </div>` : ''}
-            ${p.genre ? `<div style="font-size:11px;color:var(--app-text-muted);margin-top:4px;">Género: ${p.genre}</div>` : ''}
-          </div>
-          <div class="detail-event-cache">${p.cache || 0} €</div>
-        </div>`).join('');
+          `;
+        }).join('');
+      }
+
+      /* Actuaciones del cantante */
+      if (perfs.length > 0) {
+        html += `
+          <div style="font-size:11px;font-weight:700;color:var(--app-text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:12px;margin-bottom:8px;">
+            🎼 Mis Actuaciones Programadas
+          </div>`;
+
+        html += perfs.map(p => `
+          <div class="detail-event">
+            <div class="detail-event-icon ${p.status}">${statusIcon(p.status)}</div>
+            <div class="detail-event-info">
+              <div class="detail-event-name">${p.venueName || 'Venue'}</div>
+              <div class="detail-event-meta">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${p.time || '—'}
+                </span>
+                ${statusBadge(p.status)}
+              </div>
+            </div>
+            <div class="detail-event-cache">${p.cache || 0} €</div>
+          </div>`).join('');
+      }
+
+      bodyEl.innerHTML = html;
+
+      document.querySelectorAll('.apply-cal-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const eventId = btn.dataset.evt;
+          btn.disabled = true;
+          btn.textContent = 'Enviando...';
+
+          try {
+            const name  = currentUserProfile?.name || 'Artista';
+            const genre = currentUserProfile?.genre || 'pop';
+            const cache = currentUserProfile?.cache || 500;
+
+            await applyToEventCall({
+              eventId,
+              artistId: currentUserId,
+              artistName: name,
+              artistGenre: genre,
+              artistCache: cache,
+              artistRating: currentUserProfile?.rating || 4.8
+            });
+
+            alert('¡Postulación enviada! El hotel recibirá tu propuesta inmediatamente.');
+            hotelCalls = await listEventCalls();
+            renderCalendar();
+            renderDetailPanel();
+          } catch (e) {
+            alert('Error al postularte.');
+            btn.disabled = false;
+            btn.textContent = 'Postularme a esta convocatoria';
+          }
+        });
+      });
     }
 
     /* ---- Update monthly stats ---- */
@@ -594,6 +678,7 @@
       }
 
       currentUserId = user.uid;
+      currentUserProfile = profile;
 
       const name = profile.name || user.email.split('@')[0];
       document.getElementById('user-name').textContent = name;
@@ -606,11 +691,17 @@
       const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
       document.getElementById('greeting').textContent = `${greeting}, ${name}`;
 
-      /* Load performances */
+      /* Load performances & hotel event calls */
       try {
         allPerformances = await listPerformances(user.uid);
       } catch (e) {
         allPerformances = [];
+      }
+
+      try {
+        hotelCalls = await listEventCalls();
+      } catch (e) {
+        hotelCalls = [];
       }
 
       /* Initialize calendar to current month */

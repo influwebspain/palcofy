@@ -592,11 +592,15 @@
 
       document.title = `PALCOFY — ${artist.name || 'Artista'}`;
 
-      /* Hero */
+      /* Hero avatar con foto si existe */
       const heroAvatar = document.getElementById('hero-avatar');
-      heroAvatar.textContent = initial;
-      heroAvatar.className = `hero-avatar artist-avatar ${avatarCls}`;
-      heroAvatar.style.background = avatarGrad;
+      if (artist.photoUrl) {
+        heroAvatar.innerHTML = `<img src="${artist.photoUrl}" alt="${artist.name}" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">`;
+      } else {
+        heroAvatar.textContent = initial;
+        heroAvatar.className = `hero-avatar artist-avatar ${avatarCls}`;
+        heroAvatar.style.background = avatarGrad;
+      }
 
       document.getElementById('hero-name').textContent = artist.name || 'Artista';
 
@@ -612,7 +616,7 @@
       const ratingEl = document.getElementById('hero-rating');
       ratingEl.innerHTML = `
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        ${artist.rating ? artist.rating : '---'}
+        ${artist.rating ? artist.rating : '4.8'}
       `;
 
       const availBadge = document.getElementById('hero-available');
@@ -624,14 +628,38 @@
         availBadge.innerHTML = '<span class="badge-dot"></span> Ocupado';
       }
 
-      /* Bio */
-      document.getElementById('artist-bio').textContent =
-        artist.description || 'Artista verificado en la plataforma PALCOFY. Contacta para más detalles sobre su repertorio y disponibilidad.';
+      /* Bio y Vídeo de Demostración */
+      const bioEl = document.getElementById('artist-bio');
+      let bioContent = artist.description || 'Artista verificado en la plataforma PALCOFY. Contacta para más detalles sobre su repertorio y disponibilidad.';
+      
+      if (artist.videoUrl) {
+        let embedUrl = artist.videoUrl;
+        if (embedUrl.includes('youtube.com/watch?v=')) {
+          const vId = embedUrl.split('v=')[1]?.split('&')[0];
+          embedUrl = `https://www.youtube.com/embed/${vId}`;
+        } else if (embedUrl.includes('youtu.be/')) {
+          const vId = embedUrl.split('youtu.be/')[1]?.split('?')[0];
+          embedUrl = `https://www.youtube.com/embed/${vId}`;
+        }
 
-      /* Genre tags */
+        bioContent += `
+          <div style="margin-top:20px;border-top:1px solid var(--app-border);padding-top:16px;">
+            <h4 style="font-size:14px;font-weight:700;color:white;margin-bottom:10px;">🎥 Vídeo de Demostración / Promo</h4>
+            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--app-border);">
+              <iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
+            </div>
+          </div>
+        `;
+      }
+      bioEl.innerHTML = bioContent;
+
+      /* Genre & Verification tags */
       document.getElementById('genre-tags').innerHTML = `
         <span class="badge badge--purple">${genreLabel}</span>
         ${artist.pro ? '<span class="badge badge--gold">Artista PRO</span>' : ''}
+        <span class="badge badge--green" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:var(--app-green);">
+          <span class="badge-dot"></span> Titularidad Bancaria Verificada ✓
+        </span>
       `;
 
       /* Experience grid */

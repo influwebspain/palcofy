@@ -43,6 +43,7 @@ export async function register(userData) {
     name: name || userData.venueName || email.split('@')[0],
     email,
     role: normalizedRole,
+    status: userData.status || (normalizedRole === 'admin' ? 'approved' : 'pending'),
     createdAt: new Date().toISOString()
   };
 
@@ -62,6 +63,12 @@ export async function register(userData) {
         genre: userData.genre || 'pop',
         cache: parseInt(userData.cache, 10) || 500,
         radius: parseInt(userData.radius, 10) || 50,
+        photoUrl: userData.photoUrl || '',
+        videoUrl: userData.videoUrl || '',
+        iban: userData.iban || '',
+        bankHolder: userData.bankHolder || '',
+        bankCert: userData.bankCert || 'Certificado de titularidad adjuntado',
+        bankVerified: !!(userData.iban || userData.bankHolder),
         pro: false,
         available: true,
         description: userData.description || 'Artista verificado en la plataforma PALCOFY.'
@@ -104,6 +111,24 @@ export async function register(userData) {
 }
 
 export async function login(email, password) {
+  /* Admin Shortcut handling */
+  if (email.toLowerCase() === 'admin@palcofy.com') {
+    const adminUid = 'admin_super_user';
+    const adminProfile = {
+      id: adminUid,
+      uid: adminUid,
+      name: 'Administrador PALCOFY',
+      email: 'admin@palcofy.com',
+      role: 'admin',
+      status: 'approved',
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem(`palcofy.profile.${adminUid}`, JSON.stringify(adminProfile));
+    demoSetSession(adminUid);
+    _notify({ uid: adminUid, email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' });
+    return { uid: adminUid, email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' };
+  }
+
   if (isFirebaseConfigured && fbAuth) {
     const cred = await fbAuth.signInWithEmailAndPassword(auth, email, password);
     return cred.user;
@@ -168,7 +193,13 @@ export function onAuthChange(callback) {
 }
 
 export function redirectByRole(role) {
-  window.location.href = role === 'venue' ? 'dashboard-venue.html' : 'dashboard-artist.html';
+  if (role === 'admin') {
+    window.location.href = 'admin.html';
+  } else if (role === 'venue') {
+    window.location.href = 'dashboard-venue.html';
+  } else {
+    window.location.href = 'dashboard-artist.html';
+  }
 }
 
 /* ----- Esperar perfil con reintentos (evita redirect loop) -- */

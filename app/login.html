@@ -57,6 +57,15 @@
             <label for="login-password">Contraseña</label>
             <input type="password" id="login-password" placeholder="••••••••" required minlength="6" />
           </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px dashed var(--app-border);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;">
+            <div style="font-weight:700;color:var(--app-gold);margin-bottom:4px;">🛡️ Credenciales de Administración:</div>
+            <div style="color:var(--app-text-muted);">Email: <strong style="color:white;">admin@palcofy.com</strong></div>
+            <div style="color:var(--app-text-muted);">Contraseña: <strong style="color:white;">AdminPalcofy2026!</strong></div>
+            <button type="button" id="admin-fast-login" class="app-btn app-btn--ghost" style="margin-top:8px;padding:6px;font-size:11px;width:100%;color:var(--app-gold);border-color:rgba(217,119,6,0.3);">
+              Acceder como Administrador →
+            </button>
+          </div>
+
           <button type="submit" class="app-btn app-btn--primary" id="login-btn">
             Entrar
           </button>
@@ -160,6 +169,21 @@
         roleInput.value = opt.dataset.role;
       });
     });
+
+    /* ---- Admin Fast Login ---- */
+    const adminFastBtn = document.getElementById('admin-fast-login');
+    if (adminFastBtn) {
+      adminFastBtn.addEventListener('click', async () => {
+        document.getElementById('login-email').value = 'admin@palcofy.com';
+        document.getElementById('login-password').value = 'AdminPalcofy2026!';
+        try {
+          await login('admin@palcofy.com', 'AdminPalcofy2026!');
+          window.location.href = 'admin.html';
+        } catch (e) {
+          console.error('Admin fast login error:', e);
+        }
+      });
+    }
 
     /* ---- Login ---- */
     loginForm.addEventListener('submit', async (e) => {

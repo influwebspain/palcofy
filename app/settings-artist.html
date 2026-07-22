@@ -176,21 +176,29 @@
           <div style="padding:20px;">
             <div class="field-grid">
               <div class="app-field">
-                <label for="field-name">Nombre art&iacute;stico</label>
-                <input type="text" id="field-name" placeholder="Tu nombre o nombre art&iacute;stico" />
+                <label for="field-name">Nombre artístico</label>
+                <input type="text" id="field-name" placeholder="Tu nombre o nombre artístico" />
               </div>
               <div class="app-field">
                 <label for="field-email">Email</label>
                 <input type="email" id="field-email" placeholder="tu@email.com" readonly />
               </div>
+              <div class="app-field">
+                <label for="field-photo-url">URL Foto de perfil / Avatar</label>
+                <input type="text" id="field-photo-url" placeholder="https://ejemplo.com/foto.jpg" />
+              </div>
+              <div class="app-field">
+                <label for="field-video-url">URL Vídeo Promo (YouTube/Vimeo)</label>
+                <input type="text" id="field-video-url" placeholder="https://youtube.com/watch?v=..." />
+              </div>
               <div class="app-field span-full">
-                <label>G&eacute;nero musical</label>
+                <label>Género musical</label>
                 <div class="genre-pills" id="genre-pills">
                   <button type="button" class="genre-pill" data-genre="jazz">Jazz</button>
                   <button type="button" class="genre-pill" data-genre="pop">Pop</button>
                   <button type="button" class="genre-pill" data-genre="rock">Rock</button>
-                  <button type="button" class="genre-pill" data-genre="electronic">Electr&oacute;nica</button>
-                  <button type="button" class="genre-pill" data-genre="classical">Cl&aacute;sica</button>
+                  <button type="button" class="genre-pill" data-genre="electronic">Electrónica</button>
+                  <button type="button" class="genre-pill" data-genre="classical">Clásica</button>
                   <button type="button" class="genre-pill" data-genre="flamenco">Flamenco</button>
                   <button type="button" class="genre-pill" data-genre="reggae">Reggae</button>
                   <button type="button" class="genre-pill" data-genre="latin">Latina</button>
@@ -201,16 +209,16 @@
                 </div>
               </div>
               <div class="app-field">
-                <label for="field-radius">Radio de actuaci&oacute;n (km)</label>
+                <label for="field-radius">Radio de actuación (km)</label>
                 <input type="number" id="field-radius" placeholder="50" min="5" max="500" step="5" />
               </div>
               <div class="app-field">
-                <label for="field-cache">Cach&eacute; base (&euro;)</label>
+                <label for="field-cache">Caché base (€)</label>
                 <input type="number" id="field-cache" placeholder="500" min="50" max="10000" step="25" />
               </div>
               <div class="app-field span-full bio-field">
-                <label for="field-bio">Descripci&oacute;n / Biograf&iacute;a</label>
-                <textarea id="field-bio" rows="4" placeholder="Cu&eacute;ntanos sobre ti, tu estilo musical, trayectoria..."></textarea>
+                <label for="field-bio">Descripción / Biografía</label>
+                <textarea id="field-bio" rows="4" placeholder="Cuéntanos sobre ti, tu estilo musical, trayectoria..."></textarea>
               </div>
             </div>
           </div>
@@ -222,7 +230,7 @@
         <div class="settings-section-header">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           <h2>Disponibilidad</h2>
-          <span class="section-desc">Controla cu&aacute;ndo puedes actuar</span>
+          <span class="section-desc">Controla cuándo puedes actuar</span>
         </div>
         <div class="data-card">
           <div class="data-card-header"><h3>Estado de disponibilidad</h3></div>
@@ -241,15 +249,15 @@
           </div>
           <div class="data-card-header"><h3>Horarios preferidos</h3></div>
           <div style="padding:20px;">
-            <p style="font-size:13px;color:var(--app-text-muted);margin-bottom:14px;">Selecciona los d&iacute;as de la semana en los que prefieres actuar.</p>
+            <p style="font-size:13px;color:var(--app-text-muted);margin-bottom:14px;">Selecciona los días de la semana en los que prefieres actuar.</p>
             <div class="schedule-grid" id="schedule-grid">
-              <div class="schedule-day"><span class="schedule-day-label">Lun</span><button type="button" class="schedule-chip" data-day="mon">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">Mar</span><button type="button" class="schedule-chip" data-day="tue">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">Mi&eacute;</span><button type="button" class="schedule-chip" data-day="wed">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">Jue</span><button type="button" class="schedule-chip" data-day="thu">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">Vie</span><button type="button" class="schedule-chip" data-day="fri">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">S&aacute;b</span><button type="button" class="schedule-chip" data-day="sat">Todo el d&iacute;a</button></div>
-              <div class="schedule-day"><span class="schedule-day-label">Dom</span><button type="button" class="schedule-chip" data-day="sun">Todo el d&iacute;a</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Lun</span><button type="button" class="schedule-chip" data-day="mon">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Mar</span><button type="button" class="schedule-chip" data-day="tue">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Mié</span><button type="button" class="schedule-chip" data-day="wed">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Jue</span><button type="button" class="schedule-chip" data-day="thu">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Vie</span><button type="button" class="schedule-chip" data-day="fri">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Sáb</span><button type="button" class="schedule-chip" data-day="sat">Todo el día</button></div>
+              <div class="schedule-day"><span class="schedule-day-label">Dom</span><button type="button" class="schedule-chip" data-day="sun">Todo el día</button></div>
             </div>
           </div>
         </div>
@@ -259,25 +267,29 @@
       <div class="settings-section">
         <div class="settings-section-header">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
-          <h2>Datos bancarios</h2>
-          <span class="section-desc">Para recibir tus liquidaciones</span>
+          <h2>Datos bancarios y Certificado</h2>
+          <span class="section-desc">Para recibir tus liquidaciones y verificación</span>
         </div>
         <div class="data-card">
-          <div class="data-card-header"><h3>Informaci&oacute;n de cobro</h3></div>
+          <div class="data-card-header"><h3>Información de cobro y Verificación</h3></div>
           <div style="padding:20px;">
             <div class="bank-card-preview" id="bank-card-preview">
-              <div class="bank-card-label">Cuenta bancaria</div>
+              <div class="bank-card-label">Cuenta bancaria verificada</div>
               <div class="bank-card-iban" id="bank-iban-display">ES ---- ---- ---- ----</div>
               <div class="bank-card-holder" id="bank-holder-display">Titular no configurado</div>
             </div>
             <div class="field-grid">
               <div class="app-field span-full">
-                <label for="field-iban">IBAN</label>
+                <label for="field-iban">IBAN de Cobro</label>
                 <input type="text" id="field-iban" placeholder="ES91 2100 0418 4502 0005 1332" maxlength="34" style="font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;" />
               </div>
               <div class="app-field span-full">
-                <label for="field-bank-holder">Titular de la cuenta</label>
-                <input type="text" id="field-bank-holder" placeholder="Nombre completo como aparece en el banco" />
+                <label for="field-bank-holder">Titular de la cuenta bancaria</label>
+                <input type="text" id="field-bank-holder" placeholder="Nombre completo del titular" />
+              </div>
+              <div class="app-field span-full">
+                <label for="field-bank-cert">Certificado de Titularidad Bancaria (Nombre/Documento)</label>
+                <input type="text" id="field-bank-cert" placeholder="Ej: Certificado_Titularidad_BBVA.pdf" />
               </div>
             </div>
             <p style="font-size:11px;color:var(--app-text-muted);margin-top:12px;line-height:1.5;">
@@ -411,11 +423,14 @@
     const fields = {
       name:       document.getElementById('field-name'),
       email:      document.getElementById('field-email'),
+      photoUrl:   document.getElementById('field-photo-url'),
+      videoUrl:   document.getElementById('field-video-url'),
       radius:     document.getElementById('field-radius'),
       cache:      document.getElementById('field-cache'),
       bio:        document.getElementById('field-bio'),
       iban:       document.getElementById('field-iban'),
       bankHolder: document.getElementById('field-bank-holder'),
+      bankCert:   document.getElementById('field-bank-cert'),
     };
 
     const toggleIds = {
@@ -451,6 +466,8 @@
     function collectValues() {
       return {
         name:             fields.name.value.trim(),
+        photoUrl:         fields.photoUrl ? fields.photoUrl.value.trim() : '',
+        videoUrl:         fields.videoUrl ? fields.videoUrl.value.trim() : '',
         genre:            getSelectedGenre(),
         radius:           parseInt(fields.radius.value, 10) || 50,
         cache:            parseInt(fields.cache.value, 10) || 500,
@@ -459,6 +476,7 @@
         scheduleDays:     getSelectedDays(),
         iban:             fields.iban.value.trim(),
         bankHolder:       fields.bankHolder.value.trim(),
+        bankCert:         fields.bankCert ? fields.bankCert.value.trim() : '',
         bookingAlerts:    toggleIds.bookingAlerts.checked,
         settlementAlerts: toggleIds.settlementAlerts.checked,
         proPromos:        toggleIds.proPromos.checked,
@@ -496,11 +514,14 @@
     function populateFields(profile) {
       fields.name.value       = profile.name || '';
       fields.email.value      = profile.email || '';
+      if (fields.photoUrl) fields.photoUrl.value = profile.photoUrl || '';
+      if (fields.videoUrl) fields.videoUrl.value = profile.videoUrl || '';
       fields.radius.value     = profile.radius || 50;
       fields.cache.value      = profile.cache || 500;
       fields.bio.value        = profile.description || profile.bio || '';
       fields.iban.value       = profile.iban || '';
       fields.bankHolder.value = profile.bankHolder || '';
+      if (fields.bankCert) fields.bankCert.value = profile.bankCert || '';
 
       // Genre pills
       const genre = profile.genre || '';

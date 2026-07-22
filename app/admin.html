@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Control de Administración y Aprobación de Usuarios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) {
+      .admin-stats { grid-template-columns: 1fr 1fr; }
+    }
+    .stat-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--app-text-muted);
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      margin-top: 6px;
+    }
+    .stat-value.gold { color: var(--app-gold); }
+    .stat-value.green { color: var(--app-green); }
+    .stat-value.purple { color: var(--app-accent); }
+    .stat-value.red { color: #ef4444; }
+
+    .tab-bar {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--app-border);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--app-text-muted);
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+    .tab-btn.is-active {
+      color: white;
+      border-bottom-color: var(--app-accent);
+    }
+
+    .user-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+    .user-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .user-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .user-avatar-lg {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--app-accent), #a855f7);
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .user-info-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .user-info-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+    }
+    .user-info-email {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+    .detail-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .detail-row:last-child { margin-bottom: 0; }
+    .detail-label { color: var(--app-text-muted); }
+    .detail-val { font-weight: 600; color: white; }
+
+    .action-btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="10" width="2" height="5" rx="1" fill="currentColor"/>
+            <rect x="7.5" y="6" width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12" y="2" width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7" width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Administración</div>
+        <a href="admin.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Panel de Control
+        </a>
+
+        <div class="sidebar-section">Perfiles de Plataforma</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M3 7v14M21 7v14M6 21V11M18 21V11M9 21v-4h6v4"/></svg>
+          Ver Vista Hotel
+        </a>
+        <a href="dashboard-artist.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Ver Vista Cantante
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" style="background:linear-gradient(135deg, #ef4444, #f59e0b);">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Administrador</div>
+            <div class="sidebar-user-role" style="color:var(--app-gold);">Super Admin</div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Panel de Administración PALCOFY</h1>
+          <p class="topbar-sub">Revisa, aprueba o deniega las solicitudes de registro de cantantes y hoteles.</p>
+        </div>
+      </div>
+
+      <!-- Stats overview -->
+      <div class="admin-stats">
+        <div class="stat-card">
+          <span class="stat-label">Pendientes de Aprobar</span>
+          <div class="stat-value gold" id="stat-pending">0</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Hoteles / Venues Aprobados</span>
+          <div class="stat-value purple" id="stat-venues">0</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Cantantes Aprobados</span>
+          <div class="stat-value green" id="stat-artists">0</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Solicitudes Denegadas</span>
+          <div class="stat-value red" id="stat-rejected">0</div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn is-active" id="tab-pending-btn">Registros Pendientes de Validación</button>
+        <button class="tab-btn" id="tab-all-btn">Directorio General de Usuarios</button>
+      </div>
+
+      <!-- Tab 1: Registros pendientes -->
+      <div id="view-pending">
+        <div class="user-card-grid" id="pending-container">
+          <div class="empty-state">
+            <div class="spinner" style="margin:0 auto 16px;"></div>
+            <p>Cargando registros pendientes…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Directorio completo -->
+      <div id="view-all" style="display:none;">
+        <div class="data-card">
+          <div class="data-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>Directorio Completo de Usuarios</h3>
+            <div style="display:flex;gap:8px;">
+              <select id="role-filter" class="filter-select" style="padding:6px 12px;font-size:12px;">
+                <option value="all">Todos los roles</option>
+                <option value="venue">Hoteles / Recintos</option>
+                <option value="artist">Cantantes</option>
+              </select>
+              <select id="status-filter" class="filter-select" style="padding:6px 12px;font-size:12px;">
+                <option value="all">Todos los estados</option>
+                <option value="pending">Pendientes</option>
+                <option value="approved">Aprobados</option>
+                <option value="rejected">Denegados</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Email</th>
+                  <th>Detalle / Certificado</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="all-users-body">
+                <tr><td colspan="6"><div class="spinner" style="margin:20px auto;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout, waitForProfile } from './auth.js';
+    import { listAllUsers, updateUserStatus } from './data.js';
+
+    const loadingEl = document.getElementById('app-loading');
+    const shellEl   = document.getElementById('app-shell');
+
+    let allUsers = [];
+
+    /* Tab switching */
+    const tabPendingBtn = document.getElementById('tab-pending-btn');
+    const tabAllBtn     = document.getElementById('tab-all-btn');
+    const viewPending   = document.getElementById('view-pending');
+    const viewAll       = document.getElementById('view-all');
+
+    tabPendingBtn.addEventListener('click', () => {
+      tabPendingBtn.classList.add('is-active');
+      tabAllBtn.classList.remove('is-active');
+      viewPending.style.display = '';
+      viewAll.style.display = 'none';
+    });
+
+    tabAllBtn.addEventListener('click', () => {
+      tabAllBtn.classList.add('is-active');
+      tabPendingBtn.classList.remove('is-active');
+      viewPending.style.display = 'none';
+      viewAll.style.display = '';
+    });
+
+    async function loadData() {
+      allUsers = await listAllUsers();
+      updateStats();
+      renderPendingCards();
+      renderAllTable();
+    }
+
+    function updateStats() {
+      const pending  = allUsers.filter(u => u.status === 'pending' || !u.status).length;
+      const venues   = allUsers.filter(u => u.role === 'venue' && u.status === 'approved').length;
+      const artists  = allUsers.filter(u => u.role === 'artist' && u.status === 'approved').length;
+      const rejected = allUsers.filter(u => u.status === 'rejected').length;
+
+      document.getElementById('stat-pending').textContent  = pending;
+      document.getElementById('stat-venues').textContent   = venues;
+      document.getElementById('stat-artists').textContent  = artists;
+      document.getElementById('stat-rejected').textContent = rejected;
+    }
+
+    function renderPendingCards() {
+      const container = document.getElementById('pending-container');
+      const pendingUsers = allUsers.filter(u => u.status === 'pending' || !u.status);
+
+      if (pendingUsers.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-icon">🎉</div>
+            <h3>¡Todo al día!</h3>
+            <p>No hay solicitudes de registro pendientes de aprobación en este momento.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = pendingUsers.map(u => {
+        const isArtist = u.role === 'artist';
+        const roleLabel = isArtist ? 'Cantante / Artista' : 'Hotel / Recinto';
+        const initial   = (u.name || u.venueName || 'U').charAt(0).toUpperCase();
+
+        return `
+          <div class="user-card">
+            <div class="user-card-header">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="user-avatar-lg">
+                  ${u.photoUrl ? `<img src="${u.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : initial}
+                </div>
+                <div class="user-info-meta">
+                  <div class="user-info-name">${u.venueName || u.name}</div>
+                  <div class="user-info-email">${u.email}</div>
+                </div>
+              </div>
+              <span class="badge ${isArtist ? 'badge--purple' : 'badge--green'}">${roleLabel}</span>
+            </div>
+
+            <div class="detail-box">
+              ${isArtist ? `
+                <div class="detail-row"><span class="detail-label">Género:</span> <span class="detail-val">${u.genre || 'pop'}</span></div>
+                <div class="detail-row"><span class="detail-label">Caché:</span> <span class="detail-val">${u.cache || 500} €</span></div>
+                <div class="detail-row"><span class="detail-label">IBAN:</span> <span class="detail-val" style="font-family:monospace;">${u.iban || 'No facilitado'}</span></div>
+                <div class="detail-row"><span class="detail-label">Titular:</span> <span class="detail-val">${u.bankHolder || u.name}</span></div>
+                <div class="detail-row"><span class="detail-label">Certificado:</span> <span class="detail-val" style="color:var(--app-green);">${u.bankCert || 'Certificado adjunto ✓'}</span></div>
+                ${u.videoUrl ? `<div class="detail-row"><span class="detail-label">Vídeo Promo:</span> <a href="${u.videoUrl}" target="_blank" style="color:var(--app-accent);">Ver vídeo demo 🎬</a></div>` : ''}
+              ` : `
+                <div class="detail-row"><span class="detail-label">Empresa / Hotel:</span> <span class="detail-val">${u.venueName || u.name}</span></div>
+                <div class="detail-row"><span class="detail-label">Ciudad:</span> <span class="detail-val">${u.city || 'Madrid'}</span></div>
+                <div class="detail-row"><span class="detail-label">Dirección:</span> <span class="detail-val">${u.address || 'Gran Vía 42'}</span></div>
+                <div class="detail-row"><span class="detail-label">Tipo Recinto:</span> <span class="detail-val">${u.type || 'hotel'}</span></div>
+                <div class="detail-row"><span class="detail-label">Capacidad:</span> <span class="detail-val">${u.capacity || 150} pax</span></div>
+              `}
+            </div>
+
+            <div class="action-btn-group">
+              <button class="app-btn app-btn--primary approve-btn" data-id="${u.id}" style="flex:1;">
+                ✓ Aprobar Registro
+              </button>
+              <button class="app-btn app-btn--ghost reject-btn" data-id="${u.id}" style="flex:1;color:#ef4444;border-color:rgba(239,68,68,0.3);">
+                ✕ Denegar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      bindActionButtons();
+    }
+
+    function renderAllTable() {
+      const tbody = document.getElementById('all-users-body');
+      const rFilter = document.getElementById('role-filter').value;
+      const sFilter = document.getElementById('status-filter').value;
+
+      let filtered = allUsers.filter(u => {
+        if (rFilter !== 'all' && u.role !== rFilter) return false;
+        const currentSt = u.status || 'pending';
+        if (sFilter !== 'all' && currentSt !== sFilter) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--app-text-muted);">Sin usuarios coincidentes.</td></tr>`;
+        return;
+      }
+
+      const statusBadgeMap = {
+        approved: '<span class="badge badge--green"><span class="badge-dot"></span> Aprobado</span>',
+        pending:  '<span class="badge badge--gold"><span class="badge-dot"></span> Pendiente</span>',
+        rejected: '<span class="badge badge--gray" style="color:#ef4444;"><span class="badge-dot" style="background:#ef4444;"></span> Denegado</span>'
+      };
+
+      tbody.innerHTML = filtered.map(u => `
+        <tr>
+          <td style="font-weight:700;color:white;">${u.venueName || u.name}</td>
+          <td><span class="badge ${u.role === 'artist' ? 'badge--purple' : 'badge--green'}">${u.role === 'artist' ? 'Cantante' : 'Hotel'}</span></td>
+          <td style="color:var(--app-text-muted);">${u.email}</td>
+          <td style="font-size:12px;">${u.role === 'artist' ? (u.bankCert || 'Certificado Ok') : (u.city || 'Madrid')}</td>
+          <td>${statusBadgeMap[u.status || 'pending']}</td>
+          <td>
+            ${u.status !== 'approved' ? `
+              <button class="app-btn app-btn--primary approve-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;">
+                Aprobar
+              </button>
+            ` : `
+              <button class="app-btn app-btn--ghost reject-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;color:#ef4444;">
+                Denegar
+              </button>
+            `}
+          </td>
+        </tr>
+      `).join('');
+
+      bindActionButtons();
+    }
+
+    document.getElementById('role-filter').addEventListener('change', renderAllTable);
+    document.getElementById('status-filter').addEventListener('change', renderAllTable);
+
+    function bindActionButtons() {
+      document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.id;
+          btn.disabled = true;
+          btn.textContent = 'Aprobando…';
+          await updateUserStatus({ userId, status: 'approved' });
+          alert('¡Usuario aprobado con éxito! Se ha habilitado el acceso completo a la plataforma.');
+          await loadData();
+        });
+      });
+
+      document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.id;
+          if (confirm('¿Deseas denegar/rechazar el registro de este usuario?')) {
+            btn.disabled = true;
+            btn.textContent = 'Denegando…';
+            await updateUserStatus({ userId, status: 'rejected' });
+            alert('El registro ha sido denegado.');
+            await loadData();
+          }
+        });
+      });
+    }
+
+    /* Auth guard */
+    onAuthChange(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      let profile = await waitForProfile(user.uid);
+      if (!profile) {
+        profile = { id: user.uid, name: 'Administrador', email: user.email, role: 'admin' };
+      }
+
+      if (profile.role !== 'admin' && user.email !== 'admin@palcofy.com') {
+        alert('Acceso reservado exclusivamente a los administradores de PALCOFY.');
+        window.location.href = 'dashboard-venue.html';
+        return;
+      }
+
+      document.getElementById('user-name').textContent = profile.name || 'Administrador';
+      await loadData();
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

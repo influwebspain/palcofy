@@ -82,6 +82,18 @@
     <!-- Main content -->
     <main class="app-main">
 
+      <!-- Banner Estado Pendiente -->
+      <div id="pending-banner" style="display:none;background:linear-gradient(135deg, rgba(217,119,6,0.15), rgba(124,58,237,0.15));border:1px solid rgba(217,119,6,0.4);border-radius:12px;padding:16px;margin-bottom:20px;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size:24px;">⏳</div>
+          <div>
+            <div style="font-weight:700;color:white;font-size:14px;">Tu registro se encuentra en proceso de revisión por los administradores</div>
+            <div style="font-size:12px;color:var(--app-text-muted);">El equipo de PALCOFY está verificando tus datos corporativos. Te notificaremos una vez sea aprobado.</div>
+          </div>
+        </div>
+        <span class="badge badge--gold"><span class="badge-dot"></span> Revisión Pendiente</span>
+      </div>
+
       <div class="app-topbar">
         <div>
           <h1 id="greeting">Buenos días</h1>
@@ -224,6 +236,11 @@
       const plan = profile.plan || 'piloto';
       const planNames = { piloto: 'Piloto 199€', esencial: 'Esencial 350€', premium: 'Premium 850€' };
       document.getElementById('user-plan').textContent = planNames[plan] || plan;
+
+      if (profile.status === 'pending') {
+        const pBanner = document.getElementById('pending-banner');
+        if (pBanner) pBanner.style.display = 'flex';
+      }
 
       const hour = new Date().getHours();
       const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';

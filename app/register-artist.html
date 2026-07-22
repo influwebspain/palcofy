@@ -78,14 +78,27 @@
             <input type="text" id="artist-name" placeholder="Ej: Carlos Vives Trio, Laura Gómez…" required />
           </div>
 
-          <div class="app-field">
-            <label for="artist-email">Email corporativo / contacto</label>
-            <input type="email" id="artist-email" placeholder="tu@email.com" required />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="artist-email">Email corporativo / contacto</label>
+              <input type="email" id="artist-email" placeholder="tu@email.com" required />
+            </div>
+            <div class="app-field">
+              <label for="artist-password">Contraseña</label>
+              <input type="password" id="artist-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+            </div>
           </div>
 
-          <div class="app-field">
-            <label for="artist-password">Contraseña de acceso</label>
-            <input type="password" id="artist-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          <!-- Foto y Vídeo promo -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="artist-photo-url">URL Foto de perfil / Avatar</label>
+              <input type="text" id="artist-photo-url" placeholder="https://ejemplo.com/foto.jpg" />
+            </div>
+            <div class="app-field">
+              <label for="artist-video-url">URL Vídeo Promo (YouTube/Vimeo)</label>
+              <input type="text" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." />
+            </div>
           </div>
 
           <div class="app-field">
@@ -109,6 +122,27 @@
             <div class="app-field">
               <label for="artist-radius">Radio actuación (km)</label>
               <input type="number" id="artist-radius" placeholder="50" value="50" min="5" max="500" required />
+            </div>
+          </div>
+
+          <!-- Datos de cobro y Certificado Bancario -->
+          <div style="background:rgba(255,255,255,0.02);border:1px solid var(--app-border);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--app-accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;">
+              💳 Datos para Cobrar y Certificado de Titularidad
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="app-field">
+                <label for="artist-iban">Cuenta Bancaria (IBAN)</label>
+                <input type="text" id="artist-iban" placeholder="ES91 2100 0418..." style="font-family:'JetBrains Mono',monospace;" />
+              </div>
+              <div class="app-field">
+                <label for="artist-bank-holder">Titular de la cuenta</label>
+                <input type="text" id="artist-bank-holder" placeholder="Nombre titular como en banco" />
+              </div>
+            </div>
+            <div class="app-field" style="margin-bottom:0;">
+              <label for="artist-bank-cert">Certificado de titularidad bancaria (PDF/Documento)</label>
+              <input type="text" id="artist-bank-cert" placeholder="Nombre o enlace del certificado (ej: Certificado_BBVA.pdf)" />
             </div>
           </div>
 
@@ -159,15 +193,21 @@
       const name        = document.getElementById('artist-name').value.trim();
       const email       = document.getElementById('artist-email').value.trim();
       const password    = document.getElementById('artist-password').value;
+      const photoUrl    = document.getElementById('artist-photo-url').value.trim();
+      const videoUrl    = document.getElementById('artist-video-url').value.trim();
       const genre       = genreInput.value;
       const cache       = parseInt(document.getElementById('artist-cache').value, 10) || 500;
       const radius      = parseInt(document.getElementById('artist-radius').value, 10) || 50;
+      const iban        = document.getElementById('artist-iban').value.trim();
+      const bankHolder  = document.getElementById('artist-bank-holder').value.trim();
+      const bankCert    = document.getElementById('artist-bank-cert').value.trim();
       const description = document.getElementById('artist-desc').value.trim();
 
       try {
         await register({
           name, email, password, role: 'artist',
-          genre, cache, radius, description
+          photoUrl, videoUrl, genre, cache, radius,
+          iban, bankHolder, bankCert, description
         });
         window.location.href = 'dashboard-artist.html';
       } catch (err) {
