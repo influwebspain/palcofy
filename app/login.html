@@ -159,6 +159,12 @@
       });
     });
 
+    /* Auto-activar pestaña si viene con hash #register */
+    if (window.location.hash.includes('register') || window.location.hash.includes('registro')) {
+      const regTab = document.querySelector('.auth-tab[data-tab="register"]');
+      if (regTab) regTab.click();
+    }
+
     /* ---- Role selector ---- */
     const roleOptions = document.querySelectorAll('.role-option');
     const roleInput = document.getElementById('reg-role');

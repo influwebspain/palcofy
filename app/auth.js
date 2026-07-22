@@ -209,6 +209,65 @@ export async function waitForProfile(uid, maxRetries = 3, delayMs = 500) {
     if (p) return p;
     await new Promise(r => setTimeout(r, delayMs));
   }
-  /* Último recurso: crear perfil por defecto */
   return null;
+}
+
+/* ----- Navegación Adaptable Móvil Automática ----- */
+export function initMobileNavigation() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('mobile-bar')) return;
+  const shell = document.getElementById('app-shell');
+  const sidebar = document.querySelector('.sidebar');
+  if (!shell || !sidebar) return;
+
+  const mobileBar = document.createElement('div');
+  mobileBar.id = 'mobile-bar';
+  mobileBar.className = 'mobile-bar';
+  mobileBar.innerHTML = `
+    <div class="mobile-brand">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="10" width="2" height="5" rx="1" fill="currentColor"/><rect x="7.5" y="6" width="2" height="13" rx="1" fill="currentColor"/><rect x="12" y="2" width="2" height="20" rx="1" fill="white"/><rect x="16.5" y="7" width="2" height="11" rx="1" fill="currentColor"/></svg>
+      </div>
+      <span>PALCOFY</span>
+    </div>
+    <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Menú navegación">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  `;
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'sidebar-backdrop';
+  backdrop.id = 'sidebar-backdrop';
+
+  shell.insertBefore(mobileBar, shell.firstChild);
+  document.body.appendChild(backdrop);
+
+  const toggleBtn = mobileBar.querySelector('#mobile-menu-btn');
+  const closeMenu = () => {
+    sidebar.classList.remove('is-open');
+    backdrop.classList.remove('is-visible');
+  };
+
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.contains('is-open');
+    if (isOpen) {
+      closeMenu();
+    } else {
+      sidebar.classList.add('is-open');
+      backdrop.classList.add('is-visible');
+    }
+  });
+
+  backdrop.addEventListener('click', closeMenu);
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileNavigation);
+  } else {
+    setTimeout(initMobileNavigation, 100);
+  }
 }
