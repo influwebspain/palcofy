@@ -167,31 +167,65 @@ export async function updateUserProfile(uid, data) {
 }
 
 export async function listArtists() {
+  const list = [];
+  const addedIds = new Set();
+  const addedEmails = new Set();
+
+  const add = (item) => {
+    const id = item.id || item.uid;
+    const email = (item.email || '').toLowerCase();
+    if (id && addedIds.has(id)) return;
+    if (email && addedEmails.has(email)) return;
+    if (id) addedIds.add(id);
+    if (email) addedEmails.add(email);
+    list.push({
+      id: id || `art_${Math.random()}`,
+      name: item.name || item.displayName || 'Artista',
+      genre: item.genre || 'pop',
+      cache: item.cache || 500,
+      radius: item.radius || 50,
+      available: item.available !== false,
+      pro: item.pro === true,
+      description: item.description || item.bio || 'Artista verificado en la plataforma PALCOFY.',
+      rating: item.rating || 4.7,
+      ...item
+    });
+  };
+
+  /* 1. Firestore */
   if (isFirebaseConfigured && fbFirestore) {
     try {
       const snap = await fbFirestore.getDocs(fbFirestore.collection(db, 'users'));
-      const list = [];
       snap.forEach(d => {
         const data = d.data();
         const r = (data.role || '').toLowerCase();
         if (r === 'artist' || r === 'cantante' || r === 'singer' || data.genre || data.cache) {
-          list.push({ id: d.id, ...data });
+          add({ id: d.id, ...data });
         }
       });
-      seedArtists();
-      const demo = demoArtists() || [];
-      demo.forEach(da => {
-        if (!list.some(a => a.id === da.id || a.email === da.email)) {
-          list.push(da);
-        }
-      });
-      return list;
     } catch (e) {
       console.warn('PALCOFY: Error al consultar artistas de Firestore:', e);
     }
   }
+
+  /* 2. Demo Users */
+  try {
+    const demoUsers = JSON.parse(localStorage.getItem('palcofy.demo.users') || '{}');
+    Object.values(demoUsers).forEach(u => {
+      const r = (u.role || '').toLowerCase();
+      if (r === 'artist' || r === 'cantante' || r === 'singer' || u.genre || u.cache) {
+        add({ id: u.uid || u.id, ...u });
+      }
+    });
+  } catch (e) {}
+
+  /* 3. Seed Artists */
   seedArtists();
-  return demoArtists() || [];
+  const demoList = demoArtists() || [];
+  demoList.forEach(da => add(da));
+
+  console.info(`PALCOFY ✓ listArtists retornado: ${list.length} artistas`);
+  return list;
 }
 
 export async function listVenues() {

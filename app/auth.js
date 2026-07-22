@@ -35,26 +35,51 @@ function _notify(user) { if (_authCb) _authCb(user); }
    PUBLIC API
    ========================================================= */
 
-export async function register({ name, email, password, role }) {
+export async function register(userData) {
+  const { name, email, password, role } = userData;
   const normalizedRole = (role || 'venue').toLowerCase();
+  
+  const baseProfile = {
+    name: name || userData.venueName || email.split('@')[0],
+    email,
+    role: normalizedRole,
+    createdAt: new Date().toISOString()
+  };
+
+  const roleProfile = normalizedRole === 'venue' || normalizedRole === 'hotel'
+    ? {
+        venueName: userData.venueName || name,
+        city: userData.city || 'Madrid',
+        address: userData.address || 'Ubicación verificada',
+        capacity: parseInt(userData.capacity, 10) || 150,
+        type: userData.type || 'hotel',
+        plan: 'piloto',
+        eventsUsed: 0,
+        eventsLimit: 4,
+        description: userData.description || 'Hotel/Venue verificado en la red PALCOFY.'
+      }
+    : {
+        genre: userData.genre || 'pop',
+        cache: parseInt(userData.cache, 10) || 500,
+        radius: parseInt(userData.radius, 10) || 50,
+        pro: false,
+        available: true,
+        description: userData.description || 'Artista verificado en la plataforma PALCOFY.'
+      };
+
+  const profileData = { ...baseProfile, ...roleProfile };
+
   if (isFirebaseConfigured && fbAuth) {
     const cred = await fbAuth.createUserWithEmailAndPassword(auth, email, password);
 
-    const profileData = {
-      name, email, role: normalizedRole,
-      createdAt: new Date().toISOString(),
-      ...(normalizedRole === 'venue' || normalizedRole === 'hotel'
-        ? { venueName: name, plan: 'piloto', eventsUsed: 0, eventsLimit: 4, city: 'Madrid', address: 'Dirección por definir', description: 'Venue verificado en la red PALCOFY.' }
-        : { genre: '', cache: 500, pro: false, available: true, radius: 50, description: 'Artista verificado en la plataforma PALCOFY.' })
-    };
     try {
-      await fbAuth.updateProfile(cred.user, { displayName: name });
+      await fbAuth.updateProfile(cred.user, { displayName: baseProfile.name });
     } catch (e) {
       console.warn('PALCOFY: updateProfile warn:', e);
     }
     try {
       await fbFirestore.setDoc(fbFirestore.doc(db, 'users', cred.user.uid), profileData);
-      console.info('PALCOFY ✓ Perfil guardado en Firestore:', cred.user.uid);
+      console.info('PALCOFY ✓ Perfil guardado en Firestore:', cred.user.uid, profileData);
     } catch (e) {
       console.error('PALCOFY ❌ Error al guardar perfil en Firestore:', e);
     }
@@ -70,18 +95,12 @@ export async function register({ name, email, password, role }) {
   if (password.length < 6) throw { code: 'auth/weak-password' };
 
   const uid = demoUid();
-  const profile = {
-    uid, name, email, role,
-    createdAt: new Date().toISOString(),
-    ...(role === 'venue'
-      ? { venueName: name, plan: 'piloto', eventsUsed: 0, eventsLimit: 4 }
-      : { genre: '', cache: 500, pro: false, available: true, radius: 50 })
-  };
+  const profile = { uid, id: uid, ...profileData };
   users[uid] = profile;
   demoSave(users);
   demoSetSession(uid);
-  _notify({ uid, email, displayName: name });
-  return { uid, email, displayName: name };
+  _notify({ uid, email, displayName: baseProfile.name });
+  return { uid, email, displayName: baseProfile.name };
 }
 
 export async function login(email, password) {

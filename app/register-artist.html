@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Registro de Cantantes y Artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .genre-select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .genre-option {
+      padding: 10px;
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--app-text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+    .genre-option:hover {
+      border-color: var(--app-accent);
+      color: white;
+    }
+    .genre-option.is-selected {
+      background: var(--app-accent);
+      border-color: var(--app-accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-page">
+
+    <!-- Left: brand panel -->
+    <div class="login-left">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="#FF3D7F"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <h1>PALCOFY</h1>
+        <p>Únete a la plataforma B2B líder para cantantes y agrupaciones musicales en hoteles y recintos. Consigue más reservas directas y cobro garantizado.</p>
+      </div>
+    </div>
+
+    <!-- Right: registration form -->
+    <div class="login-right">
+      <div class="login-card" style="max-width:480px;">
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="font-size:28px;">🎵</div>
+          <div>
+            <h2 style="font-size:20px;font-weight:800;color:white;">Registro de Artista / Cantante</h2>
+            <p style="font-size:13px;color:var(--app-text-muted);">Crea tu perfil profesional para ser contratado por hoteles y recintos.</p>
+          </div>
+        </div>
+
+        <div class="auth-error" id="auth-error"></div>
+
+        <form id="artist-reg-form">
+          <div class="app-field">
+            <label for="artist-name">Nombre artístico o grupo</label>
+            <input type="text" id="artist-name" placeholder="Ej: Carlos Vives Trio, Laura Gómez…" required />
+          </div>
+
+          <div class="app-field">
+            <label for="artist-email">Email corporativo / contacto</label>
+            <input type="email" id="artist-email" placeholder="tu@email.com" required />
+          </div>
+
+          <div class="app-field">
+            <label for="artist-password">Contraseña de acceso</label>
+            <input type="password" id="artist-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          </div>
+
+          <div class="app-field">
+            <label>Género musical principal</label>
+            <div class="genre-select-grid" id="genre-grid">
+              <div class="genre-option is-selected" data-genre="jazz">🎷 Jazz & Soul</div>
+              <div class="genre-option" data-genre="pop">🎤 Pop & Indie</div>
+              <div class="genre-option" data-genre="rock">🎸 Rock & Blues</div>
+              <div class="genre-option" data-genre="electronic">🎧 DJ & Electrónica</div>
+              <div class="genre-option" data-genre="classical">🎻 Clásica</div>
+              <div class="genre-option" data-genre="flamenco">💃 Flamenco</div>
+            </div>
+            <input type="hidden" id="artist-genre" value="jazz" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="artist-cache">Caché estimado (€)</label>
+              <input type="number" id="artist-cache" placeholder="500" value="500" min="50" max="10000" required />
+            </div>
+            <div class="app-field">
+              <label for="artist-radius">Radio actuación (km)</label>
+              <input type="number" id="artist-radius" placeholder="50" value="50" min="5" max="500" required />
+            </div>
+          </div>
+
+          <div class="app-field">
+            <label for="artist-desc">Biografía o presentación corta</label>
+            <textarea id="artist-desc" rows="3" placeholder="Describe tu repertorio, trayectoria o tipo de actuación…"></textarea>
+          </div>
+
+          <button type="submit" class="app-btn app-btn--primary" id="submit-btn" style="margin-top:10px;">
+            Completar registro de Artista →
+          </button>
+
+          <div style="margin-top:16px;text-align:center;font-size:13px;color:var(--app-text-muted);">
+            ¿Ya tienes cuenta? <a href="login.html" style="color:var(--app-accent);text-decoration:none;font-weight:600;">Iniciar sesión</a>
+            <span style="margin:0 8px;">•</span>
+            <a href="register-venue.html" style="color:var(--app-text-muted);text-decoration:underline;">Soy un Hotel/Venue</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { register } from './auth.js';
+
+    const genreOptions = document.querySelectorAll('.genre-option');
+    const genreInput   = document.getElementById('artist-genre');
+    const form         = document.getElementById('artist-reg-form');
+    const errorEl      = document.getElementById('auth-error');
+    const submitBtn    = document.getElementById('submit-btn');
+
+    genreOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        genreOptions.forEach(o => o.classList.remove('is-selected'));
+        opt.classList.add('is-selected');
+        genreInput.value = opt.dataset.genre;
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.remove('is-visible');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta de artista…';
+
+      const name        = document.getElementById('artist-name').value.trim();
+      const email       = document.getElementById('artist-email').value.trim();
+      const password    = document.getElementById('artist-password').value;
+      const genre       = genreInput.value;
+      const cache       = parseInt(document.getElementById('artist-cache').value, 10) || 500;
+      const radius      = parseInt(document.getElementById('artist-radius').value, 10) || 50;
+      const description = document.getElementById('artist-desc').value.trim();
+
+      try {
+        await register({
+          name, email, password, role: 'artist',
+          genre, cache, radius, description
+        });
+        window.location.href = 'dashboard-artist.html';
+      } catch (err) {
+        console.error('Registration error:', err);
+        const msg = err.code === 'auth/email-already-in-use'
+          ? 'Ya existe una cuenta con este email.'
+          : err.code === 'auth/weak-password'
+          ? 'La contraseña debe tener al menos 6 caracteres.'
+          : 'Error al registrar el cantante. Inténtalo de nuevo.';
+        errorEl.textContent = msg;
+        errorEl.classList.add('is-visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Completar registro de Artista →';
+      }
+    });
+  </script>
+</body>
+</html>

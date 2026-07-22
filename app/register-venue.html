@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Registro de Hotel / Venue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .type-select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .type-option {
+      padding: 10px;
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--app-text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+    .type-option:hover {
+      border-color: var(--app-accent);
+      color: white;
+    }
+    .type-option.is-selected {
+      background: var(--app-accent);
+      border-color: var(--app-accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-page">
+
+    <!-- Left: brand panel -->
+    <div class="login-left">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="#FF3D7F"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <h1>PALCOFY</h1>
+        <p>Potencia la oferta de música en vivo de tu Hotel o Recinto. Busca, reserva y contrata cantantes de primer nivel con facturación unificada y escrow.</p>
+      </div>
+    </div>
+
+    <!-- Right: registration form -->
+    <div class="login-right">
+      <div class="login-card" style="max-width:480px;">
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="font-size:28px;">🏨</div>
+          <div>
+            <h2 style="font-size:20px;font-weight:800;color:white;">Registro de Hotel / Venue</h2>
+            <p style="font-size:13px;color:var(--app-text-muted);">Crea tu cuenta corporativa para programar música y reservar cantantes.</p>
+          </div>
+        </div>
+
+        <div class="auth-error" id="auth-error"></div>
+
+        <form id="venue-reg-form">
+          <div class="app-field">
+            <label for="venue-name">Nombre del Hotel o Recinto</label>
+            <input type="text" id="venue-name" placeholder="Ej: Hotel Vértice, Rooftop Central…" required />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="contact-name">Persona de contacto</label>
+              <input type="text" id="contact-name" placeholder="Tu nombre" required />
+            </div>
+            <div class="app-field">
+              <label for="venue-city">Ciudad</label>
+              <input type="text" id="venue-city" placeholder="Ej: Madrid" required />
+            </div>
+          </div>
+
+          <div class="app-field">
+            <label for="venue-email">Email corporativo</label>
+            <input type="email" id="venue-email" placeholder="eventos@hotel.com" required />
+          </div>
+
+          <div class="app-field">
+            <label for="venue-password">Contraseña de acceso</label>
+            <input type="password" id="venue-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          </div>
+
+          <div class="app-field">
+            <label>Tipo de espacio</label>
+            <div class="type-select-grid" id="type-grid">
+              <div class="type-option is-selected" data-type="hotel">🏨 Hotel / Resort</div>
+              <div class="type-option" data-type="rooftop">🏙️ Rooftop</div>
+              <div class="type-option" data-type="bar">🎷 Bar / Lounge</div>
+              <div class="type-option" data-type="club">🎵 Club / Sala</div>
+              <div class="type-option" data-type="hall">🏛️ Eventos</div>
+            </div>
+            <input type="hidden" id="venue-type" value="hotel" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="venue-capacity">Aforo (capacidad pax)</label>
+              <input type="number" id="venue-capacity" placeholder="150" value="150" min="10" max="10000" required />
+            </div>
+            <div class="app-field">
+              <label for="venue-address">Dirección</label>
+              <input type="text" id="venue-address" placeholder="Gran Vía 42" required />
+            </div>
+          </div>
+
+          <button type="submit" class="app-btn app-btn--primary" id="submit-btn" style="margin-top:10px;">
+            Completar registro de Hotel →
+          </button>
+
+          <div style="margin-top:16px;text-align:center;font-size:13px;color:var(--app-text-muted);">
+            ¿Ya tienes cuenta? <a href="login.html" style="color:var(--app-accent);text-decoration:none;font-weight:600;">Iniciar sesión</a>
+            <span style="margin:0 8px;">•</span>
+            <a href="register-artist.html" style="color:var(--app-text-muted);text-decoration:underline;">Soy un Cantante/Artista</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { register } from './auth.js';
+
+    const typeOptions = document.querySelectorAll('.type-option');
+    const typeInput   = document.getElementById('venue-type');
+    const form        = document.getElementById('venue-reg-form');
+    const errorEl     = document.getElementById('auth-error');
+    const submitBtn   = document.getElementById('submit-btn');
+
+    typeOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        typeOptions.forEach(o => o.classList.remove('is-selected'));
+        opt.classList.add('is-selected');
+        typeInput.value = opt.dataset.type;
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.remove('is-visible');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta de hotel…';
+
+      const venueName   = document.getElementById('venue-name').value.trim();
+      const contactName = document.getElementById('contact-name').value.trim();
+      const email       = document.getElementById('venue-email').value.trim();
+      const password    = document.getElementById('venue-password').value;
+      const city        = document.getElementById('venue-city').value.trim();
+      const address     = document.getElementById('venue-address').value.trim();
+      const type        = typeInput.value;
+      const capacity    = parseInt(document.getElementById('venue-capacity').value, 10) || 150;
+
+      try {
+        await register({
+          name: contactName,
+          venueName,
+          email, password,
+          role: 'venue',
+          city, address, type, capacity
+        });
+        window.location.href = 'dashboard-venue.html';
+      } catch (err) {
+        console.error('Registration error:', err);
+        const msg = err.code === 'auth/email-already-in-use'
+          ? 'Ya existe una cuenta con este email.'
+          : err.code === 'auth/weak-password'
+          ? 'La contraseña debe tener al menos 6 caracteres.'
+          : 'Error al registrar el hotel. Inténtalo de nuevo.';
+        errorEl.textContent = msg;
+        errorEl.classList.add('is-visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Completar registro de Hotel →';
+      }
+    });
+  </script>
+</body>
+</html>

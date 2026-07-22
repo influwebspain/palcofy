@@ -65,44 +65,34 @@
           </a>
         </form>
 
-        <!-- ===== REGISTER FORM ===== -->
-        <form id="register-form" style="display:none;">
-          <div class="app-field">
-            <label for="reg-name">Nombre</label>
-            <input type="text" id="reg-name" placeholder="Tu nombre o el del venue" required />
-          </div>
-          <div class="app-field">
-            <label for="reg-email">Email</label>
-            <input type="email" id="reg-email" placeholder="tu@email.com" required />
-          </div>
-          <div class="app-field">
-            <label for="reg-password">Contraseña</label>
-            <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+        <!-- ===== REGISTER CHOICE PANEL ===== -->
+        <div id="register-form" style="display:none;">
+          <p style="font-size:14px;color:var(--app-text-muted);margin-bottom:16px;text-align:center;">
+            Elige tu perfil para comenzar el proceso de registro:
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+            <a href="register-artist.html" class="role-option" style="text-decoration:none;display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid var(--app-accent);background:rgba(124,58,237,0.08);border-radius:12px;">
+              <div class="role-icon" style="font-size:28px;">🎵</div>
+              <div>
+                <div class="role-label" style="font-size:16px;font-weight:700;color:white;">Soy Cantante / Artista</div>
+                <div class="role-desc" style="font-size:12px;color:var(--app-text-muted);">Quiero recibir reservas, gestionar mi caché y cobrar seguro.</div>
+              </div>
+            </a>
+
+            <a href="register-venue.html" class="role-option" style="text-decoration:none;display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.02);border-radius:12px;">
+              <div class="role-icon" style="font-size:28px;">🏨</div>
+              <div>
+                <div class="role-label" style="font-size:16px;font-weight:700;color:white;">Soy Hotel / Venue / Empresa</div>
+                <div class="role-desc" style="font-size:12px;color:var(--app-text-muted);">Busco artistas y cantantes para mi programación de eventos.</div>
+              </div>
+            </a>
           </div>
 
-          <!-- Role selector -->
-          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px;">Soy un…</label>
-          <div class="role-selector">
-            <div class="role-option is-selected" data-role="venue">
-              <div class="role-icon">🏨</div>
-              <div class="role-label">Venue / Hotel</div>
-              <div class="role-desc">Busco artistas para mi programación</div>
-            </div>
-            <div class="role-option" data-role="artist">
-              <div class="role-icon">🎵</div>
-              <div class="role-label">Artista</div>
-              <div class="role-desc">Quiero más reservas y cobrar rápido</div>
-            </div>
-          </div>
-          <input type="hidden" id="reg-role" value="venue" />
-
-          <button type="submit" class="app-btn app-btn--primary" id="register-btn">
-            Crear cuenta
-          </button>
           <a href="../index.html" class="app-btn app-btn--ghost" style="text-decoration:none;text-align:center;">
             ← Volver a la web
           </a>
-        </form>
+        </div>
 
       </div>
     </div>
