@@ -222,6 +222,72 @@
     });
   }
 
+  /* ----- Modal de Hojas Legales --------------------------- */
+  window.openLegalModal = function (type) {
+    var modal = document.getElementById('legal-modal-overlay');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'legal-modal-overlay';
+      modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;';
+      modal.innerHTML = `
+        <div style="background:#1A1230;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;color:white;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+          <button id="legal-modal-close" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.08);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+          <div id="legal-modal-content"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.querySelector('#legal-modal-close').addEventListener('click', function () {
+        modal.style.display = 'none';
+      });
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+    }
+
+    var contentEl = modal.querySelector('#legal-modal-content');
+    var docs = {
+      aviso: `
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Aviso Legal</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px;">
+          En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y Comercio Electrónico (LSSI-CE), se informa que la plataforma PALCOFY opera como marketplace B2B de gestión musical para recintos de hostelería y eventos.
+        </p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
+          Para cualquier consulta legal o comercial, puede dirigirse a nuestro canal de soporte en contacto@palcofy.com. Desarrollado de forma profesional por <strong>influweb.es</strong>.
+        </p>
+      `,
+      privacidad: `
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Política de Privacidad</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px;">
+          De conformidad con el Reglamento General de Protección de Datos (RGPD UE 2016/679) y la LOPDGDD 3/2018, los datos recabados en PALCOFY se procesan con estricta confidencialidad para la gestión de contrataciones, reservas y facturación entre artistas y recintos.
+        </p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
+          Puede ejercitar sus derechos de acceso, rectificación, supresión y oposición escribiendo a datos@palcofy.com.
+        </p>
+      `,
+      cookies: `
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Política de Cookies</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px;">
+          Este sitio web utiliza cookies técnicas indispensables para el inicio de sesión, preferencia de idioma y almacenamiento de sesión segura en la plataforma.
+        </p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
+          No se emplean cookies de rastreo publicitario de terceros sin su consentimiento explícito.
+        </p>
+      `,
+      terminos: `
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Términos y Condiciones de Uso</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px;">
+          El uso de la plataforma PALCOFY está reservado a recintos de hostelería, empresas organizadoras de eventos y artistas registrados. Todas las contrataciones están sujetas a liquidación automatizada y sustitución garantizada.
+        </p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
+          Desarrollado de forma profesional por <strong>influweb.es</strong>.
+        </p>
+      `
+    };
+
+    contentEl.innerHTML = docs[type] || docs.aviso;
+    modal.style.display = 'flex';
+  };
+
   /* ----- Init --------------------------------------------- */
   function init() {
     initLangSwitcher();
