@@ -132,6 +132,10 @@
     /* Si ya hay sesión, redirigir */
     onAuthChange(async (user) => {
       if (user) {
+        if (user.uid === 'admin_super_user' || (user.email && user.email.toLowerCase() === 'admin@palcofy.com')) {
+          window.location.href = 'admin.html';
+          return;
+        }
         const profile = await getUserProfile(user.uid);
         if (profile) redirectByRole(profile.role);
       }

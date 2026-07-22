@@ -123,6 +123,14 @@ export async function login(email, password) {
       status: 'approved',
       createdAt: new Date().toISOString()
     };
+
+    /* Save profile in cache and demo users dictionary */
+    try {
+      const users = demoUsers();
+      users[adminUid] = adminProfile;
+      demoSave(users);
+    } catch (e) {}
+
     localStorage.setItem(`palcofy.profile.${adminUid}`, JSON.stringify(adminProfile));
     demoSetSession(adminUid);
     _notify({ uid: adminUid, email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' });
@@ -146,49 +154,79 @@ export async function login(email, password) {
 
 export async function logout() {
   if (isFirebaseConfigured && fbAuth) {
-    return fbAuth.signOut(auth);
+    try { await fbAuth.signOut(auth); } catch (e) {}
   }
   demoClearSession();
   _notify(null);
 }
 
 export async function getUserProfile(uid) {
+  if (uid === 'admin_super_user') {
+    return {
+      id: 'admin_super_user',
+      uid: 'admin_super_user',
+      name: 'Administrador PALCOFY',
+      email: 'admin@palcofy.com',
+      role: 'admin',
+      status: 'approved'
+    };
+  }
+
+  /* Cache local primero */
+  const cacheKey = `palcofy.profile.${uid}`;
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey));
+    if (cached) return cached;
+  } catch (e) {}
+
   if (isFirebaseConfigured && fbFirestore) {
-    /* Cache: serve from localStorage first, fetch in background */
-    const cacheKey = `palcofy.profile.${uid}`;
-    const cached = (() => { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
-
-    if (cached) {
-      /* Return cache immediately, refresh in background */
-      fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid)).then(snap => {
-        if (snap.exists()) localStorage.setItem(cacheKey, JSON.stringify({ id: uid, ...snap.data() }));
-      }).catch(() => {});
-      return cached;
+    try {
+      const snap = await fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid));
+      const profile = snap.exists() ? { id: uid, ...snap.data() } : null;
+      if (profile) localStorage.setItem(cacheKey, JSON.stringify(profile));
+      return profile;
+    } catch (e) {
+      console.warn('PALCOFY: Error al leer perfil en Firestore:', e);
     }
-
-    const snap = await fbFirestore.getDoc(fbFirestore.doc(db, 'users', uid));
-    const profile = snap.exists() ? { id: uid, ...snap.data() } : null;
-    if (profile) localStorage.setItem(cacheKey, JSON.stringify(profile));
-    return profile;
   }
   const users = demoUsers();
   return users[uid] || null;
 }
 
 export function onAuthChange(callback) {
-  if (isFirebaseConfigured && fbAuth) {
-    return fbAuth.onAuthStateChanged(auth, callback);
-  }
-
-  /* DEMO */
   _authCb = callback;
   const session = demoSession();
+
+  /* Si la sesión pertenece al superadministrador */
+  if (session && session.uid === 'admin_super_user') {
+    const adminUser = { uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' };
+    setTimeout(() => callback(adminUser), 0);
+    return () => {};
+  }
+
+  if (isFirebaseConfigured && fbAuth) {
+    return fbAuth.onAuthStateChanged(auth, (user) => {
+      if (!user && session && session.uid === 'admin_super_user') {
+        callback({ uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' });
+      } else {
+        callback(user);
+      }
+    });
+  }
+
+  /* DEMO fallback */
   if (session) {
     const users = demoUsers();
-    const u = users[session.uid];
-    if (u) { callback({ uid: u.uid, email: u.email, displayName: u.name }); return () => {}; }
+    let u = users[session.uid];
+    if (!u) {
+      try { u = JSON.parse(localStorage.getItem(`palcofy.profile.${session.uid}`)); } catch(e) {}
+    }
+    if (u) {
+      setTimeout(() => callback({ uid: u.uid || u.id, email: u.email, displayName: u.name }), 0);
+      return () => {};
+    }
   }
-  callback(null);
+  setTimeout(() => callback(null), 0);
   return () => {};
 }
 

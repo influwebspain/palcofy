@@ -469,22 +469,28 @@
     /* Auth guard */
     onAuthChange(async (user) => {
       if (!user) {
-        window.location.href = 'login.html';
-        return;
+        const sess = (() => { try { return JSON.parse(localStorage.getItem('palcofy.demo.session')); } catch { return null; } })();
+        if (sess && sess.uid === 'admin_super_user') {
+          user = { uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' };
+        } else {
+          window.location.href = 'login.html';
+          return;
+        }
       }
 
       let profile = await waitForProfile(user.uid);
       if (!profile) {
-        profile = { id: user.uid, name: 'Administrador', email: user.email, role: 'admin' };
+        profile = { id: user.uid, name: 'Administrador PALCOFY', email: user.email || 'admin@palcofy.com', role: 'admin' };
       }
 
-      if (profile.role !== 'admin' && user.email !== 'admin@palcofy.com') {
+      const isSuperAdmin = user.uid === 'admin_super_user' || (user.email && user.email.toLowerCase() === 'admin@palcofy.com');
+      if (profile.role !== 'admin' && !isSuperAdmin) {
         alert('Acceso reservado exclusivamente a los administradores de PALCOFY.');
         window.location.href = 'dashboard-venue.html';
         return;
       }
 
-      document.getElementById('user-name').textContent = profile.name || 'Administrador';
+      document.getElementById('user-name').textContent = profile.name || 'Administrador PALCOFY';
       await loadData();
 
       loadingEl.style.display = 'none';
