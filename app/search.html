@@ -99,7 +99,13 @@
           <option value="rock">Rock & Blues</option>
           <option value="electronic">DJ & Electronic</option>
           <option value="classical">Clásica</option>
-          <option value="corporate">Corporativo</option>
+          <option value="remember">Remember & Retro</option>
+          <option value="flamenco">Flamenco</option>
+          <option value="latin">Latina & Salsa</option>
+          <option value="reggae">Reggae & Ska</option>
+          <option value="urban">Urban & R&B</option>
+          <option value="folk">Folk & Acústico</option>
+          <option value="funk">Funk & Disco</option>
         </select>
         <select class="filter-select" id="filter-cache">
           <option value="">Cualquier caché</option>
@@ -221,7 +227,12 @@
       emptyEl.style.display = 'none';
       countEl.textContent = `${artists.length} artista${artists.length !== 1 ? 's' : ''} encontrado${artists.length !== 1 ? 's' : ''}`;
 
-      const genreLabels = { jazz:'Jazz & Soul', pop:'Pop & Indie', rock:'Rock & Blues', electronic:'DJ & Electronic', classical:'Clásica', corporate:'Corporativo' };
+      const genreLabels = { 
+        jazz:'Jazz & Soul', pop:'Pop & Indie', rock:'Rock & Blues', 
+        electronic:'DJ & Electronic', classical:'Clásica', flamenco:'Flamenco',
+        remember:'Remember & Retro', reggae:'Reggae & Ska', latin:'Latina & Salsa',
+        urban:'Urban & R&B', folk:'Folk & Acústico', funk:'Funk & Disco'
+      };
       const avatarClasses = { jazz:'artist-avatar--jazz', pop:'artist-avatar--pop', rock:'artist-avatar--rock', electronic:'artist-avatar--default', classical:'artist-avatar--jazz', corporate:'artist-avatar--pop' };
 
       grid.innerHTML = artists.map(a => `

@@ -93,31 +93,42 @@
             </div>
           </div>
 
-          <!-- Foto y Vídeo promo -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <!-- Foto de Perfil y Vídeo Promo -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
             <div class="app-field">
-              <label for="artist-photo-url">Foto de perfil (Subir archivo o Enlace)</label>
-              <input type="file" id="artist-photo-file" accept="image/*" style="margin-bottom:6px;font-size:12px;" />
-              <input type="text" id="artist-photo-url" placeholder="https://ejemplo.com/foto.jpg" />
+              <label>Foto de Perfil (Subir imagen)</label>
+              <div class="upload-box" id="photo-upload-box">
+                <input type="file" id="artist-photo-file" accept="image/*" style="display:none;" />
+                <div class="upload-box-icon" id="photo-box-icon">📸</div>
+                <div class="upload-box-text" id="photo-box-text">Subir foto de perfil</div>
+                <div class="upload-box-sub" id="photo-box-sub">JPG, PNG o WEBP</div>
+              </div>
             </div>
             <div class="app-field">
-              <label for="artist-video-url">Vídeo Promo (Enlace YouTube/Vimeo o Archivo)</label>
-              <input type="file" id="artist-video-file" accept="video/*" style="margin-bottom:6px;font-size:12px;" />
-              <input type="text" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." />
+              <label for="artist-video-url">Vídeo Promo (Enlace YouTube / Vimeo)</label>
+              <input type="url" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-top:4px;" />
+              <p style="font-size:11px;color:var(--app-text-muted);margin-top:6px;line-line-height:1.4;">
+                Pega la URL de tu videoclip o actuación en directo.
+              </p>
             </div>
           </div>
 
           <div class="app-field">
-            <label>Género musical principal</label>
-            <div class="genre-select-grid" id="genre-grid">
+            <label>Géneros musicales (Puedes seleccionar varios)</label>
+            <div class="genre-select-grid" id="genre-grid" style="grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px;">
               <div class="genre-option is-selected" data-genre="jazz">🎷 Jazz & Soul</div>
               <div class="genre-option" data-genre="pop">🎤 Pop & Indie</div>
               <div class="genre-option" data-genre="rock">🎸 Rock & Blues</div>
               <div class="genre-option" data-genre="electronic">🎧 DJ & Electrónica</div>
               <div class="genre-option" data-genre="classical">🎻 Clásica</div>
               <div class="genre-option" data-genre="flamenco">💃 Flamenco</div>
+              <div class="genre-option" data-genre="reggae">🎺 Reggae & Ska</div>
+              <div class="genre-option" data-genre="latin">🪗 Latina & Salsa</div>
+              <div class="genre-option" data-genre="urban">🎙️ Urban & R&B</div>
+              <div class="genre-option" data-genre="folk">🪕 Folk & Acústico</div>
+              <div class="genre-option" data-genre="funk">🎷 Funk & Disco</div>
+              <div class="genre-option" data-genre="remember">📻 Remember & Retro</div>
             </div>
-            <input type="hidden" id="artist-genre" value="jazz" />
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -136,7 +147,7 @@
             <div style="font-size:12px;font-weight:700;color:var(--app-accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;">
               💳 Datos para Cobrar y Certificado de Titularidad
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
               <div class="app-field">
                 <label for="artist-iban">Cuenta Bancaria (IBAN)</label>
                 <input type="text" id="artist-iban" placeholder="ES91 2100 0418..." style="font-family:'JetBrains Mono',monospace;" />
@@ -147,9 +158,13 @@
               </div>
             </div>
             <div class="app-field" style="margin-bottom:0;">
-              <label for="artist-bank-cert">Certificado de titularidad bancaria (Subir PDF/Documento)</label>
-              <input type="file" id="artist-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="margin-bottom:6px;font-size:12px;" />
-              <input type="text" id="artist-bank-cert" placeholder="Nombre o enlace del certificado (ej: Certificado_BBVA.pdf)" />
+              <label>Certificado de titularidad bancaria (Subir PDF)</label>
+              <div class="upload-box" id="cert-upload-box">
+                <input type="file" id="artist-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none;" />
+                <div class="upload-box-icon" id="cert-box-icon">📄</div>
+                <div class="upload-box-text" id="cert-box-text">Subir certificado bancario PDF</div>
+                <div class="upload-box-sub" id="cert-box-sub">Documento oficial PDF o imagen del banco</div>
+              </div>
             </div>
           </div>
 
@@ -182,43 +197,48 @@
     import { register } from './auth.js';
 
     const genreOptions = document.querySelectorAll('.genre-option');
-    const genreInput   = document.getElementById('artist-genre');
     const form         = document.getElementById('artist-reg-form');
     const errorEl      = document.getElementById('auth-error');
     const submitBtn    = document.getElementById('submit-btn');
 
+    let uploadedPhotoName = '';
+    let uploadedCertName  = '';
+
+    /* Multi-select genres */
     genreOptions.forEach(opt => {
       opt.addEventListener('click', () => {
-        genreOptions.forEach(o => o.classList.remove('is-selected'));
-        opt.classList.add('is-selected');
-        genreInput.value = opt.dataset.genre;
+        opt.classList.toggle('is-selected');
       });
     });
 
-    /* Auto-fill text fields when files are selected */
-    const photoFileInput = document.getElementById('artist-photo-file');
-    if (photoFileInput) {
-      photoFileInput.addEventListener('change', (e) => {
+    /* Photo Dropzone click & change */
+    const photoBox = document.getElementById('photo-upload-box');
+    const photoInput = document.getElementById('artist-photo-file');
+    if (photoBox && photoInput) {
+      photoBox.addEventListener('click', () => photoInput.click());
+      photoInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-          document.getElementById('artist-photo-url').value = e.target.files[0].name;
+          uploadedPhotoName = e.target.files[0].name;
+          document.getElementById('photo-box-text').textContent = uploadedPhotoName;
+          document.getElementById('photo-box-sub').textContent = 'Imagen cargada correctamente';
+          document.getElementById('photo-box-icon').textContent = '✓';
+          photoBox.classList.add('has-file');
         }
       });
     }
 
-    const videoFileInput = document.getElementById('artist-video-file');
-    if (videoFileInput) {
-      videoFileInput.addEventListener('change', (e) => {
+    /* Cert Dropzone click & change */
+    const certBox = document.getElementById('cert-upload-box');
+    const certInput = document.getElementById('artist-bank-cert-file');
+    if (certBox && certInput) {
+      certBox.addEventListener('click', () => certInput.click());
+      certInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-          document.getElementById('artist-video-url').value = e.target.files[0].name;
-        }
-      });
-    }
-
-    const bankCertFileInput = document.getElementById('artist-bank-cert-file');
-    if (bankCertFileInput) {
-      bankCertFileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          document.getElementById('artist-bank-cert').value = e.target.files[0].name;
+          uploadedCertName = e.target.files[0].name;
+          document.getElementById('cert-box-text').textContent = uploadedCertName;
+          document.getElementById('cert-box-sub').textContent = 'Documento PDF cargado correctamente';
+          document.getElementById('cert-box-icon').textContent = '✓';
+          certBox.classList.add('has-file');
         }
       });
     }
@@ -232,14 +252,19 @@
       const name        = document.getElementById('artist-name').value.trim();
       const email       = document.getElementById('artist-email').value.trim();
       const password    = document.getElementById('artist-password').value;
-      const photoUrl    = document.getElementById('artist-photo-url').value.trim();
+      const photoUrl    = uploadedPhotoName || '';
       const videoUrl    = document.getElementById('artist-video-url').value.trim();
-      const genre       = genreInput.value;
+      
+      /* Collect multiple selected genres */
+      const selectedGenreEls = document.querySelectorAll('.genre-option.is-selected');
+      const selectedGenres = Array.from(selectedGenreEls).map(el => el.dataset.genre);
+      const genre       = selectedGenres.length > 0 ? selectedGenres.join(',') : 'jazz';
+
       const cache       = parseInt(document.getElementById('artist-cache').value, 10) || 500;
       const radius      = parseInt(document.getElementById('artist-radius').value, 10) || 50;
       const iban        = document.getElementById('artist-iban').value.trim();
       const bankHolder  = document.getElementById('artist-bank-holder').value.trim();
-      const bankCert    = document.getElementById('artist-bank-cert').value.trim();
+      const bankCert    = uploadedCertName || '';
       const description = document.getElementById('artist-desc').value.trim();
 
       try {

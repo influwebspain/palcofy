@@ -184,30 +184,33 @@
                 <input type="email" id="field-email" placeholder="tu@email.com" readonly />
               </div>
               <div class="app-field">
-                <label for="field-photo-url">Foto de perfil (Subir archivo o Enlace)</label>
-                <input type="file" id="field-photo-file" accept="image/*" style="margin-bottom:6px;font-size:12px;" />
-                <input type="text" id="field-photo-url" placeholder="https://ejemplo.com/foto.jpg" />
+                <label>Foto de Perfil (Subir imagen)</label>
+                <div class="upload-box" id="settings-photo-box">
+                  <input type="file" id="field-photo-file" accept="image/*" style="display:none;" />
+                  <div class="upload-box-icon" id="settings-photo-icon">📸</div>
+                  <div class="upload-box-text" id="settings-photo-text">Subir foto de perfil</div>
+                  <div class="upload-box-sub">JPG, PNG o WEBP</div>
+                </div>
               </div>
               <div class="app-field">
-                <label for="field-video-url">Vídeo Promo (Enlace YouTube/Vimeo o Archivo)</label>
-                <input type="file" id="field-video-file" accept="video/*" style="margin-bottom:6px;font-size:12px;" />
-                <input type="text" id="field-video-url" placeholder="https://youtube.com/watch?v=..." />
+                <label for="field-video-url">Vídeo Promo (Enlace YouTube / Vimeo)</label>
+                <input type="url" id="field-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-top:4px;" />
               </div>
               <div class="app-field span-full">
-                <label>Género musical</label>
+                <label>Géneros musicales (Puedes seleccionar varios)</label>
                 <div class="genre-pills" id="genre-pills">
-                  <button type="button" class="genre-pill" data-genre="jazz">Jazz</button>
-                  <button type="button" class="genre-pill" data-genre="pop">Pop</button>
-                  <button type="button" class="genre-pill" data-genre="rock">Rock</button>
+                  <button type="button" class="genre-pill" data-genre="jazz">Jazz & Soul</button>
+                  <button type="button" class="genre-pill" data-genre="pop">Pop & Indie</button>
+                  <button type="button" class="genre-pill" data-genre="rock">Rock & Blues</button>
                   <button type="button" class="genre-pill" data-genre="electronic">Electrónica</button>
                   <button type="button" class="genre-pill" data-genre="classical">Clásica</button>
                   <button type="button" class="genre-pill" data-genre="flamenco">Flamenco</button>
-                  <button type="button" class="genre-pill" data-genre="reggae">Reggae</button>
-                  <button type="button" class="genre-pill" data-genre="latin">Latina</button>
-                  <button type="button" class="genre-pill" data-genre="indie">Indie</button>
-                  <button type="button" class="genre-pill" data-genre="folk">Folk</button>
-                  <button type="button" class="genre-pill" data-genre="blues">Blues</button>
-                  <button type="button" class="genre-pill" data-genre="soul">Soul</button>
+                  <button type="button" class="genre-pill" data-genre="reggae">Reggae & Ska</button>
+                  <button type="button" class="genre-pill" data-genre="latin">Latina & Salsa</button>
+                  <button type="button" class="genre-pill" data-genre="urban">Urban & R&B</button>
+                  <button type="button" class="genre-pill" data-genre="folk">Folk & Acústico</button>
+                  <button type="button" class="genre-pill" data-genre="funk">Funk & Disco</button>
+                  <button type="button" class="genre-pill" data-genre="remember">Remember & Retro</button>
                 </div>
               </div>
               <div class="app-field">
@@ -268,7 +271,7 @@
       <!-- 3. Datos bancarios -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           <h2>Datos bancarios y Certificado</h2>
           <span class="section-desc">Para recibir tus liquidaciones y verificación</span>
         </div>
@@ -290,9 +293,13 @@
                 <input type="text" id="field-bank-holder" placeholder="Nombre completo del titular" />
               </div>
               <div class="app-field span-full">
-                <label for="field-bank-cert">Certificado de Titularidad Bancaria (Subir PDF/Documento)</label>
-                <input type="file" id="field-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="margin-bottom:6px;font-size:12px;" />
-                <input type="text" id="field-bank-cert" placeholder="Ej: Certificado_Titularidad_BBVA.pdf" />
+                <label>Certificado de Titularidad Bancaria (Subir PDF)</label>
+                <div class="upload-box" id="settings-cert-box">
+                  <input type="file" id="field-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none;" />
+                  <div class="upload-box-icon" id="settings-cert-icon">📄</div>
+                  <div class="upload-box-text" id="settings-cert-text">Subir certificado bancario PDF</div>
+                  <div class="upload-box-sub">Documento oficial PDF o imagen del banco</div>
+                </div>
               </div>
             </div>
             <p style="font-size:11px;color:var(--app-text-muted);margin-top:12px;line-height:1.5;">
@@ -595,32 +602,35 @@
       el.addEventListener('input', updateDirtyState);
     });
 
-    /* Auto-fill text fields when files are selected */
-    const photoFileEl = document.getElementById('field-photo-file');
-    if (photoFileEl) {
-      photoFileEl.addEventListener('change', (e) => {
+    /* Dropzone Photo */
+    const settingsPhotoBox = document.getElementById('settings-photo-box');
+    const settingsPhotoInput = document.getElementById('field-photo-file');
+    if (settingsPhotoBox && settingsPhotoInput) {
+      settingsPhotoBox.addEventListener('click', () => settingsPhotoInput.click());
+      settingsPhotoInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-          fields.photoUrl.value = e.target.files[0].name;
+          const fn = e.target.files[0].name;
+          document.getElementById('settings-photo-text').textContent = fn;
+          document.getElementById('settings-photo-icon').textContent = '✓';
+          settingsPhotoBox.classList.add('has-file');
+          if (fields.photoUrl) fields.photoUrl = fn;
           updateDirtyState();
         }
       });
     }
 
-    const videoFileEl = document.getElementById('field-video-file');
-    if (videoFileEl) {
-      videoFileEl.addEventListener('change', (e) => {
+    /* Dropzone Cert */
+    const settingsCertBox = document.getElementById('settings-cert-box');
+    const settingsCertInput = document.getElementById('field-bank-cert-file');
+    if (settingsCertBox && settingsCertInput) {
+      settingsCertBox.addEventListener('click', () => settingsCertInput.click());
+      settingsCertInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-          fields.videoUrl.value = e.target.files[0].name;
-          updateDirtyState();
-        }
-      });
-    }
-
-    const bankCertFileEl = document.getElementById('field-bank-cert-file');
-    if (bankCertFileEl) {
-      bankCertFileEl.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          fields.bankCert.value = e.target.files[0].name;
+          const fn = e.target.files[0].name;
+          document.getElementById('settings-cert-text').textContent = fn;
+          document.getElementById('settings-cert-icon').textContent = '✓';
+          settingsCertBox.classList.add('has-file');
+          if (fields.bankCert) fields.bankCert = fn;
           updateDirtyState();
         }
       });
@@ -630,11 +640,10 @@
       el.addEventListener('change', updateDirtyState);
     });
 
-    /* ---- Genre pill click ---- */
+    /* ---- Genre pill click (Multi-select) ---- */
     genrePills.forEach(pill => {
       pill.addEventListener('click', () => {
-        genrePills.forEach(p => p.classList.remove('is-selected'));
-        pill.classList.add('is-selected');
+        pill.classList.toggle('is-selected');
         updateDirtyState();
       });
     });
