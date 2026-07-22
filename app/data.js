@@ -287,6 +287,153 @@ export async function createBooking({ venueId, artistId, artistName, date, time,
   return booking.id;
 }
 
+/* =========================================================
+   EVENT CALLS & CANDIDATES API (Convocatorias)
+   ========================================================= */
+const DEMO_EVENTS_KEY = 'palcofy.demo.events';
+
+function demoEvents() {
+  try { return JSON.parse(localStorage.getItem(DEMO_EVENTS_KEY)) || []; } catch { return []; }
+}
+function demoSaveEvents(evts) { localStorage.setItem(DEMO_EVENTS_KEY, JSON.stringify(evts)); }
+
+function seedEvents() {
+  if (demoEvents().length > 0) return;
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const fmt = (d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  demoSaveEvents([
+    {
+      id: 'evt_1', venueId: 'v1', venueName: 'Hotel Vértice Madrid',
+      title: 'Noche de Jazz & Soul en Terraza', date: fmt(15), time: '21:00',
+      genre: 'jazz', budget: 750, notes: 'Se ofrece cena para los músicos y camerino.',
+      status: 'open', candidates: [
+        { id: 'c1', artistId: '1', artistName: 'Carlos Vives Trio', artistGenre: 'jazz', artistCache: 800, rating: 4.9, appliedAt: new Date().toISOString() },
+        { id: 'c2', artistId: '4', artistName: 'Quinteto Sol', artistGenre: 'jazz', artistCache: 350, rating: 4.6, appliedAt: new Date().toISOString() }
+      ],
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'evt_2', venueId: 'v2', venueName: 'Rooftop The Standard',
+      title: 'Sunset Session — Pop & DJ Set', date: fmt(22), time: '20:00',
+      genre: 'electronic', budget: 600, notes: 'Equipo de sonido e iluminación incluidos.',
+      status: 'open', candidates: [
+        { id: 'c3', artistId: '7', artistName: 'DJ Martín Vega', artistGenre: 'electronic', artistCache: 400, rating: 4.4, appliedAt: new Date().toISOString() }
+      ],
+      createdAt: new Date().toISOString()
+    }
+  ]);
+}
+
+export async function createEventCall({ venueId, venueName, title, date, time, genre, budget, notes }) {
+  const eventCall = {
+    id: `evt_${Date.now()}`,
+    venueId, venueName: venueName || 'Hotel Partner',
+    title: title || 'Convocatoria Musical',
+    date, time: time || '21:00',
+    genre: genre || 'jazz',
+    budget: parseInt(budget, 10) || 500,
+    notes: notes || '',
+    status: 'open',
+    candidates: [],
+    createdAt: new Date().toISOString()
+  };
+
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      await fbFirestore.setDoc(fbFirestore.doc(db, 'events', eventCall.id), eventCall);
+      return eventCall.id;
+    } catch (e) {
+      console.warn('PALCOFY: Error guardando evento en Firestore:', e);
+    }
+  }
+
+  const events = demoEvents();
+  events.push(eventCall);
+  demoSaveEvents(events);
+  return eventCall.id;
+}
+
+export async function listEventCalls() {
+  seedEvents();
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const snap = await fbFirestore.getDocs(fbFirestore.collection(db, 'events'));
+      const list = [];
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      if (list.length > 0) return list;
+    } catch (e) {
+      console.warn('PALCOFY: Error al listar eventos:', e);
+    }
+  }
+  return demoEvents();
+}
+
+export async function listVenueEventCalls(venueId) {
+  const events = await listEventCalls();
+  return events.filter(e => e.venueId === venueId || !venueId);
+}
+
+export async function applyToEventCall({ eventId, artistId, artistName, artistGenre, artistCache, artistRating }) {
+  const events = await listEventCalls();
+  const evt = events.find(e => e.id === eventId);
+  if (!evt) throw new Error('Evento no encontrado');
+
+  evt.candidates = evt.candidates || [];
+  if (evt.candidates.some(c => c.artistId === artistId)) {
+    return; // Ya postulado
+  }
+
+  evt.candidates.push({
+    id: `cand_${Date.now()}`,
+    artistId, artistName: artistName || 'Artista',
+    artistGenre: artistGenre || 'pop',
+    artistCache: artistCache || 500,
+    rating: artistRating || 4.8,
+    appliedAt: new Date().toISOString()
+  });
+
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      await fbFirestore.setDoc(fbFirestore.doc(db, 'events', eventId), evt);
+    } catch (e) {}
+  }
+  const demoList = demoEvents();
+  const idx = demoList.findIndex(e => e.id === eventId);
+  if (idx >= 0) { demoList[idx] = evt; demoSaveEvents(demoList); }
+  else { demoList.push(evt); demoSaveEvents(demoList); }
+}
+
+export async function acceptEventCandidate({ eventId, artistId, artistName, cache }) {
+  const events = await listEventCalls();
+  const evt = events.find(e => e.id === eventId);
+  if (evt) {
+    evt.status = 'closed';
+    evt.selectedArtistId = artistId;
+    evt.selectedArtistName = artistName;
+
+    if (isFirebaseConfigured && fbFirestore) {
+      try { await fbFirestore.setDoc(fbFirestore.doc(db, 'events', eventId), evt); } catch (e) {}
+    }
+    const demoList = demoEvents();
+    const idx = demoList.findIndex(e => e.id === eventId);
+    if (idx >= 0) { demoList[idx] = evt; demoSaveEvents(demoList); }
+  }
+
+  // Crear la reserva confirmada automáticamente
+  if (evt) {
+    await createBooking({
+      venueId: evt.venueId,
+      artistId,
+      artistName,
+      date: evt.date,
+      time: evt.time,
+      notes: `Confirmado desde convocatoria: ${evt.title}`,
+      cache: cache || evt.budget
+    });
+  }
+}
+
 export async function listBookings(venueId) {
   if (isFirebaseConfigured && fbFirestore) {
     try {

@@ -345,6 +345,22 @@
         </div>
       </div>
 
+      <!-- Convocatorias Abiertas de Hoteles -->
+      <div style="margin-bottom:28px;">
+        <div class="data-card">
+          <div class="data-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>Convocatorias Abiertas de Hoteles y Venues</h3>
+            <span class="badge badge--green"><span class="badge-dot"></span> Postulaciones Abiertas</span>
+          </div>
+          <div style="padding:20px;" id="open-calls-container">
+            <div class="empty-state">
+              <div class="spinner" style="margin:0 auto 16px;"></div>
+              <p>Cargando convocatorias abiertas...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Performances table -->
       <div class="data-card">
         <div class="data-card-header">
@@ -357,10 +373,10 @@
               <tr>
                 <th>Fecha</th>
                 <th>Venue</th>
-                <th>G&eacute;nero</th>
-                <th>Cach&eacute;</th>
+                <th>Género</th>
+                <th>Caché</th>
                 <th>Estado</th>
-                <th>Valoraci&oacute;n</th>
+                <th>Valoración</th>
               </tr>
             </thead>
             <tbody id="performances-body">
@@ -382,7 +398,7 @@
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, listPerformances } from './data.js';
+    import { getUserProfile, listPerformances, listEventCalls, applyToEventCall } from './data.js';
 
     /* =========================================================
        State
@@ -437,13 +453,113 @@
       const isPro = userProfile.pro || false;
       document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
 
-      /* Load performances */
+      /* Load performances & event calls */
       await loadPerformances();
+      await loadOpenEventCalls();
 
       /* Show shell */
       loadingEl.style.display = 'none';
       shellEl.style.display = '';
     });
+
+    /* =========================================================
+       Open Event Calls for Artists
+       ========================================================= */
+    async function loadOpenEventCalls() {
+      const container = document.getElementById('open-calls-container');
+      if (!container) return;
+
+      try {
+        const events = await listEventCalls();
+        const openEvents = events.filter(e => e.status === 'open');
+
+        if (openEvents.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📢</div>
+              <h3>Sin convocatorias abiertas hoy</h3>
+              <p>Vuelve pronto para consultar nuevas ofertas de hoteles y recintos.</p>
+            </div>`;
+          return;
+        }
+
+        const genreLabels = { jazz:'Jazz & Soul', pop:'Pop & Indie', rock:'Rock & Blues', electronic:'DJ & Electrónica', classical:'Clásica', flamenco:'Flamenco' };
+
+        container.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:16px;">
+            ${openEvents.map(evt => {
+              const candidates = evt.candidates || [];
+              const hasApplied = candidates.some(c => c.artistId === currentUser.uid);
+
+              return `
+                <div style="background:var(--app-surface-2);border:1px solid var(--app-border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;">
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--app-accent);text-transform:uppercase;letter-spacing:0.06em;">
+                      ${evt.venueName || 'Hotel Partner'}
+                    </div>
+                    <h4 style="font-size:16px;font-weight:700;color:white;margin-top:2px;">${evt.title}</h4>
+                    <div style="font-size:12px;color:var(--app-text-muted);margin-top:4px;">
+                      📅 ${evt.date} • ⏰ ${evt.time} • ${genreLabels[evt.genre] || evt.genre}
+                    </div>
+                  </div>
+
+                  <div style="font-size:13px;color:var(--app-text-muted);line-height:1.4;">
+                    ${evt.notes || 'El recinto busca artista para ambientar la velada.'}
+                  </div>
+
+                  <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--app-border);padding-top:12px;margin-top:auto;">
+                    <div>
+                      <div style="font-size:10px;text-transform:uppercase;color:var(--app-text-muted);">Presupuesto</div>
+                      <div style="font-size:16px;font-weight:800;color:var(--app-green);">${evt.budget} €</div>
+                    </div>
+                    ${hasApplied ? `
+                      <span class="badge badge--green" style="font-size:12px;padding:6px 12px;">Postulado ✓</span>
+                    ` : `
+                      <button class="app-btn app-btn--primary apply-btn" data-evt="${evt.id}" style="width:auto;padding:8px 16px;font-size:12px;">
+                        Postularme / Aplicar
+                      </button>
+                    `}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+        document.querySelectorAll('.apply-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const eventId = btn.dataset.evt;
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            try {
+              const name  = userProfile?.name || currentUser.displayName || 'Artista';
+              const genre = userProfile?.genre || 'pop';
+              const cache = userProfile?.cache || 500;
+
+              await applyToEventCall({
+                eventId,
+                artistId: currentUser.uid,
+                artistName: name,
+                artistGenre: genre,
+                artistCache: cache,
+                artistRating: userProfile?.rating || 4.8
+              });
+
+              alert('¡Te has postulado con éxito a este evento! El hotel podrá ver tu candidatura en su calendario y aceptarte.');
+              await loadOpenEventCalls();
+            } catch (e) {
+              alert('Error al postularte al evento.');
+              btn.disabled = false;
+              btn.textContent = 'Postularme / Aplicar';
+            }
+          });
+        });
+
+      } catch (e) {
+        console.warn('Error loading open calls:', e);
+      }
+    }
 
     /* =========================================================
        Load performances

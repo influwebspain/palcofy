@@ -484,12 +484,17 @@
       <div class="app-topbar">
         <div>
           <h1 id="greeting">Buenos días</h1>
-          <p class="topbar-sub">Gestiona la programación de tu venue.</p>
+          <p class="topbar-sub">Gestiona la programación y convocatorias de tu venue.</p>
         </div>
-        <a href="search.html" class="app-btn app-btn--primary" style="width:auto;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Reservar artista
-        </a>
+        <div style="display:flex;gap:10px;">
+          <button class="app-btn app-btn--primary" id="open-evt-modal-btn" style="width:auto;background:linear-gradient(135deg, var(--app-accent), #a855f7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Publicar Convocatoria
+          </button>
+          <a href="search.html" class="app-btn app-btn--ghost" style="width:auto;border:1px solid var(--app-border);">
+            Reservar artista
+          </a>
+        </div>
       </div>
 
       <!-- Summary stats -->
@@ -575,19 +580,87 @@
 
       </div>
 
+      <!-- Convocatorias publicadas y Postulaciones de Cantantes -->
+      <div style="margin-top:32px;">
+        <div class="data-card">
+          <div class="data-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>Convocatorias Publicadas y Postulaciones de Cantantes</h3>
+            <span class="badge badge--purple"><span class="badge-dot"></span> Abierta a Cantantes</span>
+          </div>
+          <div style="padding:20px;" id="venue-event-calls-container">
+            <div class="empty-state">
+              <div class="empty-icon">📢</div>
+              <h3>Sin convocatorias activas</h3>
+              <p>Haz clic en "+ Publicar Convocatoria" para anunciar una fecha disponible y recibir propuestas de cantantes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
+  </div>
+
+  <!-- Modal Publicar Convocatoria -->
+  <div id="event-call-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+    <div style="background:var(--app-surface);border:1px solid var(--app-border);border-radius:16px;padding:32px;max-width:480px;width:90%;">
+      <h3 style="font-size:20px;font-weight:800;color:white;margin-bottom:6px;">Publicar Convocatoria de Evento</h3>
+      <p style="font-size:13px;color:var(--app-text-muted);margin-bottom:20px;">Los cantantes registrados podrán ver esta fecha y postularse.</p>
+
+      <div class="app-field">
+        <label for="evt-title">Título del evento</label>
+        <input type="text" id="evt-title" placeholder="Ej: Noche de Jazz & Soul, DJ Sunset Session…" required />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="app-field">
+          <label for="evt-date">Fecha</label>
+          <input type="date" id="evt-date" required />
+        </div>
+        <div class="app-field">
+          <label for="evt-time">Hora de inicio</label>
+          <input type="time" id="evt-time" value="21:00" required />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="app-field">
+          <label for="evt-genre">Género buscado</label>
+          <select id="evt-genre" class="filter-select" style="width:100%;">
+            <option value="jazz">Jazz & Soul</option>
+            <option value="pop">Pop & Indie</option>
+            <option value="rock">Rock & Blues</option>
+            <option value="electronic">DJ & Electrónica</option>
+            <option value="classical">Clásica</option>
+            <option value="flamenco">Flamenco</option>
+          </select>
+        </div>
+        <div class="app-field">
+          <label for="evt-budget">Presupuesto ofertado (€)</label>
+          <input type="number" id="evt-budget" placeholder="600" value="600" min="50" step="50" required />
+        </div>
+      </div>
+      <div class="app-field">
+        <label for="evt-notes">Detalles u observaciones del recinto</label>
+        <input type="text" id="evt-notes" placeholder="Ej: Camerino disponible, sonorización incluida…" />
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:24px;">
+        <button class="app-btn app-btn--ghost" id="evt-modal-cancel" style="flex:1;">Cancelar</button>
+        <button class="app-btn app-btn--primary" id="evt-modal-save" style="flex:1;">Publicar Convocatoria</button>
+      </div>
+    </div>
   </div>
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, listBookings } from './data.js';
+    import { getUserProfile, listBookings, createEventCall, listVenueEventCalls, acceptEventCandidate } from './data.js';
 
     const loadingEl = document.getElementById('app-loading');
     const shellEl   = document.getElementById('app-shell');
 
     /* ---- State ---- */
     let currentUserId = null;
+    let currentUserProfile = null;
     let allBookings = [];
+    let venueCalls  = [];
     let currentYear, currentMonth; // 0-indexed month
     let selectedDate = null; // 'YYYY-MM-DD'
 
@@ -597,6 +670,163 @@
     ];
 
     const DAY_NAMES_SHORT = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+    /* ---- Event Call Modal & Calls Rendering ---- */
+    const evtModal     = document.getElementById('event-call-modal');
+    const openModalBtn = document.getElementById('open-evt-modal-btn');
+    const cancelEvtBtn = document.getElementById('evt-modal-cancel');
+    const saveEvtBtn   = document.getElementById('evt-modal-save');
+    const callsContainer = document.getElementById('venue-event-calls-container');
+
+    if (openModalBtn) {
+      openModalBtn.addEventListener('click', () => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('evt-date').value = todayStr;
+        document.getElementById('evt-title').value = '';
+        document.getElementById('evt-notes').value = '';
+        evtModal.style.display = 'flex';
+      });
+    }
+
+    if (cancelEvtBtn) {
+      cancelEvtBtn.addEventListener('click', () => {
+        evtModal.style.display = 'none';
+      });
+    }
+
+    if (saveEvtBtn) {
+      saveEvtBtn.addEventListener('click', async () => {
+        const title  = document.getElementById('evt-title').value.trim();
+        const date   = document.getElementById('evt-date').value;
+        const time   = document.getElementById('evt-time').value;
+        const genre  = document.getElementById('evt-genre').value;
+        const budget = document.getElementById('evt-budget').value;
+        const notes  = document.getElementById('evt-notes').value.trim();
+
+        if (!title || !date) { alert('Introduce título y fecha para la convocatoria.'); return; }
+
+        saveEvtBtn.disabled = true;
+        saveEvtBtn.textContent = 'Publicando...';
+
+        try {
+          const vName = currentUserProfile?.venueName || currentUserProfile?.name || 'Hotel Partner';
+          await createEventCall({
+            venueId: currentUserId,
+            venueName: vName,
+            title, date, time, genre, budget, notes
+          });
+          evtModal.style.display = 'none';
+          alert('¡Convocatoria publicada con éxito! Los cantantes podrán verla y postularse.');
+          await loadVenueCalls();
+        } catch (e) {
+          alert('Error al publicar convocatoria.');
+        } finally {
+          saveEvtBtn.disabled = false;
+          saveEvtBtn.textContent = 'Publicar Convocatoria';
+        }
+      });
+    }
+
+    async function loadVenueCalls() {
+      if (!currentUserId) return;
+      venueCalls = await listVenueEventCalls(currentUserId);
+      renderVenueCalls();
+    }
+
+    function renderVenueCalls() {
+      if (!callsContainer) return;
+      if (venueCalls.length === 0) {
+        callsContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📢</div>
+            <h3>Sin convocatorias activas</h3>
+            <p>Haz clic en "+ Publicar Convocatoria" para anunciar una fecha disponible y recibir propuestas de cantantes.</p>
+          </div>`;
+        return;
+      }
+
+      const genreLabels = { jazz:'Jazz & Soul', pop:'Pop & Indie', rock:'Rock & Blues', electronic:'DJ & Electrónica', classical:'Clásica', flamenco:'Flamenco' };
+
+      callsContainer.innerHTML = venueCalls.map(evt => {
+        const candidates = evt.candidates || [];
+        const isOpen = evt.status === 'open';
+
+        return `
+          <div style="background:var(--app-surface-2);border:1px solid var(--app-border);border-radius:14px;padding:20px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div>
+                <h4 style="font-size:16px;font-weight:700;color:white;">${evt.title}</h4>
+                <div style="font-size:12px;color:var(--app-text-muted);margin-top:2px;">
+                  📅 ${evt.date} a las ${evt.time} • Ofertado: <strong style="color:white;">${evt.budget}€</strong> • ${genreLabels[evt.genre] || evt.genre}
+                </div>
+              </div>
+              <span class="badge ${isOpen ? 'badge--green' : 'badge--gray'}">
+                <span class="badge-dot"></span> ${isOpen ? 'Convocatoria Abierta' : 'Asignado'}
+              </span>
+            </div>
+
+            ${evt.notes ? `<p style="font-size:12px;color:var(--app-text-muted);margin-bottom:12px;">${evt.notes}</p>` : ''}
+
+            <!-- Candidatos -->
+            <div style="border-top:1px solid var(--app-border);padding-top:12px;margin-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:var(--app-text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;">
+                Candidatos Postulados (${candidates.length})
+              </div>
+
+              ${candidates.length === 0 ? `
+                <div style="font-size:12px;color:var(--app-text-muted);font-style:italic;">
+                  Aún no hay cantantes postulados a esta fecha. Te avisaremos en cuanto aplique un artista.
+                </div>
+              ` : `
+                <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:10px;">
+                  ${candidates.map(c => `
+                    <div style="background:var(--app-surface);border:1px solid var(--app-border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;">
+                      <div>
+                        <div style="font-weight:700;font-size:14px;color:white;">${c.artistName}</div>
+                        <div style="font-size:11px;color:var(--app-text-muted);">
+                          Caché: ${c.artistCache}€ • Valoración: ★ ${c.rating || '4.8'}
+                        </div>
+                      </div>
+                      ${isOpen ? `
+                        <button class="app-btn app-btn--primary accept-cand-btn" data-evt="${evt.id}" data-artist-id="${c.artistId}" data-artist-name="${c.artistName}" data-cache="${c.artistCache}" style="padding:6px 12px;font-size:11px;width:auto;">
+                          Aceptar Cantante
+                        </button>
+                      ` : `
+                        <span class="badge badge--green" style="font-size:10px;">Seleccionado</span>
+                      `}
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.accept-cand-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const eventId    = btn.dataset.evt;
+          const artistId   = btn.dataset.artistId;
+          const artistName = btn.dataset.artistName;
+          const cache      = parseInt(btn.dataset.cache, 10);
+
+          if (confirm(`¿Deseas seleccionar a ${artistName} para este evento? Se confirmará la reserva automáticamente.`)) {
+            btn.disabled = true;
+            btn.textContent = 'Aceptando...';
+            try {
+              await acceptEventCandidate({ eventId, artistId, artistName, cache });
+              alert(`¡${artistName} ha sido contratado para el evento! La reserva ya aparece confirmada en tu calendario.`);
+              allBookings = await listBookings(currentUserId);
+              renderCalendar();
+              renderDetailPanel();
+              await loadVenueCalls();
+            } catch (e) {
+              alert('Error al aceptar candidato.');
+            }
+          }
+        });
+      });
+    }
 
     /* ---- Date helpers ---- */
     function dateKey(y, m, d) {
@@ -608,7 +838,6 @@
     }
 
     function getFirstDayOfMonth(y, m) {
-      // getDay() returns 0=Sun. We want Monday=0.
       const day = new Date(y, m, 1).getDay();
       return day === 0 ? 6 : day - 1;
     }
@@ -634,7 +863,6 @@
     function renderCalendar() {
       const grid = document.getElementById('calendar-grid');
 
-      // Keep the 7 day-header divs, remove day cells
       const headers = grid.querySelectorAll('.calendar-day-header');
       grid.innerHTML = '';
       headers.forEach(h => grid.appendChild(h));
@@ -645,7 +873,6 @@
       const daysInMonth = getDaysInMonth(currentYear, currentMonth);
       const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
 
-      // Previous month padding
       const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
       const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
@@ -656,13 +883,11 @@
         grid.appendChild(cell);
       }
 
-      // Current month days
       for (let d = 1; d <= daysInMonth; d++) {
         const cell = createDayCell(currentYear, currentMonth, d, false);
         grid.appendChild(cell);
       }
 
-      // Next month padding
       const totalCells = firstDay + daysInMonth;
       const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
@@ -676,27 +901,22 @@
       updateStats();
     }
 
-    function createDayCell(y, m, d, isOtherMonth) {
-      const key = dateKey(y, m, d);
-      const today = isToday(y, m, d);
-      const bookings = isOtherMonth ? [] : bookingsForDate(key);
-      const hasEvents = bookings.length > 0;
-
+    function createDayCell(year, month, day, isOtherMonth) {
       const cell = document.createElement('div');
-      cell.className = 'calendar-day';
-      if (isOtherMonth) cell.classList.add('is-empty');
-      if (today) cell.classList.add('is-today');
-      if (hasEvents) cell.classList.add('has-event');
-      if (selectedDate === key) cell.classList.add('is-selected');
+      const key = dateKey(year, month, day);
 
-      // Day number
+      cell.className = 'calendar-day';
+      if (isOtherMonth) cell.classList.add('other-month');
+      if (isToday(year, month, day)) cell.classList.add('today');
+      if (key === selectedDate) cell.classList.add('selected');
+
       const num = document.createElement('span');
       num.className = 'day-number';
-      num.textContent = d;
+      num.textContent = day;
       cell.appendChild(num);
 
-      // Event dots (small screen indicator)
-      if (hasEvents) {
+      const bookings = bookingsForDate(key);
+      if (bookings.length > 0 && !isOtherMonth) {
         const dots = document.createElement('div');
         dots.className = 'event-dots';
         bookings.slice(0, 3).forEach(b => {
@@ -707,7 +927,6 @@
         cell.appendChild(dots);
       }
 
-      // Click handler
       if (!isOtherMonth) {
         cell.addEventListener('click', () => {
           selectedDate = key;
@@ -808,10 +1027,7 @@
     /* ---- Navigation ---- */
     document.getElementById('prev-month').addEventListener('click', () => {
       currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
       selectedDate = null;
       renderCalendar();
       renderDetailPanel();
@@ -819,10 +1035,7 @@
 
     document.getElementById('next-month').addEventListener('click', () => {
       currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
       selectedDate = null;
       renderCalendar();
       renderDetailPanel();
@@ -855,10 +1068,11 @@
       }
 
       currentUserId = user.uid;
+      currentUserProfile = profile;
 
-      const name = profile.name || profile.venueName || user.email.split('@')[0];
-      document.getElementById('user-name').textContent = name;
-      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+      const venueDisplayName = profile.venueName || profile.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = venueDisplayName;
+      document.getElementById('user-avatar').textContent = venueDisplayName.charAt(0).toUpperCase();
 
       const plan = profile.plan || 'piloto';
       const planNames = { piloto: 'Piloto 199€', esencial: 'Esencial 350€', premium: 'Premium 850€' };
@@ -866,22 +1080,22 @@
 
       const hour = new Date().getHours();
       const greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
-      document.getElementById('greeting').textContent = `${greeting}, ${name}`;
+      document.getElementById('greeting').textContent = `${greeting}, ${venueDisplayName}`;
 
-      /* Load bookings */
+      /* Load bookings & event calls */
       try {
         allBookings = await listBookings(user.uid);
       } catch (e) {
         allBookings = [];
       }
 
-      /* Initialize calendar to current month */
       const now = new Date();
       currentYear = now.getFullYear();
       currentMonth = now.getMonth();
 
       renderCalendar();
       renderDetailPanel();
+      await loadVenueCalls();
 
       loadingEl.style.display = 'none';
       shellEl.style.display = '';

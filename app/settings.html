@@ -137,7 +137,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
           Buscar artistas
         </a>
-        <div class="sidebar-section">Facturacion</div>
+        <a href="calendar.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+        <div class="sidebar-section">Facturación</div>
         <a href="invoices.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           Facturas
@@ -149,7 +153,7 @@
         <div class="sidebar-section">Cuenta</div>
         <a href="settings.html" class="sidebar-link is-active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-          Configuracion
+          Configuración
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -161,7 +165,7 @@
           </div>
         </div>
         <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
-          Cerrar sesion
+          Cerrar sesión
         </button>
       </div>
     </aside>
@@ -170,8 +174,8 @@
     <main class="app-main">
       <div class="app-topbar">
         <div>
-          <h1>Configuracion</h1>
-          <p class="topbar-sub">Gestiona tu perfil, facturacion y preferencias.</p>
+          <h1>Configuración de la Empresa / Hotel</h1>
+          <p class="topbar-sub">Gestiona tu perfil corporativo, logotipo, dirección y preferencias.</p>
         </div>
       </div>
 
@@ -179,31 +183,39 @@
       <div class="settings-section">
         <div class="settings-section-header">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
-          <h2>Perfil del venue</h2>
+          <h2>Perfil corporativo del Hotel / Venue</h2>
         </div>
         <div class="data-card">
-          <div class="data-card-header"><h3>Informacion personal</h3></div>
+          <div class="data-card-header"><h3>Datos de la Empresa y Marca</h3></div>
           <div style="padding:20px;">
             <div class="field-grid">
+              <div class="app-field span-full">
+                <label for="field-venue-name">Nombre de la Empresa / Hotel (para la ficha y ofertas)</label>
+                <input type="text" id="field-venue-name" placeholder="Ej: Hotel Vértice Madrid, Rooftop Central…" style="font-weight:700;" />
+              </div>
+              <div class="app-field span-full">
+                <label for="field-logo-url">URL del Logotipo / Imagen corporativa</label>
+                <input type="text" id="field-logo-url" placeholder="https://ejemplo.com/logotipo.png" />
+              </div>
               <div class="app-field">
-                <label for="field-name">Nombre completo</label>
+                <label for="field-name">Persona de contacto / Responsable</label>
                 <input type="text" id="field-name" placeholder="Tu nombre" />
               </div>
               <div class="app-field">
-                <label for="field-email">Email</label>
+                <label for="field-email">Email corporativo</label>
                 <input type="email" id="field-email" placeholder="tu@email.com" readonly />
               </div>
               <div class="app-field">
-                <label for="field-venue-name">Nombre del venue</label>
-                <input type="text" id="field-venue-name" placeholder="Nombre de tu local" />
-              </div>
-              <div class="app-field">
-                <label for="field-phone">Telefono</label>
+                <label for="field-phone">Teléfono de contacto</label>
                 <input type="tel" id="field-phone" placeholder="+34 600 000 000" />
               </div>
+              <div class="app-field">
+                <label for="field-city">Ciudad</label>
+                <input type="text" id="field-city" placeholder="Madrid, Barcelona…" />
+              </div>
               <div class="app-field span-full">
-                <label for="field-address">Direccion</label>
-                <input type="text" id="field-address" placeholder="Calle, numero, ciudad, CP" />
+                <label for="field-address">Dirección completa del recinto</label>
+                <input type="text" id="field-address" placeholder="Calle, número, CP" />
               </div>
             </div>
           </div>
@@ -352,7 +364,9 @@
       name:          document.getElementById('field-name'),
       email:         document.getElementById('field-email'),
       venueName:     document.getElementById('field-venue-name'),
+      logoUrl:       document.getElementById('field-logo-url'),
       phone:         document.getElementById('field-phone'),
+      city:          document.getElementById('field-city'),
       address:       document.getElementById('field-address'),
       nif:           document.getElementById('field-nif'),
       razon:         document.getElementById('field-razon'),
@@ -374,7 +388,9 @@
       return {
         name:              fields.name.value.trim(),
         venueName:         fields.venueName.value.trim(),
+        logoUrl:           fields.logoUrl.value.trim(),
         phone:             fields.phone.value.trim(),
+        city:              fields.city ? fields.city.value.trim() : '',
         address:           fields.address.value.trim(),
         nif:               fields.nif.value.trim(),
         razon:             fields.razon.value.trim(),
@@ -388,8 +404,10 @@
     function populateFields(p) {
       fields.name.value          = p.name || '';
       fields.email.value         = p.email || '';
-      fields.venueName.value     = p.venueName || '';
+      fields.venueName.value     = p.venueName || p.name || '';
+      fields.logoUrl.value       = p.logoUrl || p.logo || '';
       fields.phone.value         = p.phone || '';
+      if (fields.city) fields.city.value = p.city || '';
       fields.address.value       = p.address || '';
       fields.nif.value           = p.nif || '';
       fields.razon.value         = p.razon || '';
