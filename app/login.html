@@ -184,10 +184,10 @@
         document.getElementById('login-password').value = 'AdminPalcofy2026!';
         try {
           await login('admin@palcofy.com', 'AdminPalcofy2026!');
-          window.location.href = 'admin.html';
         } catch (e) {
           console.error('Admin fast login error:', e);
         }
+        window.location.href = 'admin.html';
       });
     }
 
@@ -202,7 +202,17 @@
       errorEl.classList.remove('is-visible');
 
       try {
-        await login(email, pass);
+        const user = await login(email, pass);
+        if (email.toLowerCase() === 'admin@palcofy.com') {
+          window.location.href = 'admin.html';
+          return;
+        }
+        const profile = user ? await getUserProfile(user.uid) : null;
+        if (profile && profile.role) {
+          redirectByRole(profile.role);
+        } else {
+          window.location.href = 'dashboard-venue.html';
+        }
       } catch (err) {
         console.error('Login error:', err);
         const msg = err.code === 'auth/user-not-found'

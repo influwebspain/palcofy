@@ -515,7 +515,7 @@
 
       currentUid = user.uid;
 
-      const displayName = profile.name || profile.venueName || user.email.split('@')[0];
+      const displayName = profile.venueName || profile.name || user.email.split('@')[0];
       document.getElementById('user-name').textContent = displayName;
       document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
       const planNames = { piloto: 'Piloto 199EUR', esencial: 'Esencial 350EUR', premium: 'Premium 850EUR' };

@@ -184,11 +184,13 @@
                 <input type="email" id="field-email" placeholder="tu@email.com" readonly />
               </div>
               <div class="app-field">
-                <label for="field-photo-url">URL Foto de perfil / Avatar</label>
+                <label for="field-photo-url">Foto de perfil (Subir archivo o Enlace)</label>
+                <input type="file" id="field-photo-file" accept="image/*" style="margin-bottom:6px;font-size:12px;" />
                 <input type="text" id="field-photo-url" placeholder="https://ejemplo.com/foto.jpg" />
               </div>
               <div class="app-field">
-                <label for="field-video-url">URL Vídeo Promo (YouTube/Vimeo)</label>
+                <label for="field-video-url">Vídeo Promo (Enlace YouTube/Vimeo o Archivo)</label>
+                <input type="file" id="field-video-file" accept="video/*" style="margin-bottom:6px;font-size:12px;" />
                 <input type="text" id="field-video-url" placeholder="https://youtube.com/watch?v=..." />
               </div>
               <div class="app-field span-full">
@@ -288,7 +290,8 @@
                 <input type="text" id="field-bank-holder" placeholder="Nombre completo del titular" />
               </div>
               <div class="app-field span-full">
-                <label for="field-bank-cert">Certificado de Titularidad Bancaria (Nombre/Documento)</label>
+                <label for="field-bank-cert">Certificado de Titularidad Bancaria (Subir PDF/Documento)</label>
+                <input type="file" id="field-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="margin-bottom:6px;font-size:12px;" />
                 <input type="text" id="field-bank-cert" placeholder="Ej: Certificado_Titularidad_BBVA.pdf" />
               </div>
             </div>
@@ -591,6 +594,37 @@
     Object.values(fields).forEach(el => {
       el.addEventListener('input', updateDirtyState);
     });
+
+    /* Auto-fill text fields when files are selected */
+    const photoFileEl = document.getElementById('field-photo-file');
+    if (photoFileEl) {
+      photoFileEl.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          fields.photoUrl.value = e.target.files[0].name;
+          updateDirtyState();
+        }
+      });
+    }
+
+    const videoFileEl = document.getElementById('field-video-file');
+    if (videoFileEl) {
+      videoFileEl.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          fields.videoUrl.value = e.target.files[0].name;
+          updateDirtyState();
+        }
+      });
+    }
+
+    const bankCertFileEl = document.getElementById('field-bank-cert-file');
+    if (bankCertFileEl) {
+      bankCertFileEl.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          fields.bankCert.value = e.target.files[0].name;
+          updateDirtyState();
+        }
+      });
+    }
 
     Object.values(toggleIds).forEach(el => {
       el.addEventListener('change', updateDirtyState);

@@ -229,7 +229,7 @@
       }
 
       /* Rellenar UI */
-      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      const name = profile.venueName || profile.name || user.email.split('@')[0];
       document.getElementById('user-name').textContent = name;
       document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
 

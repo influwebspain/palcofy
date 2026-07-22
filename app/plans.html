@@ -244,7 +244,7 @@
     });
 
     function populateSidebar(p) {
-      var n = p.name||p.venueName||user.email.split('@')[0];
+      var n = p.venueName||p.name||user.email.split('@')[0];
       document.getElementById('user-name').textContent = n;
       document.getElementById('user-avatar').textContent = n.charAt(0).toUpperCase();
       var d = PLANS[p.plan||'piloto'] || PLANS.piloto;
