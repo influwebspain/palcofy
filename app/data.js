@@ -13,6 +13,7 @@ import {
    DEMO DATA
    ========================================================= */
 const DEMO_ARTISTS_KEY       = 'palcofy.demo.artists';
+const DEMO_VENUES_KEY        = 'palcofy.demo.venues';
 const DEMO_BOOKINGS_KEY      = 'palcofy.demo.bookings';
 const DEMO_INVOICES_KEY      = 'palcofy.demo.invoices';
 const DEMO_PERFORMANCES_KEY  = 'palcofy.demo.performances';
@@ -23,10 +24,11 @@ function demoArtists() {
   try { return JSON.parse(localStorage.getItem(DEMO_ARTISTS_KEY)); } catch { return null; }
 }
 function demoSaveArtists(a) { localStorage.setItem(DEMO_ARTISTS_KEY, JSON.stringify(a)); }
-function demoBookings() {
-  try { return JSON.parse(localStorage.getItem(DEMO_BOOKINGS_KEY)) || []; } catch { return []; }
+
+function demoVenues() {
+  try { return JSON.parse(localStorage.getItem(DEMO_VENUES_KEY)); } catch { return null; }
 }
-function demoSaveBookings(b) { localStorage.setItem(DEMO_BOOKINGS_KEY, JSON.stringify(b)); }
+function demoSaveVenues(v) { localStorage.setItem(DEMO_VENUES_KEY, JSON.stringify(v)); }
 
 function seedArtists() {
   if (demoArtists()) return;
@@ -39,6 +41,17 @@ function seedArtists() {
     { id:'6', name:'Ensemble Clásica', genre:'classical', cache:1500, available:true, pro:true, radius:35, description:'Cuarteto de cuerdas. Repertorio clásico y contemporáneo.', rating:4.9 },
     { id:'7', name:'DJ Martín Vega', genre:'electronic', cache:400, available:true, pro:false, radius:20, description:'House tech y deep house. Sets de 2-4 horas.', rating:4.4 },
     { id:'8', name:'Flamenco Vivo', genre:'rock', cache:900, available:true, pro:true, radius:45, description:'Flamenco contemporáneo con toques de world music.', rating:4.8 },
+  ]);
+}
+
+function seedVenues() {
+  if (demoVenues()) return;
+  demoSaveVenues([
+    { id:'v1', name:'Hotel Vértice Madrid', venueName:'Hotel Vértice Madrid', role:'venue', city:'Madrid', address:'Gran Vía 42', plan:'pro', capacity:300, type:'hotel', description:'Hotel boutique de 4 estrellas con terraza panorámica y escenario acondicionado.', rating:4.9, activeEvents:4 },
+    { id:'v2', name:'Rooftop The Standard', venueName:'Rooftop The Standard', role:'venue', city:'Madrid', address:'Plaza de España 8', plan:'piloto', capacity:150, type:'rooftop', description:'Espacio al aire libre ideal para DJ sets, música electrónica e indie pop.', rating:4.8, activeEvents:2 },
+    { id:'v3', name:'Hotel Urso & Spa', venueName:'Hotel Urso & Spa', role:'venue', city:'Madrid', address:'Calle de la Puebla 5', plan:'pro', capacity:100, type:'hotel', description:'Entorno íntimo y exclusivo con piano de cola para jazz y música de cámara.', rating:4.9, activeEvents:3 },
+    { id:'v4', name:'NH Collection Eurobuilding', venueName:'NH Collection Eurobuilding', role:'venue', city:'Madrid', address:'Padre Damián 23', plan:'pro', capacity:500, type:'hotel', description:'Gran complejo hostelero especializado en galas, eventos corporativos y conciertos.', rating:4.7, activeEvents:6 },
+    { id:'v5', name:'Bar Malasaña Live', venueName:'Bar Malasaña Live', role:'venue', city:'Madrid', address:'Calle Manuela Malasaña 14', plan:'piloto', capacity:80, type:'bar', description:'Mítica sala del centro de Madrid para actuaciones en vivo de rock y pop indie.', rating:4.6, activeEvents:1 },
   ]);
 }
 
@@ -156,15 +169,69 @@ export async function updateUserProfile(uid, data) {
 export async function listArtists() {
   if (isFirebaseConfigured && fbFirestore) {
     try {
-      const q = fbFirestore.query(fbFirestore.collection(db, 'users'), fbFirestore.where('role', '==', 'artist'));
-      const snap = await fbFirestore.getDocs(q);
+      const snap = await fbFirestore.getDocs(fbFirestore.collection(db, 'users'));
       const list = [];
-      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+      snap.forEach(d => {
+        const data = d.data();
+        const r = (data.role || '').toLowerCase();
+        if (r === 'artist' || r === 'cantante' || r === 'singer' || data.genre || data.cache) {
+          list.push({ id: d.id, ...data });
+        }
+      });
+      seedArtists();
+      const demo = demoArtists() || [];
+      demo.forEach(da => {
+        if (!list.some(a => a.id === da.id || a.email === da.email)) {
+          list.push(da);
+        }
+      });
       return list;
-    } catch { return []; }
+    } catch (e) {
+      console.warn('PALCOFY: Error al consultar artistas de Firestore:', e);
+    }
   }
   seedArtists();
   return demoArtists() || [];
+}
+
+export async function listVenues() {
+  if (isFirebaseConfigured && fbFirestore) {
+    try {
+      const snap = await fbFirestore.getDocs(fbFirestore.collection(db, 'users'));
+      const list = [];
+      snap.forEach(d => {
+        const data = d.data();
+        const r = (data.role || '').toLowerCase();
+        if (r === 'venue' || r === 'hotel' || r === 'recinto' || r === 'cliente' || data.venueName) {
+          list.push({
+            id: d.id,
+            name: data.venueName || data.name || 'Venue Registrado',
+            venueName: data.venueName || data.name || 'Venue Registrado',
+            city: data.city || 'Madrid',
+            address: data.address || 'Ubicación verificada',
+            plan: data.plan || 'piloto',
+            capacity: data.capacity || 150,
+            type: data.type || 'hotel',
+            description: data.description || 'Recinto/Hotel verificado en la red PALCOFY.',
+            rating: data.rating || 4.8,
+            ...data
+          });
+        }
+      });
+      seedVenues();
+      const demo = demoVenues() || [];
+      demo.forEach(dv => {
+        if (!list.some(v => v.id === dv.id || (v.email && v.email === dv.email))) {
+          list.push(dv);
+        }
+      });
+      return list;
+    } catch (e) {
+      console.warn('PALCOFY: Error al consultar venues de Firestore:', e);
+    }
+  }
+  seedVenues();
+  return demoVenues() || [];
 }
 
 export async function createBooking({ venueId, artistId, artistName, date, time, notes, cache }) {

@@ -36,19 +36,30 @@ function _notify(user) { if (_authCb) _authCb(user); }
    ========================================================= */
 
 export async function register({ name, email, password, role }) {
+  const normalizedRole = (role || 'venue').toLowerCase();
   if (isFirebaseConfigured && fbAuth) {
     const cred = await fbAuth.createUserWithEmailAndPassword(auth, email, password);
 
-    /* Fire-and-forget: perfil + Firestore en background (no bloquear UI) */
     const profileData = {
-      name, email, role,
+      name, email, role: normalizedRole,
       createdAt: new Date().toISOString(),
-      ...(role === 'venue'
-        ? { venueName: name, plan: 'piloto', eventsUsed: 0, eventsLimit: 4 }
-        : { genre: '', cache: 500, pro: false, available: true, radius: 50 })
+      ...(normalizedRole === 'venue' || normalizedRole === 'hotel'
+        ? { venueName: name, plan: 'piloto', eventsUsed: 0, eventsLimit: 4, city: 'Madrid', address: 'Dirección por definir', description: 'Venue verificado en la red PALCOFY.' }
+        : { genre: '', cache: 500, pro: false, available: true, radius: 50, description: 'Artista verificado en la plataforma PALCOFY.' })
     };
-    fbAuth.updateProfile(cred.user, { displayName: name }).catch(() => {});
-    fbFirestore.setDoc(fbFirestore.doc(db, 'users', cred.user.uid), profileData).catch(() => {});
+    try {
+      await fbAuth.updateProfile(cred.user, { displayName: name });
+    } catch (e) {
+      console.warn('PALCOFY: updateProfile warn:', e);
+    }
+    try {
+      await fbFirestore.setDoc(fbFirestore.doc(db, 'users', cred.user.uid), profileData);
+      console.info('PALCOFY ✓ Perfil guardado en Firestore:', cred.user.uid);
+    } catch (e) {
+      console.error('PALCOFY ❌ Error al guardar perfil en Firestore:', e);
+    }
+    /* Guardar en caché local inmediatamente */
+    localStorage.setItem(`palcofy.profile.${cred.user.uid}`, JSON.stringify({ id: cred.user.uid, ...profileData }));
 
     return cred.user;
   }

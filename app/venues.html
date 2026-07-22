@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALCOFY — Directorio de Hoteles y Recintos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .venue-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--app-radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 200ms ease;
+    }
+    .venue-card:hover {
+      border-color: var(--app-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    .venue-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .venue-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.1));
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .venue-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .venue-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .venue-location {
+      font-size: 12px;
+      color: var(--app-text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .venue-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+    }
+    .venue-detail-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--app-text-muted);
+    }
+    .venue-detail-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      margin-top: 2px;
+    }
+    .venue-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-loading" id="app-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3"    y="10" width="2" height="5"  rx="1" fill="currentColor"/>
+            <rect x="7.5"  y="6"  width="2" height="13" rx="1" fill="currentColor"/>
+            <rect x="12"   y="2"  width="2" height="20" rx="1" fill="white"/>
+            <rect x="16.5" y="7"  width="2" height="11" rx="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">PALCOFY</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Principal</div>
+        <a href="dashboard-artist.html" class="sidebar-link" id="nav-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="venues.html" class="sidebar-link is-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>
+          Hoteles y Recintos
+        </a>
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          Buscar artistas
+        </a>
+        <a href="calendar-artist.html" class="sidebar-link" id="nav-calendar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Calendario
+        </a>
+
+        <div class="sidebar-section">Finanzas</div>
+        <a href="settlements.html" class="sidebar-link" id="nav-finances">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Liquidaciones
+        </a>
+
+        <div class="sidebar-section">Cuenta</div>
+        <a href="settings-artist.html" class="sidebar-link" id="nav-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Configuración
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">U</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Usuario</div>
+            <div class="sidebar-user-role" id="user-role-label">Palcofy User</div>
+          </div>
+        </div>
+        <button class="app-btn app-btn--ghost" id="logout-btn" style="margin-top:10px;font-size:12px;padding:8px;">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Directorio de Hoteles y Recintos</h1>
+          <p class="topbar-sub">Descubre y conecta con los espacios verificados en la red PALCOFY.</p>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="search-bar">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input type="text" id="search-venue" placeholder="Buscar hotel, recinto o dirección…" />
+        </div>
+        <select class="filter-select" id="filter-city">
+          <option value="">Todas las ciudades</option>
+          <option value="madrid">Madrid</option>
+          <option value="barcelona">Barcelona</option>
+          <option value="valencia">Valencia</option>
+          <option value="sevilla">Sevilla</option>
+        </select>
+        <select class="filter-select" id="filter-plan">
+          <option value="">Todos los planes</option>
+          <option value="pro">PALCOFY PRO</option>
+          <option value="piloto">Piloto / Estándar</option>
+        </select>
+        <select class="filter-select" id="filter-capacity">
+          <option value="">Cualquier aforo</option>
+          <option value="small">Hasta 100 pax</option>
+          <option value="mid">100 – 300 pax</option>
+          <option value="large">Más de 300 pax</option>
+        </select>
+      </div>
+
+      <!-- Resultados contador -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <span style="font-size:13px;color:var(--app-text-muted);" id="venues-count">Cargando recintos…</span>
+        <div style="display:flex;gap:6px;">
+          <span class="badge badge--green"><span class="badge-dot"></span> Verificado</span>
+          <span class="badge badge--purple"><span class="badge-dot"></span> PALCOFY Partner</span>
+        </div>
+      </div>
+
+      <!-- Grid de recintos -->
+      <div class="artist-grid" id="venues-grid">
+        <!-- Se llena con JS -->
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-icon">🏨</div>
+        <h3>Sin hoteles o recintos encontrados</h3>
+        <p>Prueba a ajustar los criterios de búsqueda o eliminar los filtros.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { onAuthChange, logout } from './auth.js';
+    import { getUserProfile, listVenues } from './data.js';
+
+    const loadingEl  = document.getElementById('app-loading');
+    const shellEl    = document.getElementById('app-shell');
+    const grid       = document.getElementById('venues-grid');
+    const emptyEl    = document.getElementById('empty-state');
+    const countEl    = document.getElementById('venues-count');
+    let allVenues    = [];
+
+    /* ---- Auth Guard ---- */
+    onAuthChange(async (user) => {
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      let profile = null;
+      for (let i = 0; i < 3; i++) {
+        profile = await getUserProfile(user.uid);
+        if (profile) break;
+        await new Promise(r => setTimeout(r, 400));
+      }
+
+      if (!profile) {
+        profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue' };
+      }
+
+      const name = profile.name || profile.venueName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('user-role-label').textContent = profile.role === 'venue' ? 'Venue / Hotel' : 'Artista';
+
+      /* Ajustar enlaces según rol */
+      if (profile.role === 'venue') {
+        document.getElementById('nav-dashboard').href = 'dashboard-venue.html';
+        document.getElementById('nav-calendar').href = 'calendar.html';
+        document.getElementById('nav-finances').href = 'invoices.html';
+        document.getElementById('nav-settings').href = 'settings.html';
+      }
+
+      allVenues = await listVenues();
+      renderVenues(allVenues);
+
+      loadingEl.style.display = 'none';
+      shellEl.style.display = '';
+    });
+
+    /* ---- Render Recintos ---- */
+    function renderVenues(venues) {
+      if (venues.length === 0) {
+        grid.innerHTML = '';
+        emptyEl.style.display = '';
+        countEl.textContent = '0 recintos encontrados';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      countEl.textContent = `${venues.length} recinto${venues.length !== 1 ? 's' : ''} registrado${venues.length !== 1 ? 's' : ''}`;
+
+      const iconTypes = { hotel: '🏨', rooftop: '🏙️', bar: '🎷', club: '🎵', hall: '🏛️' };
+
+      grid.innerHTML = venues.map(v => `
+        <div class="venue-card" data-id="${v.id}">
+          <div class="venue-card-header">
+            <div class="venue-avatar">
+              ${iconTypes[v.type] || '🏨'}
+            </div>
+            <div class="venue-info">
+              <div class="venue-name">
+                ${v.venueName || v.name || 'Hotel Partner'}
+                ${(v.plan === 'pro' || v.pro) ? '<span class="badge badge--gold" style="font-size:9px;">PRO</span>' : ''}
+              </div>
+              <div class="venue-location">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${v.address || 'Ubicación'}, ${v.city || 'Madrid'}
+              </div>
+            </div>
+            <span class="badge badge--green">
+              <span class="badge-dot"></span> Verificado
+            </span>
+          </div>
+
+          <p style="font-size:13px;color:var(--app-text-muted);line-height:1.5;">
+            ${v.description || 'Recinto verificado en la plataforma PALCOFY para la programación de música en directo.'}
+          </p>
+
+          <div class="venue-details">
+            <div>
+              <div class="venue-detail-label">Aforo</div>
+              <div class="venue-detail-value">${v.capacity || 150} pax</div>
+            </div>
+            <div>
+              <div class="venue-detail-label">Tipo</div>
+              <div class="venue-detail-value">${(v.type || 'Hotel').toUpperCase()}</div>
+            </div>
+            <div>
+              <div class="venue-detail-label">Valoración</div>
+              <div class="venue-detail-value">${v.rating ? '★ ' + v.rating : '4.8'}</div>
+            </div>
+          </div>
+
+          <div class="venue-actions">
+            <button class="app-btn app-btn--primary" style="flex:1;" onclick="alert('Consulta con ${v.venueName || v.name}: Espacio listo para contrataciones.')">
+              Contactar recinto
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ---- Filtros ---- */
+    function applyFilters() {
+      const text     = document.getElementById('search-venue').value.toLowerCase();
+      const city     = document.getElementById('filter-city').value;
+      const plan     = document.getElementById('filter-plan').value;
+      const capacity = document.getElementById('filter-capacity').value;
+
+      let filtered = allVenues.filter(v => {
+        const fullText = `${v.venueName || ''} ${v.name || ''} ${v.address || ''} ${v.city || ''} ${v.description || ''}`.toLowerCase();
+        if (text && !fullText.includes(text)) return false;
+        if (city && (v.city || '').toLowerCase() !== city) return false;
+        if (plan && (v.plan || 'piloto') !== plan) return false;
+        if (capacity) {
+          const cap = v.capacity || 150;
+          if (capacity === 'small' && cap > 100) return false;
+          if (capacity === 'mid' && (cap < 100 || cap > 300)) return false;
+          if (capacity === 'large' && cap < 300) return false;
+        }
+        return true;
+      });
+      renderVenues(filtered);
+    }
+
+    document.getElementById('search-venue').addEventListener('input', applyFilters);
+    document.getElementById('filter-city').addEventListener('change', applyFilters);
+    document.getElementById('filter-plan').addEventListener('change', applyFilters);
+    document.getElementById('filter-capacity').addEventListener('change', applyFilters);
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
