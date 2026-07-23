@@ -191,7 +191,7 @@
   </div>
 
   <script type="module">
-    import { onAuthChange, logout } from './auth.js';
+    import { onAuthChange, logout, renderAdminPreviewBanner } from './auth.js';
     import { getUserProfile, listBookings, getBookingStats } from './data.js';
 
     const loadingEl = document.getElementById('app-loading');
@@ -223,7 +223,9 @@
         localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
       }
 
-      if (profile.role !== 'venue') {
+      if (profile.role === 'admin') {
+        renderAdminPreviewBanner('Hotel / Recinto');
+      } else if (profile.role !== 'venue') {
         window.location.href = 'dashboard-artist.html';
         return;
       }

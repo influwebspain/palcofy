@@ -187,6 +187,17 @@
       }
 
       if (valid) {
+        // Enviar correo de agradecimiento por formulario de contacto
+        import('./app/email-service.js').then(function (emailModule) {
+          emailModule.sendContactFormEmail({
+            name: name ? name.value.trim() : '',
+            email: email ? email.value.trim() : '',
+            message: message ? message.value.trim() : ''
+          });
+        }).catch(function (err) {
+          console.warn('PALCOFY Email Service import error:', err);
+        });
+
         // Show success state
         var btn = form.querySelector('.btn[type="submit"], .btn--block');
         if (btn) {

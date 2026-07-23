@@ -279,6 +279,7 @@
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
     import { listAllUsers, updateUserStatus } from './data.js';
+    import { sendApprovalEmail } from './email-service.js';
 
     const loadingEl = document.getElementById('app-loading');
     const shellEl   = document.getElementById('app-shell');
@@ -447,7 +448,11 @@
           btn.disabled = true;
           btn.textContent = 'Aprobando…';
           await updateUserStatus({ userId, status: 'approved' });
-          alert('¡Usuario aprobado con éxito! Se ha habilitado el acceso completo a la plataforma.');
+          const approvedUser = allUsers.find(u => u.id === userId || u.uid === userId);
+          if (approvedUser && approvedUser.email) {
+            sendApprovalEmail(approvedUser);
+          }
+          alert('¡Usuario aprobado con éxito! Se ha habilitado el acceso completo a la plataforma y se le ha enviado la confirmación por correo electrónico.');
           await loadData();
         });
       });

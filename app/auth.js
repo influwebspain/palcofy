@@ -8,6 +8,7 @@ import {
   auth, db,
   fbAuth, fbFirestore
 } from './firebase-config.js';
+import { sendWelcomeEmail } from './email-service.js';
 
 /* =========================================================
    DEMO helpers
@@ -93,6 +94,9 @@ export async function register(userData) {
     /* Guardar en caché local inmediatamente */
     localStorage.setItem(`palcofy.profile.${cred.user.uid}`, JSON.stringify({ id: cred.user.uid, ...profileData }));
 
+    /* Enviar correo de bienvenida */
+    try { sendWelcomeEmail(profileData); } catch (e) {}
+
     return cred.user;
   }
 
@@ -107,6 +111,10 @@ export async function register(userData) {
   demoSave(users);
   demoSetSession(uid);
   _notify({ uid, email, displayName: baseProfile.name });
+
+  /* Enviar correo de bienvenida */
+  try { sendWelcomeEmail(profileData); } catch (e) {}
+
   return { uid, email, displayName: baseProfile.name };
 }
 
@@ -248,6 +256,38 @@ export async function waitForProfile(uid, maxRetries = 3, delayMs = 500) {
     await new Promise(r => setTimeout(r, delayMs));
   }
   return null;
+}
+
+/* ----- Modo Vista Previa Administrador ----- */
+export function renderAdminPreviewBanner(viewType) {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('admin-preview-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'admin-preview-banner';
+  banner.style.cssText = `
+    background: linear-gradient(90deg, #7c3aed, #d97706);
+    color: white;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 99999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  `;
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:4px;font-size:11px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;">ADMIN</span>
+      <span>Vista Previa: Modo <strong>${viewType}</strong></span>
+    </div>
+    <a href="admin.html" style="background:white;color:#1e1b4b;padding:6px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease;">
+      ← Volver al Panel Admin
+    </a>
+  `;
+  document.body.insertBefore(banner, document.body.firstChild);
 }
 
 /* ----- Navegación Adaptable Móvil Automática ----- */

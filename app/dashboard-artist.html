@@ -200,7 +200,7 @@
   </div>
 
   <script type="module">
-    import { onAuthChange, logout } from './auth.js';
+    import { onAuthChange, logout, renderAdminPreviewBanner } from './auth.js';
     import { getUserProfile, updateUserProfile } from './data.js';
 
     const loadingEl = document.getElementById('app-loading');
@@ -232,7 +232,9 @@
         localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
       }
 
-      if (profile.role !== 'artist') {
+      if (profile.role === 'admin') {
+        renderAdminPreviewBanner('Cantante / Artista');
+      } else if (profile.role !== 'artist') {
         window.location.href = 'dashboard-venue.html';
         return;
       }

@@ -237,7 +237,7 @@
         p = { id:u.uid, name:u.displayName||u.email.split('@')[0], email:u.email, role:'venue', plan:'piloto', eventsUsed:0, eventsLimit:4 };
         localStorage.setItem('palcofy.profile.'+u.uid, JSON.stringify(p));
       }
-      if (p.role !== 'venue') { window.location.href = 'dashboard-artist.html'; return; }
+      if (p.role !== 'venue' && p.role !== 'admin') { window.location.href = 'dashboard-artist.html'; return; }
       user = u; profile = p;
       populateSidebar(p); renderStats(p); renderCards(p.plan||'piloto');
       $loading.style.display = 'none'; $shell.style.display = '';

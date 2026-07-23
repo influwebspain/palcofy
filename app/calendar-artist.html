@@ -672,7 +672,7 @@
         };
         localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
       }
-      if (profile.role !== 'artist') {
+      if (profile.role !== 'artist' && profile.role !== 'admin') {
         window.location.href = 'dashboard-venue.html';
         return;
       }

@@ -779,7 +779,7 @@
       }
 
       /* Redirect non-artists to venue dashboard */
-      if (profile.role !== 'artist') {
+      if (profile.role !== 'artist' && profile.role !== 'admin') {
         window.location.href = 'dashboard-venue.html';
         return;
       }

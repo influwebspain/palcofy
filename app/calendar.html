@@ -652,6 +652,7 @@
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
     import { getUserProfile, listBookings, createEventCall, listVenueEventCalls, acceptEventCandidate } from './data.js';
+    import { sendEventCreatedEmail, sendBookingAcceptedEmail } from './email-service.js';
 
     const loadingEl = document.getElementById('app-loading');
     const shellEl   = document.getElementById('app-shell');
@@ -715,6 +716,12 @@
             venueName: vName,
             title, date, time, genre, budget, notes
           });
+          sendEventCreatedEmail({
+            eventTitle: title,
+            date, time,
+            venueName: vName,
+            cache: budget
+          }, currentUserProfile?.email);
           evtModal.style.display = 'none';
           alert('¡Convocatoria publicada con éxito! Los cantantes podrán verla y postularse.');
           await loadVenueCalls();
@@ -815,7 +822,12 @@
             btn.textContent = 'Aceptando...';
             try {
               await acceptEventCandidate({ eventId, artistId, artistName, cache });
-              alert(`¡${artistName} ha sido contratado para el evento! La reserva ya aparece confirmada en tu calendario.`);
+              sendBookingAcceptedEmail({
+                artistName,
+                venueName: currentUserProfile?.venueName || currentUserProfile?.name || 'Hotel Recinto',
+                date: selectedDate || 'Fecha reservada'
+              });
+              alert(`¡${artistName} ha sido contratado para el evento! La reserva ya aparece confirmada en tu calendario y se ha enviado la notificación.`);
               allBookings = await listBookings(currentUserId);
               renderCalendar();
               renderDetailPanel();
@@ -1062,7 +1074,7 @@
         profile = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, role: 'venue', venueName: '', plan: 'piloto', eventsUsed: 0, eventsLimit: 4 };
         localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
       }
-      if (profile.role !== 'venue') {
+      if (profile.role !== 'venue' && profile.role !== 'admin') {
         window.location.href = 'dashboard-artist.html';
         return;
       }

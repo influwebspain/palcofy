@@ -511,7 +511,7 @@
         };
         localStorage.setItem(`palcofy.profile.${user.uid}`, JSON.stringify(profile));
       }
-      if (profile.role !== 'venue') { window.location.href = 'dashboard-artist.html'; return; }
+      if (profile.role !== 'venue' && profile.role !== 'admin') { window.location.href = 'dashboard-artist.html'; return; }
 
       currentUid = user.uid;
 
