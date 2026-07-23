@@ -157,20 +157,28 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="sidebar-section">Administración</div>
+        <div class="sidebar-section">Herramientas Admin</div>
         <a href="admin.html" class="sidebar-link is-active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           Panel de Control
         </a>
-
-        <div class="sidebar-section">Perfiles de Plataforma</div>
-        <a href="dashboard-venue.html" class="sidebar-link">
+        <a href="search.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Buscador de Cantantes
+        </a>
+        <a href="venues.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M3 7v14M21 7v14M6 21V11M18 21V11M9 21v-4h6v4"/></svg>
-          Ver Vista Hotel
+          Directorio Hoteles
+        </a>
+
+        <div class="sidebar-section">Vista Previa de Plataforma</div>
+        <a href="dashboard-venue.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+          Vista Previa Hotel
         </a>
         <a href="dashboard-artist.html" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          Ver Vista Cantante
+          Vista Previa Cantante
         </a>
       </nav>
 
@@ -222,6 +230,9 @@
       <div class="tab-bar">
         <button class="tab-btn is-active" id="tab-pending-btn">Registros Pendientes de Validación</button>
         <button class="tab-btn" id="tab-all-btn">Directorio General de Usuarios</button>
+        <button class="tab-btn" id="tab-artists-btn" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(245,158,11,0.2)); border: 1px solid var(--app-gold); color: white;">
+          🔎 Buscador de Cantantes (Sustitución por Cancelación)
+        </button>
       </div>
 
       <!-- Tab 1: Registros pendientes -->
@@ -273,6 +284,33 @@
         </div>
       </div>
 
+      <!-- Tab 3: Buscador de Cantantes para Cancelaciones y Reemplazos -->
+      <div id="view-artists" style="display:none;">
+        <div class="data-card" style="padding: 24px;">
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+            <div>
+              <h3 style="margin:0; font-size:18px; color:white;">Búsqueda y Reemplazo de Cantantes por Cancelación</h3>
+              <p style="margin:4px 0 0 0; font-size:13px; color:var(--app-text-muted);">Localiza cantantes disponibles al instante para cubrir cancelaciones de última hora en hoteles y recintos.</p>
+            </div>
+            <div style="display:flex; gap:10px; width:100%; max-width:500px;">
+              <input type="text" id="artist-search-input" placeholder="Buscar cantante por nombre o género..." style="flex:1; padding:8px 14px; background:var(--app-bg); border:1px solid var(--app-border); border-radius:8px; color:white; font-size:13px;" />
+              <select id="artist-genre-filter" class="filter-select" style="padding:8px 12px; font-size:13px;">
+                <option value="all">Todos los géneros</option>
+                <option value="pop">Pop & Indie</option>
+                <option value="jazz">Jazz & Soul</option>
+                <option value="rock">Rock & Blues</option>
+                <option value="flamenco">Flamenco</option>
+                <option value="electronic">DJ & Electrónica</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="artist-search-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+            <!-- Contenido dinámico de cantantes -->
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -289,22 +327,109 @@
     /* Tab switching */
     const tabPendingBtn = document.getElementById('tab-pending-btn');
     const tabAllBtn     = document.getElementById('tab-all-btn');
+    const tabArtistsBtn = document.getElementById('tab-artists-btn');
+
     const viewPending   = document.getElementById('view-pending');
     const viewAll       = document.getElementById('view-all');
+    const viewArtists   = document.getElementById('view-artists');
 
     tabPendingBtn.addEventListener('click', () => {
       tabPendingBtn.classList.add('is-active');
       tabAllBtn.classList.remove('is-active');
+      tabArtistsBtn.classList.remove('is-active');
       viewPending.style.display = '';
       viewAll.style.display = 'none';
+      viewArtists.style.display = 'none';
     });
 
     tabAllBtn.addEventListener('click', () => {
       tabAllBtn.classList.add('is-active');
       tabPendingBtn.classList.remove('is-active');
+      tabArtistsBtn.classList.remove('is-active');
       viewPending.style.display = 'none';
       viewAll.style.display = '';
+      viewArtists.style.display = 'none';
     });
+
+    tabArtistsBtn.addEventListener('click', () => {
+      tabArtistsBtn.classList.add('is-active');
+      tabPendingBtn.classList.remove('is-active');
+      tabAllBtn.classList.remove('is-active');
+      viewPending.style.display = 'none';
+      viewAll.style.display = 'none';
+      viewArtists.style.display = '';
+      renderArtistSearchGrid();
+    });
+
+    document.getElementById('artist-search-input').addEventListener('input', renderArtistSearchGrid);
+    document.getElementById('artist-genre-filter').addEventListener('change', renderArtistSearchGrid);
+
+    function renderArtistSearchGrid() {
+      const container = document.getElementById('artist-search-grid');
+      const query = document.getElementById('artist-search-input').value.toLowerCase().trim();
+      const selectedGenre = document.getElementById('artist-genre-filter').value;
+
+      const artists = allUsers.filter(u => u.role === 'artist' || u.genre || u.cache);
+
+      const filtered = artists.filter(a => {
+        const nameMatch = (a.name || a.venueName || '').toLowerCase().includes(query) || (a.genre || '').toLowerCase().includes(query);
+        const genreMatch = selectedGenre === 'all' || (a.genre || '').toLowerCase() === selectedGenre;
+        return nameMatch && genreMatch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column:1/-1; text-align:center; padding:40px 20px; background:var(--app-bg); border-radius:12px; border:1px solid var(--app-border);">
+            <div style="font-size:32px; margin-bottom:8px;">🎤</div>
+            <h4 style="color:white; margin:0 0 4px 0;">No se encontraron cantantes</h4>
+            <p style="color:var(--app-text-muted); font-size:13px; margin:0;">Prueba con otros términos de búsqueda o género.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(a => {
+        const name = a.name || a.venueName || a.email.split('@')[0];
+        const genre = a.genre || 'Pop & Vocal';
+        const cache = a.cache || 500;
+        const available = a.available !== false;
+        const initial = name.charAt(0).toUpperCase();
+
+        return `
+          <div style="background:var(--app-surface); border:1px solid var(--app-border); border-radius:12px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+              <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7c3aed, #f59e0b); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:white; overflow:hidden; flex-shrink:0;">
+                ${a.photoUrl ? `<img src="${a.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : initial}
+              </div>
+              <div>
+                <div style="font-weight:700; color:white; font-size:15px;">${name}</div>
+                <div style="font-size:12px; color:var(--app-gold); text-transform:capitalize;">${genre}</div>
+              </div>
+            </div>
+
+            <div style="background:rgba(15,23,42,0.6); border-radius:8px; padding:10px; font-size:12px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="color:var(--app-text-muted);">Caché estimado:</span>
+                <strong style="color:white;">${cache} €</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="color:var(--app-text-muted);">Disponibilidad:</span>
+                <span style="color:${available ? 'var(--app-green)' : '#ef4444'}; font-weight:700;">${available ? '✓ Disponible' : '✕ Ocupado'}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--app-text-muted);">Email:</span>
+                <strong style="color:#e2e8f0; font-size:11px;">${a.email || '—'}</strong>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <a href="mailto:${a.email}?subject=Solicitud URGENTE de sustitución por cancelación - PALCOFY" class="app-btn app-btn--primary" style="flex:1; text-align:center; padding:8px; font-size:12px; text-decoration:none;">
+                ✉️ Contactar Urgente
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     async function loadData() {
       allUsers = await listAllUsers();

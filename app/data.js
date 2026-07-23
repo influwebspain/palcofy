@@ -139,6 +139,17 @@ function seedArtistInvoices(userId) {
    ========================================================= */
 
 export async function getUserProfile(uid) {
+  if (uid === 'admin_super_user') {
+    return {
+      id: 'admin_super_user',
+      uid: 'admin_super_user',
+      name: 'Administrador PALCOFY',
+      email: 'admin@palcofy.com',
+      role: 'admin',
+      status: 'approved'
+    };
+  }
+
   if (isFirebaseConfigured && fbFirestore) {
     const cacheKey = `palcofy.profile.${uid}`;
     const cached = (() => { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
