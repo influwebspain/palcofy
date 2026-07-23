@@ -177,6 +177,36 @@ export async function updateUserProfile(uid, data) {
   if (users[uid]) { Object.assign(users[uid], data); localStorage.setItem('palcofy.demo.users', JSON.stringify(users)); }
 }
 
+export async function deleteUser(uid) {
+  if (uid === 'admin_super_user') return;
+  if (isFirebaseConfigured && fbFirestore) {
+    try { await fbFirestore.deleteDoc(fbFirestore.doc(db, 'users', uid)); } catch(e){}
+  }
+  localStorage.removeItem(`palcofy.profile.${uid}`);
+  const users = JSON.parse(localStorage.getItem('palcofy.demo.users') || '{}');
+  delete users[uid];
+  localStorage.setItem('palcofy.demo.users', JSON.stringify(users));
+}
+
+export async function clearAllDemoUsers() {
+  const adminProfile = {
+    id: 'admin_super_user',
+    uid: 'admin_super_user',
+    name: 'Administrador PALCOFY',
+    email: 'admin@palcofy.com',
+    role: 'admin',
+    status: 'approved'
+  };
+  localStorage.setItem('palcofy.demo.users', JSON.stringify({ admin_super_user: adminProfile }));
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('palcofy.profile.') && key !== 'palcofy.profile.admin_super_user') {
+      localStorage.removeItem(key);
+    }
+  });
+  localStorage.removeItem('palcofy.demo.bookings');
+  localStorage.removeItem('palcofy.demo.event_calls');
+}
+
 export async function listArtists() {
   const list = [];
   const addedIds = new Set();

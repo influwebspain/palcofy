@@ -199,11 +199,14 @@
     <!-- Main Content -->
     <main class="app-main">
 
-      <div class="app-topbar">
+      <div class="app-topbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
         <div>
           <h1>Panel de Administración PALCOFY</h1>
           <p class="topbar-sub">Revisa, aprueba o deniega las solicitudes de registro de cantantes y hoteles.</p>
         </div>
+        <button id="clear-demo-btn" class="app-btn app-btn--ghost" style="color:#ef4444; border-color:rgba(239,68,68,0.4); font-size:12px; padding:8px 14px;">
+          🗑️ Borrar Usuarios de Prueba
+        </button>
       </div>
 
       <!-- Stats overview -->
@@ -316,7 +319,7 @@
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { listAllUsers, updateUserStatus } from './data.js';
+    import { listAllUsers, updateUserStatus, deleteUser, clearAllDemoUsers } from './data.js';
     import { sendApprovalEmail } from './email-service.js';
 
     const loadingEl = document.getElementById('app-loading');
@@ -547,15 +550,22 @@
           <td style="font-size:12px;">${u.role === 'artist' ? (u.bankCert || 'Certificado Ok') : (u.city || 'Madrid')}</td>
           <td>${statusBadgeMap[u.status || 'pending']}</td>
           <td>
-            ${u.status !== 'approved' ? `
-              <button class="app-btn app-btn--primary approve-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;">
-                Aprobar
-              </button>
-            ` : `
-              <button class="app-btn app-btn--ghost reject-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;color:#ef4444;">
-                Denegar
-              </button>
-            `}
+            <div style="display:flex;gap:6px;align-items:center;">
+              ${u.status !== 'approved' ? `
+                <button class="app-btn app-btn--primary approve-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;">
+                  Aprobar
+                </button>
+              ` : `
+                <button class="app-btn app-btn--ghost reject-btn" data-id="${u.id}" style="padding:4px 10px;font-size:11px;width:auto;color:#ef4444;">
+                  Denegar
+                </button>
+              `}
+              ${u.id !== 'admin_super_user' ? `
+                <button class="app-btn app-btn--ghost delete-user-btn" data-id="${u.id}" style="padding:4px 8px;font-size:11px;width:auto;color:#ef4444;border-color:rgba(239,68,68,0.3);" title="Eliminar usuario">
+                  🗑️ Borrar
+                </button>
+              ` : ''}
+            </div>
           </td>
         </tr>
       `).join('');
@@ -565,6 +575,14 @@
 
     document.getElementById('role-filter').addEventListener('change', renderAllTable);
     document.getElementById('status-filter').addEventListener('change', renderAllTable);
+
+    document.getElementById('clear-demo-btn').addEventListener('click', async () => {
+      if (confirm('⚠️ ¿Estás seguro de que deseas eliminar TODOS los hoteles, cantantes y reservas de prueba?\n\nEsta acción no afectará a la cuenta de Administrador.')) {
+        await clearAllDemoUsers();
+        alert('¡Se han eliminado todos los registros y usuarios de prueba correctamente!');
+        await loadData();
+      }
+    });
 
     function bindActionButtons() {
       document.querySelectorAll('.approve-btn').forEach(btn => {
@@ -590,6 +608,19 @@
             btn.textContent = 'Denegando…';
             await updateUserStatus({ userId, status: 'rejected' });
             alert('El registro ha sido denegado.');
+            await loadData();
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.id;
+          if (confirm('¿Deseas eliminar permanentemente este usuario?')) {
+            btn.disabled = true;
+            btn.textContent = 'Borrando…';
+            await deleteUser(userId);
+            alert('Usuario eliminado correctamente.');
             await loadData();
           }
         });
