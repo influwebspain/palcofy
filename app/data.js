@@ -6,7 +6,7 @@
 import {
   isFirebaseConfigured,
   auth, db,
-  fbFirestore
+  fbFirestore, fbAuth
 } from './firebase-config.js';
 
 /* =========================================================
@@ -179,8 +179,13 @@ export async function updateUserProfile(uid, data) {
 
 export async function deleteUser(uid) {
   if (uid === 'admin_super_user') return;
-  if (isFirebaseConfigured && fbFirestore) {
-    try { await fbFirestore.deleteDoc(fbFirestore.doc(db, 'users', uid)); } catch(e){}
+  if (isFirebaseConfigured && fbFirestore && fbAuth && auth.currentUser) {
+    try { 
+      await fbFirestore.deleteDoc(fbFirestore.doc(db, 'users', uid));
+      await fbAuth.deleteUser(auth.currentUser);
+    } catch(e) {
+      console.error("Error deleting Firebase user:", e);
+    }
   }
   localStorage.removeItem(`palcofy.profile.${uid}`);
   const users = JSON.parse(localStorage.getItem('palcofy.demo.users') || '{}');
