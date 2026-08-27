@@ -398,7 +398,7 @@
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, updateUserProfile } from './data.js';
+    import { getUserProfile, updateUserProfile, deleteUser } from './data.js';
 
     /* =========================================================
        DOM references
@@ -728,7 +728,7 @@
 
       try {
         if (currentUid) {
-          await updateUserProfile(currentUid, { deleted: true, deletedAt: new Date().toISOString() });
+          await deleteUser(currentUid);
         }
         deleteModal.classList.remove('is-visible');
         showToast('Cuenta eliminada. Redirigiendo...');

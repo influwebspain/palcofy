@@ -345,7 +345,7 @@
 
   <script type="module">
     import { onAuthChange, logout, waitForProfile } from './auth.js';
-    import { getUserProfile, updateUserProfile } from './data.js';
+    import { getUserProfile, updateUserProfile, deleteUser } from './data.js';
 
     /* --- DOM refs --- */
     const loadingEl    = document.getElementById('app-loading');
@@ -479,7 +479,7 @@
       modalConfirm.disabled = true;
       modalConfirm.textContent = 'Eliminando...';
       try {
-        if (currentUid) await updateUserProfile(currentUid, { deleted: true, deletedAt: new Date().toISOString() });
+        if (currentUid) await deleteUser(currentUid);
         deleteModal.classList.remove('is-visible');
         showToast('Cuenta eliminada. Redirigiendo...');
         setTimeout(async () => { await logout(); window.location.href = 'login.html'; }, 1500);
