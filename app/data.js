@@ -9,6 +9,12 @@ import {
   fbFirestore, fbAuth
 } from './firebase-config.js';
 
+import {
+  sendBookingRequestEmail,
+  sendBookingConfirmEmail,
+  sendBookingCancelEmail
+} from './email-service.js';
+
 /* =========================================================
    DEMO DATA
    ========================================================= */
@@ -59,6 +65,7 @@ function seedVenues() {
 function demoBookingsRaw() {
   try { return JSON.parse(localStorage.getItem(DEMO_BOOKINGS_KEY)) || []; } catch { return []; }
 }
+function demoSaveBookings(b) { localStorage.setItem(DEMO_BOOKINGS_KEY, JSON.stringify(b)); }
 function seedBookings(userId) {
   if (demoBookingsRaw().length > 0) return;
   const today = new Date();
@@ -314,23 +321,39 @@ export async function listVenues() {
   return demoVenues() || [];
 }
 
-export async function createBooking({ venueId, artistId, artistName, date, time, notes, cache }) {
-  if (isFirebaseConfigured && fbFirestore) {
-    const id = `${venueId}_${artistId}_${date}`;
-    await fbFirestore.setDoc(fbFirestore.doc(db, 'bookings', id), {
-      venueId, artistId, artistName, date, time, notes, cache,
-      status: 'pending', createdAt: new Date().toISOString()
-    });
-    return id;
+export async function createBooking({ venueId, venueName, artistId, artistName, date, time, notes, cache, status = 'pending' }) {
+  let vName = venueName;
+  if (!vName) {
+    const vProf = await getUserProfile(venueId);
+    if (vProf) vName = vProf.venueName || vProf.name;
   }
-  const bookings = demoBookings();
+  let aEmail = null;
+  const aProf = await getUserProfile(artistId);
+  if (aProf) aEmail = aProf.email;
+
+  const id = (isFirebaseConfigured && fbFirestore) ? `${venueId}_${artistId}_${date}` : `demo_${Date.now()}`;
   const booking = {
-    id: `demo_${Date.now()}`, venueId, artistId, artistName, date, time, notes, cache,
-    status: 'pending', createdAt: new Date().toISOString()
+    id, venueId, venueName: vName, artistId, artistName, date, time, notes, cache,
+    status, createdAt: new Date().toISOString()
   };
-  bookings.push(booking);
-  demoSaveBookings(bookings);
-  return booking.id;
+
+  if (isFirebaseConfigured && fbFirestore) {
+    await fbFirestore.setDoc(fbFirestore.doc(db, 'bookings', id), booking);
+  } else {
+    const bookings = demoBookingsRaw();
+    bookings.push(booking);
+    demoSaveBookings(bookings);
+  }
+
+  if (aEmail) {
+    if (status === 'pending') {
+      sendBookingRequestEmail(booking, aEmail);
+    } else if (status === 'confirmed') {
+      sendBookingConfirmEmail(booking, aEmail);
+    }
+  }
+
+  return id;
 }
 
 /* =========================================================
@@ -470,12 +493,14 @@ export async function acceptEventCandidate({ eventId, artistId, artistName, cach
   if (evt) {
     await createBooking({
       venueId: evt.venueId,
+      venueName: evt.venueName,
       artistId,
       artistName,
       date: evt.date,
       time: evt.time,
       notes: `Confirmado desde convocatoria: ${evt.title}`,
-      cache: cache || evt.budget
+      cache: cache || evt.budget,
+      status: 'confirmed'
     });
   }
 }
@@ -495,12 +520,29 @@ export async function listBookings(venueId) {
 }
 
 export async function updateBookingStatus(bookingId, status) {
+  let bookingData = null;
+
   if (isFirebaseConfigured && fbFirestore) {
-    return fbFirestore.updateDoc(fbFirestore.doc(db, 'bookings', bookingId), { status });
+    await fbFirestore.updateDoc(fbFirestore.doc(db, 'bookings', bookingId), { status });
+    const snap = await fbFirestore.getDoc(fbFirestore.doc(db, 'bookings', bookingId));
+    if (snap.exists()) bookingData = snap.data();
+  } else {
+    const bookings = demoBookingsRaw();
+    const b = bookings.find(x => x.id === bookingId);
+    if (b) { 
+      b.status = status; 
+      demoSaveBookings(bookings); 
+      bookingData = b;
+    }
   }
-  const bookings = demoBookings();
-  const b = bookings.find(x => x.id === bookingId);
-  if (b) { b.status = status; demoSaveBookings(bookings); }
+
+  if (bookingData) {
+    const aProf = await getUserProfile(bookingData.artistId);
+    if (aProf && aProf.email) {
+      if (status === 'confirmed') sendBookingConfirmEmail(bookingData, aProf.email);
+      if (status === 'cancelled') sendBookingCancelEmail(bookingData, aProf.email);
+    }
+  }
 }
 
 export async function listInvoices(venueId) {

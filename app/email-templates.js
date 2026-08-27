@@ -228,6 +228,56 @@ export function getTemplateHtml(templateName, data = {}) {
         `)
       };
 
+    case 'booking_requested':
+      return {
+        subject: `NUEVA OFERTA: ${data.venueName} quiere contratarte`,
+        html: baseLayout('Nueva Solicitud de Reserva', `
+          <h2>¡Tienes una nueva oferta de actuación! 🎤</h2>
+          <p>Hola <strong>${data.artistName || 'Artista'}</strong>, el recinto <strong>${data.venueName}</strong> está interesado en contratarte.</p>
+          <table class="info-table">
+            <tr><td class="label">Recinto</td><td class="value">${data.venueName}</td></tr>
+            <tr><td class="label">Fecha</td><td class="value">${data.date}</td></tr>
+            <tr><td class="label">Hora</td><td class="value">${data.time || 'A convenir'}</td></tr>
+            <tr><td class="label">Caché propuesto</td><td class="value" style="color:${BRAND_COLOR_GOLD}">${data.cache} €</td></tr>
+            <tr><td class="label">Notas</td><td class="value">${data.notes || 'Sin notas adicionales'}</td></tr>
+          </table>
+          <p>Accede a tu panel para aceptar o rechazar esta solicitud.</p>
+          <div class="btn-container">
+            <a href="https://palcofy.com/app/dashboard-artist.html" class="btn">Ver Solicitud</a>
+          </div>
+        `)
+      };
+
+    case 'booking_confirmed':
+      return {
+        subject: `✅ Actuación CONFIRMADA: ${data.artistName} en ${data.venueName}`,
+        html: baseLayout('Actuación Confirmada', `
+          <h2>¡La actuación está confirmada! 🎉</h2>
+          <p>Hola <strong>${userName}</strong>, la reserva para la actuación de <strong>${data.artistName}</strong> en <strong>${data.venueName}</strong> ha sido confirmada oficialmente.</p>
+          <table class="info-table">
+            <tr><td class="label">Artista</td><td class="value">${data.artistName}</td></tr>
+            <tr><td class="label">Recinto</td><td class="value">${data.venueName}</td></tr>
+            <tr><td class="label">Fecha</td><td class="value">${data.date}</td></tr>
+            <tr><td class="label">Hora</td><td class="value">${data.time || 'A convenir'}</td></tr>
+            <tr><td class="label">Caché</td><td class="value" style="color:${BRAND_COLOR_GOLD}">${data.cache} €</td></tr>
+          </table>
+          <p>El sistema ha registrado la reserva y se encargará de las notificaciones futuras.</p>
+          <div class="btn-container">
+            <a href="https://palcofy.com/app/" class="btn">Ver Mis Actuaciones</a>
+          </div>
+        `)
+      };
+
+    case 'booking_cancelled':
+      return {
+        subject: `❌ Actuación CANCELADA: ${data.artistName} en ${data.venueName}`,
+        html: baseLayout('Actuación Cancelada', `
+          <h2>Actuación Cancelada</h2>
+          <p>Hola <strong>${userName}</strong>, te informamos de que la reserva para la actuación de <strong>${data.artistName}</strong> en <strong>${data.venueName}</strong> el <strong>${data.date}</strong> ha sido cancelada.</p>
+          <p>Si consideras que se trata de un error, por favor ponte en contacto con la otra parte o responde a este correo.</p>
+        `)
+      };
+
     case 'event_created':
       return {
         subject: `📅 Nuevo Evento Programado: ${data.eventTitle || 'Actuación Musical PALCOFY'}`,

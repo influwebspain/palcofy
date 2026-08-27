@@ -84,3 +84,27 @@ export async function sendBookingAcceptedEmail(bookingData, recipientEmail) {
     data: bookingData
   });
 }
+
+export async function sendBookingRequestEmail(bookingData, artistEmail) {
+  return sendEmail({
+    to: artistEmail,
+    template: 'booking_requested',
+    data: bookingData
+  });
+}
+
+export async function sendBookingConfirmEmail(bookingData, artistEmail) {
+  return sendEmail({
+    to: artistEmail,
+    template: 'booking_confirmed',
+    data: bookingData
+  });
+}
+
+export async function sendBookingCancelEmail(bookingData, artistEmail) {
+  return sendEmail({
+    to: artistEmail,
+    template: 'booking_cancelled',
+    data: bookingData
+  });
+}

@@ -5,8 +5,8 @@ const { getTemplateHtml } = require('./app/email-templates.js');
 const PORT = 3000;
 const SMTP_HOST = 'authsmtp.securemail.pro';
 const SMTP_PORT = 465;
-const SMTP_USER = 'hola@palcofy.com';
-const SMTP_PASS = '@Exito.2027';
+const SMTP_USER = 'notificaciones@palcofy.com';
+const SMTP_PASS = '3vGHCNrEm.cYxQn';
 
 function sendSmtpEmail({ to, subject, html, text }) {
   return new Promise((resolve, reject) => {
@@ -154,5 +154,5 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`🚀 Servidor de Correos Nativo PALCOFY activo en http://localhost:${PORT}`);
-  console.log(`📡 SMTP configurado en authsmtp.securemail.pro:465 SSL para hola@palcofy.com`);
+  console.log(`📡 SMTP configurado en authsmtp.securemail.pro:465 SSL para notificaciones@palcofy.com`);
 });
