@@ -3,7 +3,8 @@
    Envío de correos a través del backend SMTP (hola@palcofy.com)
    ========================================================= */
 
-const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+const API_BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '')
   ? 'http://localhost:3000'
   : ''; // Usar servidor local en dev o endpoint relativo en producción
 

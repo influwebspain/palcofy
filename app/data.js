@@ -329,7 +329,12 @@ export async function createBooking({ venueId, venueName, artistId, artistName, 
   }
   let aEmail = null;
   const aProf = await getUserProfile(artistId);
-  if (aProf) aEmail = aProf.email;
+  if (aProf && aProf.email) {
+    aEmail = aProf.email;
+  } else {
+    // Fallback for demo users that don't have an email in seed data
+    aEmail = 'notificaciones@palcofy.com';
+  }
 
   const id = (isFirebaseConfigured && fbFirestore) ? `${venueId}_${artistId}_${date}` : `demo_${Date.now()}`;
   const booking = {
@@ -538,10 +543,9 @@ export async function updateBookingStatus(bookingId, status) {
 
   if (bookingData) {
     const aProf = await getUserProfile(bookingData.artistId);
-    if (aProf && aProf.email) {
-      if (status === 'confirmed') sendBookingConfirmEmail(bookingData, aProf.email);
-      if (status === 'cancelled') sendBookingCancelEmail(bookingData, aProf.email);
-    }
+    const emailTarget = (aProf && aProf.email) ? aProf.email : 'notificaciones@palcofy.com';
+    if (status === 'confirmed') sendBookingConfirmEmail(bookingData, emailTarget);
+    if (status === 'cancelled') sendBookingCancelEmail(bookingData, emailTarget);
   }
 }
 

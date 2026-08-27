@@ -174,7 +174,7 @@ function baseLayout(title, contentHtml) {
 </html>`;
 }
 
-export function getTemplateHtml(templateName, data = {}) {
+function getTemplateHtml(templateName, data = {}) {
   const userName = data.name || data.venueName || data.email ? (data.name || data.venueName || data.email.split('@')[0]) : 'Usuario';
   const roleName = data.role === 'artist' ? 'Cantante / Artista' : 'Hotel / Recinto';
 
@@ -359,4 +359,8 @@ export function getTemplateHtml(templateName, data = {}) {
         `)
       };
   }
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { getTemplateHtml };
 }
