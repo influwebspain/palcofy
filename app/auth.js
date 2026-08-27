@@ -168,6 +168,19 @@ export async function logout() {
   _notify(null);
 }
 
+export async function resetPassword(email) {
+  if (isFirebaseConfigured && fbAuth) {
+    await fbAuth.sendPasswordResetEmail(auth, email);
+    return;
+  }
+  /* DEMO */
+  const users = demoUsers();
+  const user = Object.values(users).find(u => u.email === email);
+  if (!user) throw { code: 'auth/user-not-found' };
+  console.log('DEMO: Se enviaría email de recuperación a', email);
+  return;
+}
+
 export async function getUserProfile(uid) {
   if (uid === 'admin_super_user') {
     return {
