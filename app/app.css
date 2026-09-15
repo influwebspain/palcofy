@@ -20,6 +20,10 @@
   --app-radius: 12px;
 }
 
+/* ----- Base Reset --------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-text); }
+
 /* ----- Login page --------------------------------------- */
 .login-page {
   min-height: 100vh;
@@ -88,17 +92,17 @@
 }
 
 .login-right {
-  width: 480px;
+  width: 420px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 60px;
+  padding: 48px;
   background: var(--app-surface);
   border-left: 1px solid var(--app-border);
 }
 
 .login-card {
-  max-width: 380px;
+  max-width: 100%;
   width: 100%;
   margin: 0 auto;
 }

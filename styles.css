@@ -1455,7 +1455,7 @@ h1, h2, h3, h4, h5, h6, p { margin: 0; }
 .plan-features li svg { color: var(--violet-2); margin-top: 3px; flex-shrink: 0; }
 .plan-features li strong { color: var(--dark); font-weight: 600; }
 .plan-cta { margin-top: auto; }
-.pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 48px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 48px; }
 
 /* Manifesto */
 .manifesto {
