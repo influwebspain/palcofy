@@ -209,13 +209,22 @@ export async function clearAllDemoUsers() {
     role: 'admin',
     status: 'approved'
   };
+  // Reset main users store keeping only admin
   localStorage.setItem('palcofy.demo.users', JSON.stringify({ admin_super_user: adminProfile }));
+  // Remove all individual profile caches
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith('palcofy.profile.') && key !== 'palcofy.profile.admin_super_user') {
       localStorage.removeItem(key);
     }
   });
-  localStorage.removeItem('palcofy.demo.bookings');
+  // Clear seed data so listAllUsers doesn't repopulate from seeds
+  localStorage.removeItem(DEMO_ARTISTS_KEY);
+  localStorage.removeItem(DEMO_VENUES_KEY);
+  localStorage.removeItem(DEMO_BOOKINGS_KEY);
+  localStorage.removeItem(DEMO_INVOICES_KEY);
+  localStorage.removeItem(DEMO_PERFORMANCES_KEY);
+  localStorage.removeItem(DEMO_SETTLEMENTS_KEY);
+  localStorage.removeItem(DEMO_ARTIST_INV_KEY);
   localStorage.removeItem('palcofy.demo.event_calls');
 }
 
