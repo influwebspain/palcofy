@@ -6,18 +6,19 @@
 :root {
   --sidebar-w: 260px;
   --header-h: 60px;
-  --app-bg: #0F0A1A;
-  --app-surface: #1A1230;
-  --app-surface-2: #231A3A;
-  --app-border: rgba(255,255,255,0.06);
-  --app-text: rgba(255,255,255,0.85);
-  --app-text-muted: rgba(255,255,255,0.45);
+  --app-bg: #F4F5F7;
+  --app-surface: #FFFFFF;
+  --app-surface-2: #F9FAFB;
+  --app-border: rgba(0,0,0,0.08);
+  --app-text: #1F2937;
+  --app-text-muted: #6B7280;
   --app-accent: #7C3AED;
   --app-accent-glow: rgba(124,58,237,0.25);
   --app-gold: #D97706;
   --app-green: #22C55E;
   --app-red: #EF4444;
   --app-radius: 12px;
+  --app-dark: #111827;
 }
 
 /* ----- Base Reset --------------------------------------- */
@@ -62,13 +63,13 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   font-size: 42px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: white;
+  color: var(--app-dark);
   margin-bottom: 12px;
 }
 
 .login-left .brand p {
   font-size: 15px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(0,0,0,0.55);
   line-height: 1.6;
 }
 
@@ -79,15 +80,15 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.08);
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .login-left .brand .logo-mark svg {
   width: 28px;
   height: 28px;
-  color: white;
+  color: var(--app-dark);
   display: block;
 }
 
@@ -110,7 +111,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .login-card h2 {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: var(--app-dark);
   letter-spacing: -0.02em;
   margin-bottom: 6px;
 }
@@ -125,7 +126,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .auth-tabs {
   display: flex;
   gap: 4px;
-  background: rgba(255,255,255,0.04);
+  background: rgba(0,0,0,0.04);
   border-radius: 10px;
   padding: 4px;
   margin-bottom: 24px;
@@ -147,7 +148,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 .auth-tab.is-active {
   background: var(--app-accent);
-  color: white;
+  color: var(--app-dark);
   box-shadow: 0 2px 12px rgba(124,58,237,0.35);
 }
 
@@ -169,29 +170,29 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 .app-field input,
 .app-field select {
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.04);
+  border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 10px;
   padding: 12px 14px;
   font-family: inherit;
   font-size: 14px;
-  color: white;
+  color: var(--app-dark);
   transition: border-color 200ms ease, box-shadow 200ms ease;
   outline: none;
 }
 
-.app-field input::placeholder { color: rgba(255,255,255,0.25); }
+.app-field input::placeholder { color: rgba(0,0,0,0.25); }
 
 .app-field input:focus,
 .app-field select:focus {
   border-color: var(--app-accent);
   box-shadow: 0 0 0 3px var(--app-accent-glow);
-  background: rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.06);
 }
 
 .app-field select option {
   background: var(--app-surface);
-  color: white;
+  color: var(--app-dark);
 }
 
 .app-field .error-msg {
@@ -206,8 +207,8 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 /* Custom Upload Dropzone Box */
 .upload-box {
-  border: 1.5px dashed rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.02);
+  border: 1.5px dashed rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.02);
   border-radius: 12px;
   padding: 16px;
   text-align: center;
@@ -237,7 +238,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .upload-box-text {
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: var(--app-dark);
 }
 
 .upload-box-sub {
@@ -256,16 +257,16 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .role-option {
   padding: 14px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.02);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
   cursor: pointer;
   text-align: center;
   transition: all 200ms ease;
 }
 
 .role-option:hover {
-  border-color: rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.04);
+  border-color: rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.04);
 }
 
 .role-option.is-selected {
@@ -281,7 +282,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .role-option .role-label {
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: var(--app-dark);
 }
 
 .role-option .role-desc {
@@ -309,7 +310,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 .app-btn--primary {
   background: var(--app-accent);
-  color: white;
+  color: var(--app-dark);
   box-shadow: 0 2px 16px rgba(124,58,237,0.35);
 }
 
@@ -328,13 +329,13 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .app-btn--ghost {
   background: transparent;
   color: var(--app-text-muted);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(0,0,0,0.08);
   margin-top: 10px;
 }
 
 .app-btn--ghost:hover {
-  color: white;
-  border-color: rgba(255,255,255,0.2);
+  color: var(--app-dark);
+  border-color: rgba(0,0,0,0.2);
 }
 
 .auth-error {
@@ -394,7 +395,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .sidebar-header .logo-icon svg {
   width: 20px;
   height: 20px;
-  color: white;
+  color: var(--app-dark);
   display: block;
 }
 
@@ -402,7 +403,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   font-weight: 800;
   font-size: 15px;
   letter-spacing: 0.04em;
-  color: white;
+  color: var(--app-dark);
 }
 
 .sidebar-nav {
@@ -427,12 +428,12 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 }
 
 .sidebar-link:hover {
-  color: white;
-  background: rgba(255,255,255,0.04);
+  color: var(--app-dark);
+  background: rgba(0,0,0,0.04);
 }
 
 .sidebar-link.is-active {
-  color: white;
+  color: var(--app-dark);
   background: rgba(124,58,237,0.15);
 }
 
@@ -450,7 +451,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
+  color: rgba(0,0,0,0.2);
   padding: 16px 14px 6px;
 }
 
@@ -469,7 +470,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   transition: background 180ms ease;
 }
 
-.sidebar-user:hover { background: rgba(255,255,255,0.04); }
+.sidebar-user:hover { background: rgba(0,0,0,0.04); }
 
 .sidebar-avatar {
   width: 34px;
@@ -481,7 +482,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   justify-content: center;
   font-weight: 700;
   font-size: 14px;
-  color: white;
+  color: var(--app-dark);
   flex-shrink: 0;
 }
 
@@ -493,7 +494,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .sidebar-user-name {
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: var(--app-dark);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -522,7 +523,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .app-topbar h1 {
   font-size: 26px;
   font-weight: 800;
-  color: white;
+  color: var(--app-dark);
   letter-spacing: -0.02em;
 }
 
@@ -562,7 +563,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: white;
+  color: var(--app-dark);
   line-height: 1;
 }
 
@@ -598,7 +599,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .data-card-header h3 {
   font-size: 15px;
   font-weight: 700;
-  color: white;
+  color: var(--app-dark);
 }
 
 .data-table {
@@ -615,7 +616,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   text-align: left;
   padding: 10px 20px;
   border-bottom: 1px solid var(--app-border);
-  background: rgba(255,255,255,0.02);
+  background: rgba(0,0,0,0.02);
 }
 
 .data-table td {
@@ -627,7 +628,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 .data-table tr:last-child td { border-bottom: 0; }
 
-.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.data-table tr:hover td { background: rgba(0,0,0,0.02); }
 
 /* Badges */
 .badge {
@@ -645,7 +646,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .badge--gold { background: rgba(217,119,6,0.12); color: var(--app-gold); }
 .badge--purple { background: rgba(124,58,237,0.12); color: var(--app-accent); }
 .badge--red { background: rgba(239,68,68,0.12); color: var(--app-red); }
-.badge--gray { background: rgba(255,255,255,0.06); color: var(--app-text-muted); }
+.badge--gray { background: rgba(0,0,0,0.06); color: var(--app-text-muted); }
 
 .badge-dot {
   width: 6px;
@@ -676,7 +677,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   border-radius: 10px;
   font-family: inherit;
   font-size: 14px;
-  color: white;
+  color: var(--app-dark);
   outline: none;
   transition: border-color 200ms ease;
 }
@@ -701,7 +702,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   border-radius: 10px;
   font-family: inherit;
   font-size: 13px;
-  color: white;
+  color: var(--app-dark);
   outline: none;
   cursor: pointer;
   min-width: 150px;
@@ -748,7 +749,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   justify-content: center;
   font-weight: 800;
   font-size: 18px;
-  color: white;
+  color: var(--app-dark);
   flex-shrink: 0;
 }
 
@@ -762,7 +763,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .artist-name {
   font-size: 16px;
   font-weight: 700;
-  color: white;
+  color: var(--app-dark);
   letter-spacing: -0.01em;
 }
 
@@ -794,7 +795,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .artist-detail-value {
   font-size: 14px;
   font-weight: 700;
-  color: white;
+  color: var(--app-dark);
 }
 
 .artist-card-actions {
@@ -843,11 +844,11 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   position: relative;
 }
 
-.calendar-day:hover { background: rgba(255,255,255,0.04); }
+.calendar-day:hover { background: rgba(0,0,0,0.04); }
 
 .calendar-day.is-today {
   background: var(--app-accent);
-  color: white;
+  color: var(--app-dark);
   font-weight: 700;
 }
 
@@ -896,14 +897,14 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .plan-name {
   font-size: 18px;
   font-weight: 800;
-  color: white;
+  color: var(--app-dark);
   letter-spacing: -0.01em;
 }
 
 .plan-price {
   font-size: 36px;
   font-weight: 800;
-  color: white;
+  color: var(--app-dark);
   letter-spacing: -0.03em;
   margin-top: 8px;
 }
@@ -999,7 +1000,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .empty-state h3 {
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--app-dark);
   margin-bottom: 8px;
 }
 
@@ -1022,7 +1023,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid rgba(255,255,255,0.1);
+  border: 3px solid rgba(0,0,0,0.1);
   border-top-color: var(--app-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -1058,7 +1059,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
     gap: 10px;
     font-weight: 800;
     font-size: 15px;
-    color: white;
+    color: var(--app-dark);
   }
 
   .mobile-brand .logo-icon {
@@ -1074,11 +1075,11 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   .mobile-brand .logo-icon svg {
     width: 18px;
     height: 18px;
-    color: white;
+    color: var(--app-dark);
   }
 
   .mobile-menu-toggle {
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.06);
     border: 1px solid var(--app-border);
     border-radius: 8px;
     width: 40px;
@@ -1086,13 +1087,13 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--app-dark);
     cursor: pointer;
     transition: background 180ms ease;
   }
 
   .mobile-menu-toggle:hover {
-    background: rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.12);
   }
 
   .sidebar {
@@ -1105,7 +1106,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
   }
 
   .sidebar.is-open {
@@ -1218,3 +1219,4 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
     font-size: 14px;
   }
 }
+

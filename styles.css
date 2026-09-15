@@ -1005,7 +1005,7 @@ h1, h2, h3, h4, h5, h6, p { margin: 0; }
 
 .pricing-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   align-items: start;
 }
