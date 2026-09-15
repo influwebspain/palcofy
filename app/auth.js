@@ -218,19 +218,33 @@ export function onAuthChange(callback) {
   _authCb = callback;
   const session = demoSession();
 
+  const enforceAdminRoute = (u) => {
+    if (typeof window !== 'undefined' && u && (u.uid === 'admin_super_user' || u.email === 'admin@palcofy.com')) {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes('.html') && !path.includes('admin.html') && !path.includes('login.html') && !path.includes('index.html')) {
+        window.location.href = 'admin.html';
+        return true; // Redirected
+      }
+    }
+    return false;
+  };
+
   /* Si la sesión pertenece al superadministrador */
   if (session && session.uid === 'admin_super_user') {
     const adminUser = { uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' };
-    setTimeout(() => callback(adminUser), 0);
+    if (!enforceAdminRoute(adminUser)) {
+      setTimeout(() => callback(adminUser), 0);
+    }
     return () => {};
   }
 
   if (isFirebaseConfigured && fbAuth) {
     return fbAuth.onAuthStateChanged(auth, (user) => {
       if (!user && session && session.uid === 'admin_super_user') {
-        callback({ uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' });
+        const u = { uid: 'admin_super_user', email: 'admin@palcofy.com', displayName: 'Administrador PALCOFY' };
+        if (!enforceAdminRoute(u)) callback(u);
       } else {
-        callback(user);
+        if (!enforceAdminRoute(user)) callback(user);
       }
     });
   }
@@ -243,7 +257,9 @@ export function onAuthChange(callback) {
       try { u = JSON.parse(localStorage.getItem(`palcofy.profile.${session.uid}`)); } catch(e) {}
     }
     if (u) {
-      setTimeout(() => callback({ uid: u.uid || u.id, email: u.email, displayName: u.name }), 0);
+      if (!enforceAdminRoute(u)) {
+        setTimeout(() => callback({ uid: u.uid || u.id, email: u.email, displayName: u.name }), 0);
+      }
       return () => {};
     }
   }
