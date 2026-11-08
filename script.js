@@ -269,10 +269,10 @@
       privacidad: `
         <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Política de Privacidad</h2>
         <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px;">
-          De conformidad con el Reglamento General de Protección de Datos (RGPD UE 2016/679) y la LOPDGDD 3/2018, los datos recabados en PALCOFY se procesan con estricta confidencialidad para la gestión de contrataciones, reservas y facturación entre artistas y recintos.
+          De conformidad con el Reglamento General de Protección de Datos (RGPD UE 2016/679) y la LOPDGDD 3/2018, los datos recabados en PALCOFY se procesan con estricta confidencialidad para gestionar solicitudes, contrataciones y reservas. El teléfono y el correo profesional de los artistas solo se muestran al equipo PALCOFY para la revisión y coordinación; no se publican en el catálogo. No solicitamos IBAN ni certificados bancarios durante el registro inicial.
         </p>
         <p style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
-          Puede ejercitar sus derechos de acceso, rectificación, supresión y oposición escribiendo a datos@palcofy.com.
+          Puede ejercitar sus derechos de acceso, rectificación, supresión y oposición escribiendo a datos@palcofy.com. El registro no garantiza contrataciones y los perfiles se revisan de forma privada.
         </p>
       `,
       cookies: `

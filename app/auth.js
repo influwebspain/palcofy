@@ -62,16 +62,20 @@ export async function register(userData) {
       }
     : {
         genre: userData.genre || 'pop',
+        category: userData.category || '',
+        city: userData.city || '',
+        phone: userData.phone || '',
         cache: parseInt(userData.cache, 10) || 500,
         radius: parseInt(userData.radius, 10) || 50,
         photoUrl: userData.photoUrl || '',
         videoUrl: userData.videoUrl || '',
-        iban: userData.iban || '',
-        bankHolder: userData.bankHolder || '',
-        bankCert: userData.bankCert || 'Certificado de titularidad adjuntado',
-        bankVerified: !!(userData.iban || userData.bankHolder),
+        media: Array.isArray(userData.media) ? userData.media : [],
+        availability: userData.availability || 'available',
+        available: userData.availability !== 'unavailable',
+        repertoire: userData.repertoire || '',
+        languages: userData.languages || '',
+        equipment: userData.equipment || '',
         pro: false,
-        available: true,
         description: userData.description || 'Artista verificado en la plataforma PALCOFY.'
       };
 

@@ -187,11 +187,11 @@
           <div style="flex:1;">
             <div style="font-size:18px;font-weight:800;color:white;letter-spacing:-0.01em;">PALCOFY <span style="color:var(--app-gold);font-style:italic;">PRO</span></div>
             <p style="font-size:13px;color:var(--app-text-muted);margin-top:4px;max-width:46ch;">
-              Posicionamiento destacado, badge de verificación y acceso prioritario a licitaciones corporativas de alto caché.
+              Perfil profesional gratuito, revisión privada y acceso a posibles oportunidades del equipo PALCOFY.
             </p>
           </div>
           <a href="#" id="pro-cta" class="app-btn app-btn--primary" style="width:auto;background:linear-gradient(135deg, var(--app-gold), #c89a45);box-shadow:0 2px 16px rgba(217,119,6,0.35);">
-            Activar PRO — 14,99€/mes
+            Completar perfil gratuito
           </a>
         </div>
       </div>
@@ -249,7 +249,7 @@
       const isPro = profile.pro || false;
       document.getElementById('user-pro-status').textContent = isPro ? 'PRO ✓' : 'Free';
       document.getElementById('pro-banner').style.display = isPro ? 'none' : '';
-      document.getElementById('pro-cta').textContent = isPro ? 'PRO activo ✓' : 'Activar PRO — 14,99€/mes';
+      document.getElementById('pro-cta').textContent = isPro ? 'Perfil completo ✓' : 'Completar perfil gratuito';
 
       if (profile.status === 'pending') {
         const pBanner = document.getElementById('pending-banner');

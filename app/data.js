@@ -6,8 +6,10 @@
 import {
   isFirebaseConfigured,
   auth, db,
-  fbFirestore, fbAuth
+  fbFirestore, fbAuth, fbStorage
 } from './firebase-config.js';
+
+import { MEDIA_RULES, isValidMediaFile } from './artist-profile.mjs';
 
 import {
   sendBookingRequestEmail,
@@ -85,7 +87,6 @@ function demoInvoices() {
 function demoSaveInvoices(inv) { localStorage.setItem(DEMO_INVOICES_KEY, JSON.stringify(inv)); }
 function seedInvoices(userId) {
   if (demoInvoices().length > 0) return;
-  const now = new Date();
   demoSaveInvoices([
     { id:'INV-2026-001', venueId:userId, month:'Junio 2026', subscription:199, events:2400, total:2599, status:'paid',    date:'2026-06-30' },
     { id:'INV-2026-002', venueId:userId, month:'Julio 2026', subscription:199, events:3200, total:3399, status:'pending', date:'2026-07-31' },
@@ -184,6 +185,40 @@ export async function updateUserProfile(uid, data) {
   if (users[uid]) { Object.assign(users[uid], data); localStorage.setItem('palcofy.demo.users', JSON.stringify(users)); }
 }
 
+export async function uploadArtistMedia(uid, file, kind) {
+  const rule = MEDIA_RULES[kind];
+  if (!uid || !file || !rule || !isValidMediaFile(file, kind)) {
+    throw new Error('Archivo no válido o demasiado grande.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const media = {
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    kind,
+    uploadedAt: new Date().toISOString()
+  };
+
+  if (isFirebaseConfigured && fbStorage) {
+    const storageRef = fbStorage.ref(fbStorage.getStorage(), `artist-media/${uid}/${Date.now()}-${safeName}`);
+    const snapshot = await fbStorage.uploadBytes(storageRef, file, { contentType: file.type });
+    media.url = await fbStorage.getDownloadURL(snapshot.ref);
+    return media;
+  }
+
+  // Demo mode keeps small previews locally; larger files remain represented by metadata.
+  if (file.size <= 2 * 1024 * 1024) {
+    media.dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+      reader.readAsDataURL(file);
+    });
+  }
+  return media;
+}
+
 export async function deleteUser(uid) {
   if (uid === 'admin_super_user') return;
   if (isFirebaseConfigured && fbFirestore && fbAuth && auth.currentUser) {
@@ -240,17 +275,22 @@ export async function listArtists() {
     if (email && addedEmails.has(email)) return;
     if (id) addedIds.add(id);
     if (email) addedEmails.add(email);
+    // Public artist cards intentionally expose only booking/profile fields.
+    // Contact details, media metadata and banking data remain admin-only.
     list.push({
       id: id || `art_${Math.random()}`,
       name: item.name || item.displayName || 'Artista',
       genre: item.genre || 'pop',
+      category: item.category || '',
+      city: item.city || '',
       cache: item.cache || 500,
       radius: item.radius || 50,
       available: item.available !== false,
       pro: item.pro === true,
       description: item.description || item.bio || 'Artista verificado en la plataforma PALCOFY.',
       rating: item.rating || 4.7,
-      ...item
+      photoUrl: item.photoUrl || '',
+      videoUrl: item.videoUrl || ''
     });
   };
 
@@ -530,7 +570,7 @@ export async function listBookings(venueId) {
     } catch { return []; }
   }
   seedBookings(venueId);
-  return demoBookings().filter(b => b.venueId === venueId).sort((a, b) => a.date > b.date ? -1 : 1);
+  return demoBookingsRaw().filter(b => b.venueId === venueId).sort((a, b) => a.date > b.date ? -1 : 1);
 }
 
 export async function updateBookingStatus(bookingId, status) {

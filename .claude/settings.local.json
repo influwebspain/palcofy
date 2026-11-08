@@ -1,4 +1,16 @@
 {
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.xkiro.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-xt-0c899885889e04412af101c7c3abd29c2af66b0688fb7d2e",
+    "ANTHROPIC_API_KEY": "",
+
+     "ANTHROPIC_MODEL": "mistralai/mistral-medium-3.5",
+
+     "ANTHROPIC_DEFAULT_OPUS_MODEL": "mistralai/mistral-medium-3.5",
+     "ANTHROPIC_DEFAULT_SONNET_MODEL": "mistralai/mistral-medium-3.5",
+     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "mistralai/ministral-14b"
+  },
+
   "permissions": {
     "allow": [
       "PowerShell(New-Item *)",

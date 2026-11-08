@@ -1,12 +1,13 @@
+require('dotenv').config();
 const http = require('http');
 const tls = require('tls');
 const { getTemplateHtml } = require('./app/email-templates.js');
 
-const PORT = 3000;
-const SMTP_HOST = 'authsmtp.securemail.pro';
-const SMTP_PORT = 465;
-const SMTP_USER = 'notificaciones@palcofy.com';
-const SMTP_PASS = '3vGHCNrEm.cYxQn';
+const PORT = Number(process.env.PORT) || 3000;
+const SMTP_HOST = process.env.SMTP_HOST || 'authsmtp.securemail.pro';
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 465;
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
 
 function sendSmtpEmail({ to, subject, html, text }) {
   return new Promise((resolve, reject) => {

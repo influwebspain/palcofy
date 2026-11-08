@@ -36,6 +36,12 @@
       border-color: var(--app-accent);
       color: white;
     }
+    @media (max-width: 640px) {
+      .login-right { padding: 24px 12px; }
+      #artist-reg-form [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+      .genre-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .upload-box { min-height: 92px; }
+    }
   </style>
 </head>
 <body>
@@ -96,19 +102,20 @@
           <!-- Foto de Perfil y Vídeo Promo -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
             <div class="app-field">
-              <label>Foto de Perfil (Subir imagen)</label>
+              <label for="artist-photo-file">Foto de perfil (opcional)</label>
               <div class="upload-box" id="photo-upload-box">
-                <input type="file" id="artist-photo-file" accept="image/*" style="display:none;" />
+                <input type="file" id="artist-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;" />
                 <div class="upload-box-icon" id="photo-box-icon">📸</div>
                 <div class="upload-box-text" id="photo-box-text">Subir foto de perfil</div>
-                <div class="upload-box-sub" id="photo-box-sub">JPG, PNG o WEBP</div>
+                <div class="upload-box-sub" id="photo-box-sub">JPG, PNG o WEBP · máximo 8 MB</div>
               </div>
             </div>
             <div class="app-field">
-              <label for="artist-video-url">Vídeo Promo (Enlace YouTube / Vimeo)</label>
-              <input type="url" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-top:4px;" />
-              <p style="font-size:11px;color:var(--app-text-muted);margin-top:6px;line-line-height:1.4;">
-                Pega la URL de tu videoclip o actuación en directo.
+              <label for="artist-video-url">Vídeo real de actuación (obligatorio)</label>
+              <input type="url" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-top:4px;" autocomplete="url" />
+              <input type="file" id="artist-video-file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:8px;" />
+              <p style="font-size:11px;color:var(--app-text-muted);margin-top:6px;line-height:1.4;">
+                Añade un enlace seguro de YouTube/Vimeo o sube un vídeo MP4, WebM o MOV de hasta 50 MB.
               </p>
             </div>
           </div>
@@ -142,29 +149,52 @@
             </div>
           </div>
 
-          <!-- Datos de cobro y Certificado Bancario -->
-          <div style="background:rgba(255,255,255,0.02);border:1px solid var(--app-border);border-radius:12px;padding:16px;margin-bottom:16px;">
-            <div style="font-size:12px;font-weight:700;color:var(--app-accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;">
-              💳 Datos para Cobrar y Certificado de Titularidad
+          <div class="app-field">
+            <label for="artist-city">Ciudad y zona de actuación</label>
+            <input type="text" id="artist-city" placeholder="Castellón, Oropesa…" required maxlength="80" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="artist-phone">Teléfono profesional</label>
+              <input type="tel" id="artist-phone" placeholder="+34 600 000 000" required maxlength="20" autocomplete="tel" />
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-              <div class="app-field">
-                <label for="artist-iban">Cuenta Bancaria (IBAN)</label>
-                <input type="text" id="artist-iban" placeholder="ES91 2100 0418..." style="font-family:'JetBrains Mono',monospace;" />
-              </div>
-              <div class="app-field">
-                <label for="artist-bank-holder">Titular de la cuenta</label>
-                <input type="text" id="artist-bank-holder" placeholder="Nombre titular como en banco" />
-              </div>
+            <div class="app-field">
+              <label for="artist-availability">Disponibilidad</label>
+              <select id="artist-availability" required>
+                <option value="available">Disponible para propuestas</option>
+                <option value="limited">Disponibilidad limitada</option>
+                <option value="unavailable">No disponible ahora</option>
+              </select>
             </div>
-            <div class="app-field" style="margin-bottom:0;">
-              <label>Certificado de titularidad bancaria (Subir PDF)</label>
-              <div class="upload-box" id="cert-upload-box">
-                <input type="file" id="artist-bank-cert-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none;" />
-                <div class="upload-box-icon" id="cert-box-icon">📄</div>
-                <div class="upload-box-text" id="cert-box-text">Subir certificado bancario PDF</div>
-                <div class="upload-box-sub" id="cert-box-sub">Documento oficial PDF o imagen del banco</div>
-              </div>
+          </div>
+
+          <div class="app-field">
+            <label for="artist-category">Tipo de espectáculo</label>
+            <select id="artist-category" required>
+              <option value="">Selecciona una categoría</option>
+              <option value="dj">DJ</option>
+              <option value="live-singer">Cantante en directo</option>
+              <option value="mc-animation">Animación / MC</option>
+              <option value="dj-singer">DJ + cantante (dos personas)</option>
+              <option value="dj-live-singer-mc">DJ + cantante en directo + animación / MC</option>
+            </select>
+          </div>
+
+          <div class="app-field">
+            <label for="artist-materials">Material profesional adicional (opcional)</label>
+            <input type="file" id="artist-materials" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,application/pdf" multiple />
+            <p class="upload-box-sub">Fotos, vídeos, CV o repertorio. JPG/PNG/WEBP hasta 8 MB, vídeo hasta 50 MB, PDF hasta 10 MB.</p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="app-field">
+              <label for="artist-repertoire">Repertorio (opcional)</label>
+              <input type="text" id="artist-repertoire" placeholder="Pop, jazz, clásicos…" maxlength="300" />
+            </div>
+            <div class="app-field">
+              <label for="artist-languages">Idiomas (opcional)</label>
+              <input type="text" id="artist-languages" placeholder="ES, EN, FR…" maxlength="120" />
             </div>
           </div>
 
@@ -173,8 +203,15 @@
             <textarea id="artist-desc" rows="3" placeholder="Describe tu repertorio, trayectoria o tipo de actuación…"></textarea>
           </div>
 
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:12px;color:var(--app-text-muted);line-height:1.5;">
+            <input type="checkbox" id="artist-privacy" required style="margin-top:3px;" />
+            <span>Acepto la <a href="../index.html#privacidad" target="_blank" rel="noopener" style="color:var(--app-accent);">política de privacidad</a>. Mi teléfono y email profesional solo serán visibles para el equipo PALCOFY y no se publicarán en el catálogo.</span>
+          </label>
+
+          <div id="form-status" role="status" aria-live="polite" style="font-size:12px;color:var(--app-text-muted);margin-top:10px;"></div>
+
           <button type="submit" class="app-btn app-btn--primary" id="submit-btn" style="margin-top:10px;">
-            Completar registro de Artista →
+            Registrarme gratis como artista →
           </button>
 
           <div style="margin-top:16px;text-align:center;font-size:13px;color:var(--app-text-muted);">
@@ -195,14 +232,18 @@
 
   <script type="module">
     import { register } from './auth.js';
+    import { uploadArtistMedia, updateUserProfile } from './data.js';
+    import { validateArtistRegistration } from './artist-profile.mjs';
 
     const genreOptions = document.querySelectorAll('.genre-option');
-    const form         = document.getElementById('artist-reg-form');
-    const errorEl      = document.getElementById('auth-error');
-    const submitBtn    = document.getElementById('submit-btn');
-
-    let uploadedPhotoName = '';
-    let uploadedCertName  = '';
+    const form = document.getElementById('artist-reg-form');
+    const errorEl = document.getElementById('auth-error');
+    const statusEl = document.getElementById('form-status');
+    const submitBtn = document.getElementById('submit-btn');
+    const photoInput = document.getElementById('artist-photo-file');
+    const videoInput = document.getElementById('artist-video-file');
+    const materialsInput = document.getElementById('artist-materials');
+    const photoBox = document.getElementById('photo-upload-box');
 
     /* Multi-select genres */
     genreOptions.forEach(opt => {
@@ -211,80 +252,83 @@
       });
     });
 
-    /* Photo Dropzone click & change */
-    const photoBox = document.getElementById('photo-upload-box');
-    const photoInput = document.getElementById('artist-photo-file');
-    if (photoBox && photoInput) {
-      photoBox.addEventListener('click', () => photoInput.click());
-      photoInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          uploadedPhotoName = e.target.files[0].name;
-          document.getElementById('photo-box-text').textContent = uploadedPhotoName;
-          document.getElementById('photo-box-sub').textContent = 'Imagen cargada correctamente';
-          document.getElementById('photo-box-icon').textContent = '✓';
-          photoBox.classList.add('has-file');
-        }
-      });
+    photoBox.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files?.[0];
+      if (file) {
+        document.getElementById('photo-box-text').textContent = file.name;
+        document.getElementById('photo-box-sub').textContent = 'Imagen seleccionada; se guardará al completar el registro.';
+        document.getElementById('photo-box-icon').textContent = '✓';
+        photoBox.classList.add('has-file');
+      }
+    });
+
+    function collectInput() {
+      const selectedGenres = [...document.querySelectorAll('.genre-option.is-selected')].map(el => el.dataset.genre);
+      return {
+        name: document.getElementById('artist-name').value.trim(),
+        email: document.getElementById('artist-email').value.trim(),
+        password: document.getElementById('artist-password').value,
+        city: document.getElementById('artist-city').value.trim(),
+        phone: document.getElementById('artist-phone').value.trim(),
+        category: document.getElementById('artist-category').value,
+        availability: document.getElementById('artist-availability').value,
+        videoUrl: document.getElementById('artist-video-url').value.trim(),
+        videoFile: videoInput.files?.[0],
+        photoFile: photoInput.files?.[0],
+        materialFiles: [...(materialsInput.files || [])],
+        genre: selectedGenres.join(',') || 'pop',
+        cache: parseInt(document.getElementById('artist-cache').value, 10),
+        radius: parseInt(document.getElementById('artist-radius').value, 10),
+        repertoire: document.getElementById('artist-repertoire').value.trim(),
+        languages: document.getElementById('artist-languages').value.trim(),
+        description: document.getElementById('artist-desc').value.trim(),
+        privacyAccepted: document.getElementById('artist-privacy').checked
+      };
     }
 
-    /* Cert Dropzone click & change */
-    const certBox = document.getElementById('cert-upload-box');
-    const certInput = document.getElementById('artist-bank-cert-file');
-    if (certBox && certInput) {
-      certBox.addEventListener('click', () => certInput.click());
-      certInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          uploadedCertName = e.target.files[0].name;
-          document.getElementById('cert-box-text').textContent = uploadedCertName;
-          document.getElementById('cert-box-sub').textContent = 'Documento PDF cargado correctamente';
-          document.getElementById('cert-box-icon').textContent = '✓';
-          certBox.classList.add('has-file');
-        }
-      });
-    }
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = collectInput();
+      const validation = validateArtistRegistration(input);
+      const messages = Object.values(validation.errors);
+      errorEl.textContent = messages.join(' ');
+      errorEl.classList.toggle('is-visible', messages.length > 0);
+      statusEl.textContent = messages.length ? 'Revisa los campos antes de continuar.' : '';
+      if (!validation.valid) return;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorEl.classList.remove('is-visible');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Creando cuenta de artista…';
-
-      const name        = document.getElementById('artist-name').value.trim();
-      const email       = document.getElementById('artist-email').value.trim();
-      const password    = document.getElementById('artist-password').value;
-      const photoUrl    = uploadedPhotoName || '';
-      const videoUrl    = document.getElementById('artist-video-url').value.trim();
-      
-      /* Collect multiple selected genres */
-      const selectedGenreEls = document.querySelectorAll('.genre-option.is-selected');
-      const selectedGenres = Array.from(selectedGenreEls).map(el => el.dataset.genre);
-      const genre       = selectedGenres.length > 0 ? selectedGenres.join(',') : 'jazz';
-
-      const cache       = parseInt(document.getElementById('artist-cache').value, 10) || 500;
-      const radius      = parseInt(document.getElementById('artist-radius').value, 10) || 50;
-      const iban        = document.getElementById('artist-iban').value.trim();
-      const bankHolder  = document.getElementById('artist-bank-holder').value.trim();
-      const bankCert    = uploadedCertName || '';
-      const description = document.getElementById('artist-desc').value.trim();
+      submitBtn.textContent = 'Guardando perfil y materiales…';
+      statusEl.textContent = 'El equipo PALCOFY revisará tu perfil de forma privada.';
 
       try {
-        await register({
-          name, email, password, role: 'artist',
-          photoUrl, videoUrl, genre, cache, radius,
-          iban, bankHolder, bankCert, description
-        });
+        const user = await register({ ...input, role: 'artist' });
+        const mediaFiles = [
+          ...(input.photoFile ? [{ file: input.photoFile, kind: 'image' }] : []),
+          ...(input.videoFile ? [{ file: input.videoFile, kind: 'video' }] : []),
+          ...input.materialFiles.map(file => ({ file, kind: file.type === 'application/pdf' ? 'document' : file.type.startsWith('video/') ? 'video' : 'image' }))
+        ];
+        const media = [];
+        for (const item of mediaFiles) media.push(await uploadArtistMedia(user.uid, item.file, item.kind));
+        const profileKey = `palcofy.profile.${user.uid}`;
+        const profile = JSON.parse(localStorage.getItem(profileKey) || '{}');
+        profile.media = media;
+        if (media.find(item => item.kind === 'image')) profile.photoUrl = media.find(item => item.kind === 'image').url || '';
+        if (!input.videoUrl && media.find(item => item.kind === 'video')) profile.videoUrl = media.find(item => item.kind === 'video').url || '';
+        localStorage.setItem(profileKey, JSON.stringify(profile));
+        if (media.length) await updateUserProfile(user.uid, { media, photoUrl: profile.photoUrl || '', videoUrl: profile.videoUrl || input.videoUrl });
         window.location.href = 'dashboard-artist.html';
       } catch (err) {
-        console.error('Registration error:', err);
-        const msg = err.code === 'auth/email-already-in-use'
+        console.error('Artist registration error:', err);
+        errorEl.textContent = err.code === 'auth/email-already-in-use'
           ? 'Ya existe una cuenta con este email.'
           : err.code === 'auth/weak-password'
           ? 'La contraseña debe tener al menos 6 caracteres.'
-          : 'Error al registrar el cantante. Inténtalo de nuevo.';
-        errorEl.textContent = msg;
+          : 'No se pudo guardar el registro o los materiales. Inténtalo de nuevo.';
         errorEl.classList.add('is-visible');
+        statusEl.textContent = '';
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Completar registro de Artista →';
+        submitBtn.textContent = 'Registrarme gratis como artista →';
       }
     });
   </script>

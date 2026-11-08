@@ -25,18 +25,21 @@ export let auth        = null;
 export let db          = null;
 export let fbAuth      = null;
 export let fbFirestore = null;
+export let fbStorage = null;
 
 if (isConfigured) {
   try {
     const appModule       = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
     const authModule      = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
     const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const storageModule   = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
 
     firebaseApp  = appModule.initializeApp(firebaseConfig);
     auth         = authModule.getAuth(firebaseApp);
     db           = firestoreModule.getFirestore(firebaseApp);
     fbAuth       = authModule;
     fbFirestore  = firestoreModule;
+    fbStorage    = storageModule;
 
     console.info('PALCOFY ✓ Firebase conectado.');
   } catch (e) {
