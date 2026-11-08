@@ -1211,6 +1211,33 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   box-shadow: 0 20px 70px rgba(35, 18, 63, .22);
 }
 
+/* Both registration pages use this dark cover. Keep every cover text readable. */
+.login-page:has(.login-left) .brand,
+.login-page:has(.login-left) .brand h1,
+.login-page:has(.login-left) .brand p {
+  color: #fff;
+}
+.login-page:has(.login-left) .brand h1 {
+  margin: 0 0 .75rem;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.login-page:has(.login-left) .brand p {
+  margin: 0;
+  color: rgba(255,255,255,.78);
+}
+
+.login-page:has(.login-left) .type-option:hover,
+.login-page:has(.login-left) .genre-option:hover {
+  color: var(--app-dark);
+}
+
+.login-page:has(.login-left) .form-header h2,
+.login-page:has(.login-left) .form-header-text h2 {
+  color: var(--app-dark);
+}
+
 .login-page:has(.login-left) .login-right {
   flex: 1 1 560px;
   max-width: 620px;
