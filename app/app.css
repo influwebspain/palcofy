@@ -1189,3 +1189,129 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   }
 }
 
+/* ----- Auth and registration polish ---------------------- */
+.login-page:has(.login-left) {
+  min-height: 100vh;
+  padding: clamp(20px, 5vw, 56px);
+  gap: 0;
+  align-items: stretch;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(124,58,237,.16), transparent 34%),
+    radial-gradient(circle at 90% 90%, rgba(219,39,119,.10), transparent 30%),
+    var(--app-bg);
+}
+
+.login-page:has(.login-left) .login-left {
+  display: flex;
+  flex: 0 1 390px;
+  max-width: 420px;
+  padding: clamp(32px, 5vw, 64px) clamp(24px, 4vw, 48px);
+  border-radius: 24px 0 0 24px;
+  background: linear-gradient(145deg, #21133d 0%, #39245a 58%, #6b245d 100%);
+  box-shadow: 0 20px 70px rgba(35, 18, 63, .22);
+}
+
+.login-page:has(.login-left) .login-right {
+  flex: 1 1 560px;
+  max-width: 620px;
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 0 24px 24px 0;
+  background: var(--app-surface);
+  box-shadow: 0 20px 70px rgba(17, 24, 39, .12);
+}
+
+.login-page:has(.login-left) .login-card {
+  max-width: none !important;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.login-page:has(.login-left) .app-field input,
+.login-page:has(.login-left) .app-field select,
+.login-page:has(.login-left) .app-field textarea,
+.login-page:has(.login-left) input[type="file"] {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.login-page:has(.login-left) .app-field input:focus,
+.login-page:has(.login-left) .app-field select:focus,
+.login-page:has(.login-left) .app-field textarea:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px var(--app-accent-glow);
+}
+
+.login-page:has(.login-left) .genre-option,
+.login-page:has(.login-left) .type-option,
+.login-page:has(.login-left) .role-option {
+  border-color: transparent;
+  background: var(--app-surface-2);
+}
+
+.login-page:has(.login-left) .genre-option:hover,
+.login-page:has(.login-left) .type-option:hover,
+.login-page:has(.login-left) .role-option:hover {
+  border-color: transparent;
+  background: rgba(124,58,237,.10);
+}
+
+.login-page:has(.login-left) .genre-option.is-selected,
+.login-page:has(.login-left) .type-option.is-selected,
+.login-page:has(.login-left) .role-option.is-selected {
+  border-color: transparent;
+  background: var(--app-accent);
+  color: white;
+}
+
+.login-page:has(.login-left) .upload-box {
+  border-color: transparent;
+  background: var(--app-surface-2);
+  min-height: 118px;
+}
+
+.login-page:has(.login-left) .upload-box:hover,
+.login-page:has(.login-left) .upload-box.has-file {
+  border-color: transparent;
+}
+
+.login-page:has(.login-left) .auth-error {
+  border-color: transparent;
+}
+
+@media (max-width: 900px) {
+  .login-page:has(.login-left) {
+    padding: 16px;
+  }
+  .login-page:has(.login-left) .login-left,
+  .login-page:has(.login-left) .login-right {
+    max-width: none;
+    border-radius: 20px;
+  }
+  .login-page:has(.login-left) .login-left {
+    flex: none;
+    padding: 32px 24px;
+  }
+  .login-page:has(.login-left) .login-right {
+    flex: none;
+    padding: 28px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-page:has(.login-left) {
+    padding: 10px;
+  }
+  .login-page:has(.login-left) .login-left,
+  .login-page:has(.login-left) .login-right {
+    border-radius: 16px;
+  }
+  .login-page:has(.login-left) .login-left {
+    padding: 28px 18px;
+  }
+  .login-page:has(.login-left) .login-right {
+    padding: 22px 16px;
+  }
+}
+

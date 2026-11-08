@@ -36,6 +36,18 @@
       border-color: var(--app-accent);
       color: white;
     }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .field-row { grid-template-columns: 1fr; }
+      .type-select-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .type-select-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -69,7 +81,7 @@
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
           <div style="font-size:28px;">🏨</div>
           <div>
-            <h2 style="font-size:20px;font-weight:800;color:white;">Registro de Hotel / Venue</h2>
+            <h2 style="font-size:20px;font-weight:800;color:var(--app-dark);">Registro de Hotel / Venue</h2>
             <p style="font-size:13px;color:var(--app-text-muted);">Crea tu cuenta corporativa para programar música y reservar cantantes.</p>
           </div>
         </div>
