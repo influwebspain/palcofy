@@ -9,10 +9,98 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="app.css" />
   <style>
+    /* Estilos para el formulario de registro de artistas */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      background: var(--app-bg);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      padding: 40px 20px;
+    }
+    .login-left {
+      background: linear-gradient(135deg, #1A1230 0%, #2D2A3E 100%);
+      color: white;
+      padding: 60px 40px;
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 480px;
+      width: 100%;
+    }
+    .login-right {
+      background: var(--app-surface);
+      padding: 48px 40px;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    }
+    .brand {
+      text-align: center;
+    }
+    .brand .logo-mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+    }
+    .brand .logo-mark svg {
+      width: 36px;
+      height: 36px;
+      color: white;
+    }
+    .brand h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .brand p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+    }
+    .login-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 16px;
+      padding: 0;
+      box-shadow: none;
+    }
+    .form-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .form-header-icon {
+      font-size: 28px;
+    }
+    .form-header-text h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--app-dark);
+      margin: 0;
+    }
+    .form-header-text p {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin: 4px 0 0;
+    }
     .genre-select-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
       margin-top: 6px;
     }
     .genre-option {
@@ -29,18 +117,121 @@
     }
     .genre-option:hover {
       border-color: var(--app-accent);
-      color: white;
+      color: var(--app-dark);
     }
     .genre-option.is-selected {
       background: var(--app-accent);
       border-color: var(--app-accent);
       color: white;
     }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .app-field textarea {
+      min-height: 80px;
+      resize: vertical;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.04);
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .app-field textarea:focus {
+      outline: none;
+      border-color: var(--app-accent);
+      box-shadow: 0 0 0 3px var(--app-accent-glow);
+      background: rgba(0,0,0,0.06);
+    }
+    .app-field textarea::placeholder {
+      color: rgba(0,0,0,0.25);
+    }
+    .privacy-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--app-text-muted);
+      line-height: 1.5;
+    }
+    .privacy-label input[type="checkbox"] {
+      margin-top: 3px;
+    }
+    .privacy-label a {
+      color: var(--app-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-status {
+      font-size: 12px;
+      color: var(--app-text-muted);
+      margin-top: 10px;
+    }
+    .form-links {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--app-text-muted);
+    }
+    .form-links a {
+      color: var(--app-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-links span {
+      margin: 0 8px;
+    }
+    .video-hint {
+      font-size: 11px;
+      color: var(--app-text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    @media (max-width: 900px) {
+      .login-page {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .login-left, .login-right {
+        max-width: 100%;
+        border-radius: 16px;
+      }
+      .login-left {
+        padding: 40px 24px;
+      }
+      .login-right {
+        padding: 32px 24px;
+      }
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+      .genre-select-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
     @media (max-width: 640px) {
-      .login-right { padding: 24px 12px; }
-      #artist-reg-form [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
-      .genre-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      .upload-box { min-height: 92px; }
+      .login-page {
+        padding: 20px 12px;
+      }
+      .login-left {
+        padding: 32px 16px;
+      }
+      .login-right {
+        padding: 24px 16px;
+      }
+      .brand h1 {
+        font-size: 24px;
+      }
+      .genre-select-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .upload-box {
+        min-height: 92px;
+      }
     }
   </style>
 </head>
@@ -66,17 +257,17 @@
 
     <!-- Right: registration form -->
     <div class="login-right">
-      <div class="login-card" style="max-width:480px;">
+      <div class="login-card">
 
         <a href="../index.html" class="app-btn app-btn--ghost" style="margin-bottom:20px;text-decoration:none;text-align:center;font-size:13px;display:flex;align-items:center;justify-content:center;">
           ← Volver a la web principal
         </a>
 
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <div style="font-size:28px;">🎵</div>
-          <div>
-            <h2 style="font-size:20px;font-weight:800;color:white;">Registro de Artista / Cantante</h2>
-            <p style="font-size:13px;color:var(--app-text-muted);">Crea tu perfil profesional para ser contratado por hoteles y recintos.</p>
+        <div class="form-header">
+          <div class="form-header-icon">🎵</div>
+          <div class="form-header-text">
+            <h2>Registro de Artista / Cantante</h2>
+            <p>Crea tu perfil profesional para ser contratado por hoteles y recintos.</p>
           </div>
         </div>
 
@@ -88,7 +279,7 @@
             <input type="text" id="artist-name" placeholder="Ej: Carlos Vives Trio, Laura Gómez…" required />
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-row">
             <div class="app-field">
               <label for="artist-email">Email corporativo / contacto</label>
               <input type="email" id="artist-email" placeholder="tu@email.com" required />
@@ -100,7 +291,7 @@
           </div>
 
           <!-- Foto de Perfil y Vídeo Promo -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div class="field-row" style="margin-bottom:16px;">
             <div class="app-field">
               <label for="artist-photo-file">Foto de perfil (opcional)</label>
               <div class="upload-box" id="photo-upload-box">
@@ -114,15 +305,13 @@
               <label for="artist-video-url">Vídeo real de actuación (obligatorio)</label>
               <input type="url" id="artist-video-url" placeholder="https://youtube.com/watch?v=..." style="margin-top:4px;" autocomplete="url" />
               <input type="file" id="artist-video-file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:8px;" />
-              <p style="font-size:11px;color:var(--app-text-muted);margin-top:6px;line-height:1.4;">
-                Añade un enlace seguro de YouTube/Vimeo o sube un vídeo MP4, WebM o MOV de hasta 50 MB.
-              </p>
+              <p class="video-hint">Añade un enlace seguro de YouTube/Vimeo o sube un vídeo MP4, WebM o MOV de hasta 50 MB.</p>
             </div>
           </div>
 
           <div class="app-field">
             <label>Géneros musicales (Puedes seleccionar varios)</label>
-            <div class="genre-select-grid" id="genre-grid" style="grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px;">
+            <div class="genre-select-grid" id="genre-grid">
               <div class="genre-option is-selected" data-genre="jazz">🎷 Jazz & Soul</div>
               <div class="genre-option" data-genre="pop">🎤 Pop & Indie</div>
               <div class="genre-option" data-genre="rock">🎸 Rock & Blues</div>
@@ -138,7 +327,7 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-row">
             <div class="app-field">
               <label for="artist-cache">Caché estimado (€)</label>
               <input type="number" id="artist-cache" placeholder="500" value="500" min="50" max="10000" required />
@@ -154,7 +343,7 @@
             <input type="text" id="artist-city" placeholder="Castellón, Oropesa…" required maxlength="80" />
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-row">
             <div class="app-field">
               <label for="artist-phone">Teléfono profesional</label>
               <input type="tel" id="artist-phone" placeholder="+34 600 000 000" required maxlength="20" autocomplete="tel" />
@@ -187,7 +376,7 @@
             <p class="upload-box-sub">Fotos, vídeos, CV o repertorio. JPG/PNG/WEBP hasta 8 MB, vídeo hasta 50 MB, PDF hasta 10 MB.</p>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-row">
             <div class="app-field">
               <label for="artist-repertoire">Repertorio (opcional)</label>
               <input type="text" id="artist-repertoire" placeholder="Pop, jazz, clásicos…" maxlength="300" />
@@ -203,21 +392,21 @@
             <textarea id="artist-desc" rows="3" placeholder="Describe tu repertorio, trayectoria o tipo de actuación…"></textarea>
           </div>
 
-          <label style="display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:12px;color:var(--app-text-muted);line-height:1.5;">
-            <input type="checkbox" id="artist-privacy" required style="margin-top:3px;" />
-            <span>Acepto la <a href="../index.html#privacidad" target="_blank" rel="noopener" style="color:var(--app-accent);">política de privacidad</a>. Mi teléfono y email profesional solo serán visibles para el equipo PALCOFY y no se publicarán en el catálogo.</span>
+          <label class="privacy-label">
+            <input type="checkbox" id="artist-privacy" required />
+            <span>Acepto la <a href="../index.html#privacidad" target="_blank" rel="noopener">política de privacidad</a>. Mi teléfono y email profesional solo serán visibles para el equipo PALCOFY y no se publicarán en el catálogo.</span>
           </label>
 
-          <div id="form-status" role="status" aria-live="polite" style="font-size:12px;color:var(--app-text-muted);margin-top:10px;"></div>
+          <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
 
           <button type="submit" class="app-btn app-btn--primary" id="submit-btn" style="margin-top:10px;">
             Registrarme gratis como artista →
           </button>
 
-          <div style="margin-top:16px;text-align:center;font-size:13px;color:var(--app-text-muted);">
-            ¿Ya tienes cuenta? <a href="login.html" style="color:var(--app-accent);text-decoration:none;font-weight:600;">Iniciar sesión</a>
-            <span style="margin:0 8px;">•</span>
-            <a href="register-venue.html" style="color:var(--app-text-muted);text-decoration:underline;">Soy un Hotel/Venue</a>
+          <div class="form-links">
+            ¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a>
+            <span>•</span>
+            <a href="register-venue.html" style="color:var(--app-text-muted);">Soy un Hotel/Venue</a>
           </div>
 
           <a href="../index.html" class="app-btn app-btn--ghost" style="margin-top:16px;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">
