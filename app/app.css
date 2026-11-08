@@ -1328,6 +1328,7 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 
 @media (max-width: 640px) {
   .login-page:has(.login-left) {
+    display: block;
     padding: 10px;
     overflow-x: hidden;
   }
@@ -1348,7 +1349,9 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   }
   .login-page:has(.login-left) .brand,
   .login-page:has(.login-left) .brand p,
-  .login-page:has(.login-left) .login-right {
+  .login-page:has(.login-left) .login-right,
+  .login-page:has(.login-left) .type-select-grid,
+  .login-page:has(.login-left) .genre-select-grid {
     width: 100%;
     min-width: 0;
     max-width: 100%;
