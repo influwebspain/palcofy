@@ -1,6 +1,10 @@
 require('dotenv').config();
 const tls = require('tls');
 const { getTemplateHtml } = require('../app/email-templates.js');
+const {
+  applySecurityHeaders, isAllowedOrigin, checkRateLimit,
+  validateEmailRequest, safeError
+} = require('./email-security.cjs');
 
 const SMTP_HOST = process.env.SMTP_HOST || 'authsmtp.securemail.pro';
 const SMTP_PORT = Number(process.env.SMTP_PORT) || 465;
@@ -9,7 +13,7 @@ const SMTP_PASS = process.env.SMTP_PASS || '';
 
 function sendSmtpEmail({ to, subject, html, text }) {
   return new Promise((resolve, reject) => {
-    const socket = tls.connect(SMTP_PORT, SMTP_HOST, { rejectUnauthorized: false }, () => {
+    const socket = tls.connect(SMTP_PORT, SMTP_HOST, { rejectUnauthorized: true, servername: SMTP_HOST, timeout: 10_000 }, () => {
       // Socket conectado por SSL/TLS
     });
 
@@ -82,48 +86,24 @@ function sendSmtpEmail({ to, subject, html, text }) {
 }
 
 module.exports = async (req, res) => {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  const origin = req.headers.origin;
+  applySecurityHeaders(res, origin);
+  if (!isAllowedOrigin(origin)) return safeError(res, 403);
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return safeError(res, 405);
+  if (!checkRateLimit(req)) return safeError(res, 429);
 
   try {
-    const { to, subject, template, data, html: customHtml, text } = req.body || {};
-
-    if (!to) {
-      return res.status(400).json({ success: false, error: 'Se requiere destinatario (to).' });
-    }
-
-    let finalHtml = customHtml;
-    let finalSubject = subject;
-
-    if (template) {
-      const compiled = getTemplateHtml(template, data || {});
-      finalHtml = compiled.html;
-      if (!finalSubject) finalSubject = compiled.subject;
-    }
-
-    console.log(`📧 Vercel Serverless: Enviando correo SMTP a ${to}...`);
-    const result = await sendSmtpEmail({
-      to,
-      subject: finalSubject || 'Notificación de PALCOFY',
-      html: finalHtml,
-      text
-    });
-
-    return res.status(200).json({ success: true, result });
+    const body = req.body || {};
+    if (JSON.stringify(body).length > 64 * 1024) return safeError(res, 413);
+    const validationError = validateEmailRequest(body);
+    if (validationError) return safeError(res, 422);
+    const { to, subject, template, data } = body;
+    const compiled = getTemplateHtml(template, data || {});
+    const result = await sendSmtpEmail({ to, subject: subject || compiled.subject, html: compiled.html });
+    return res.status(200).json({ success: true, result: { success: result.success } });
   } catch (err) {
-    console.error('❌ Error en envío SMTP Vercel:', err.message);
-    return res.status(500).json({ success: false, error: err.message });
+    console.error('SMTP delivery failed:', err.message);
+    return safeError(res, 500);
   }
 };

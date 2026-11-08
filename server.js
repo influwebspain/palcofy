@@ -2,6 +2,10 @@ require('dotenv').config();
 const http = require('http');
 const tls = require('tls');
 const { getTemplateHtml } = require('./app/email-templates.js');
+const {
+  MAX_BODY_BYTES, applySecurityHeaders, isAllowedOrigin, checkRateLimit,
+  validateEmailRequest, safeError, safeJson
+} = require('./api/email-security.cjs');
 
 const PORT = Number(process.env.PORT) || 3000;
 const SMTP_HOST = process.env.SMTP_HOST || 'authsmtp.securemail.pro';
@@ -11,7 +15,7 @@ const SMTP_PASS = process.env.SMTP_PASS || '';
 
 function sendSmtpEmail({ to, subject, html, text }) {
   return new Promise((resolve, reject) => {
-    const socket = tls.connect(SMTP_PORT, SMTP_HOST, { rejectUnauthorized: false }, () => {
+    const socket = tls.connect(SMTP_PORT, SMTP_HOST, { rejectUnauthorized: true, servername: SMTP_HOST, timeout: 10_000 }, () => {
       // Socket conectado por SSL/TLS
     });
 
@@ -84,11 +88,13 @@ function sendSmtpEmail({ to, subject, html, text }) {
 }
 
 const server = http.createServer(async (req, res) => {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  const origin = req.headers.origin;
+  applySecurityHeaders(res, origin);
 
+  if (!isAllowedOrigin(origin)) {
+    safeError(res, 403);
+    return;
+  }
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
@@ -96,64 +102,44 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.url === '/api/health' && req.method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'ok',
-      service: 'PALCOFY Email Service (Native Node TLS/SMTP)',
-      smtpHost: SMTP_HOST,
-      smtpUser: SMTP_USER,
-      timestamp: new Date().toISOString()
-    }));
+    safeJson(res, 200, { status: 'ok', service: 'PALCOFY Email Service', timestamp: new Date().toISOString() });
     return;
   }
 
   if (req.url === '/api/send-email' && req.method === 'POST') {
+    if (!checkRateLimit(req)) { safeError(res, 429); return; }
     let bodyStr = '';
-    req.on('data', chunk => { bodyStr += chunk; });
+    let tooLarge = false;
+    req.on('data', chunk => {
+      if (bodyStr.length + chunk.length > MAX_BODY_BYTES) {
+        tooLarge = true;
+        req.destroy();
+        return;
+      }
+      bodyStr += chunk;
+    });
     req.on('end', async () => {
+      if (tooLarge) { safeError(res, 413); return; }
       try {
         const body = JSON.parse(bodyStr || '{}');
-        const { to, subject, template, data, html: customHtml, text } = body;
-
-        if (!to) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: false, error: 'Se requiere destinatario (to).' }));
-          return;
-        }
-
-        let finalHtml = customHtml;
-        let finalSubject = subject;
-
-        if (template) {
-          const compiled = getTemplateHtml(template, data || {});
-          finalHtml = compiled.html;
-          if (!finalSubject) finalSubject = compiled.subject;
-        }
-
-        console.log(`📧 Enviando correo por SMTP SSL (authsmtp.securemail.pro:465) a: ${to}...`);
-        const result = await sendSmtpEmail({
-          to,
-          subject: finalSubject || 'Notificación de PALCOFY',
-          html: finalHtml,
-          text
-        });
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, result }));
+        const validationError = validateEmailRequest(body);
+        if (validationError) { safeError(res, 422); return; }
+        const { to, subject, template, data } = body;
+        const compiled = getTemplateHtml(template, data || {});
+        const result = await sendSmtpEmail({ to, subject: subject || compiled.subject, html: compiled.html });
+        safeJson(res, 200, { success: true, result: { success: result.success } });
       } catch (err) {
-        console.error('❌ Error en envío SMTP:', err.message);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: err.message }));
+        console.error('SMTP delivery failed:', err.message);
+        safeError(res, 500);
       }
     });
     return;
   }
 
-  res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Endpoint no encontrado' }));
+  safeJson(res, 404, { error: 'Endpoint no encontrado' });
 });
 
 server.listen(PORT, () => {
   console.log(`🚀 Servidor de Correos Nativo PALCOFY activo en http://localhost:${PORT}`);
-  console.log(`📡 SMTP configurado en authsmtp.securemail.pro:465 SSL para notificaciones@palcofy.com`);
+  console.log(`📡 SMTP configurado en ${SMTP_HOST}:${SMTP_PORT} con TLS verificado.`);
 });
