@@ -1329,9 +1329,15 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
 @media (max-width: 640px) {
   .login-page:has(.login-left) {
     padding: 10px;
+    overflow-x: hidden;
   }
   .login-page:has(.login-left) .login-left,
   .login-page:has(.login-left) .login-right {
+    width: calc(100vw - 20px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 20px) !important;
+    flex-basis: auto !important;
+    box-sizing: border-box;
     border-radius: 16px;
   }
   .login-page:has(.login-left) .login-left {
@@ -1339,6 +1345,24 @@ html, body { margin: 0; padding: 0; background: var(--app-bg); color: var(--app-
   }
   .login-page:has(.login-left) .login-right {
     padding: 22px 16px;
+  }
+  .login-page:has(.login-left) .brand,
+  .login-page:has(.login-left) .brand p,
+  .login-page:has(.login-left) .login-right {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  body:has(.login-page) {
+    overflow-x: hidden;
+  }
+  .login-page:has(.login-left) .brand p,
+  .login-page:has(.login-left) .form-header-text p {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
 
